@@ -81,15 +81,10 @@ export class PulseAPI {
         }
     }
 
-    private get baseUrl(): string {
-        // Use local proxy when running in browser on localhost to avoid CORS (unless overridden)
+    private get targetBaseUrl(): string {
         if (typeof window !== 'undefined') {
             const localUrl = localStorage.getItem(`titan_config_${this.projectId}_url`);
             if (localUrl) return localUrl;
-
-            if (window.location.hostname === 'localhost') {
-                return '/api/proxy';
-            }
         }
 
         let url = this.getEnvUrl() || 'https://api.commonground.example';
@@ -109,6 +104,8 @@ export class PulseAPI {
     }
 
     private async fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+        let url = `${this.targetBaseUrl}${endpoint}`;
+
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
             ...options.headers as Record<string, string>,
@@ -123,13 +120,20 @@ export class PulseAPI {
             }
         }
 
+        // Use Proxy on Client Side to avoid CORS
+        if (typeof window !== 'undefined') {
+            headers['X-Proxy-Target'] = url;
+            url = '/api/proxy';
+        }
+
         try {
-            const response = await fetch(`${this.baseUrl}${endpoint}`, {
+            const response = await fetch(url, {
                 ...options,
                 headers,
             });
 
             if (!response.ok) {
+                // If 404/500, throw so we fall back to mock
                 throw new Error(`API Error: ${response.statusText}`);
             }
 
@@ -142,7 +146,7 @@ export class PulseAPI {
 
     async getStats(): Promise<{ data: CommonGroundStats; isLive: boolean; error?: string }> {
         try {
-            if (this.apiKey && this.baseUrl !== 'https://api.commonground.example') {
+            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
                 const data = await this.fetchWithAuth('/stats');
                 return { data, isLive: true };
             }
@@ -156,7 +160,7 @@ export class PulseAPI {
 
     async getLiveUsers(): Promise<{ data: LiveUser[]; isLive: boolean }> {
         try {
-            if (this.apiKey && this.baseUrl !== 'https://api.commonground.example') {
+            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
                 // Assuming /live-users endpoint exists, otherwise fallback
                 const data = await this.fetchWithAuth('/live-users');
                 return { data, isLive: true };
@@ -169,7 +173,7 @@ export class PulseAPI {
 
     async getPopularLabs(): Promise<string[]> {
         try {
-            if (this.apiKey && this.baseUrl !== 'https://api.commonground.example') {
+            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
                 return await this.fetchWithAuth('/popular-labs');
             }
         } catch (error) {
@@ -182,8 +186,8 @@ export class PulseAPI {
         return {
             hasKey: !!this.apiKey,
             keyStart: this.apiKey ? this.apiKey.substring(0, 4) + '...' : 'None',
-            baseUrl: this.baseUrl,
-            isDefaultUrl: this.baseUrl === 'https://api.commonground.example',
+            baseUrl: this.targetBaseUrl,
+            isDefaultUrl: this.targetBaseUrl === 'https://api.commonground.example',
             projectId: this.projectId
         };
     }
