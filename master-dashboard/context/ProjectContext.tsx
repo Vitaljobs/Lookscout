@@ -12,6 +12,7 @@ export interface Project {
     slug: string; // Used for URL routing (e.g. 'commonground')
     status: ProjectStatus;
     url: string;
+    publicUrl?: string;
     key: string;
     theme: ProjectTheme;
 }
@@ -26,37 +27,39 @@ interface ProjectContextType {
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
-const DEFAULT_PROJECTS: Project[] = [
-    {
-        id: 'commonground',
+{
+    id: 'commonground',
         name: 'Common Ground Pulse',
-        description: 'Real-time social sentiment monitoring',
-        slug: 'commonground',
-        status: 'operational',
-        url: '',
-        key: '',
-        theme: 'green'
-    },
-    {
-        id: 'vibechain',
+            description: 'Real-time social sentiment monitoring',
+                slug: 'commonground',
+                    status: 'operational',
+                        url: '',
+                            publicUrl: '',
+                                key: '',
+                                    theme: 'green'
+},
+{
+    id: 'vibechain',
         name: 'VIBECHAIN',
-        description: 'Blockchain-based vibe tracking',
-        slug: 'vibechain',
-        status: 'operational',
-        url: '',
-        key: '',
-        theme: 'blue'
-    },
-    {
-        id: 'vitaljobs',
+            description: 'Blockchain-based vibe tracking',
+                slug: 'vibechain',
+                    status: 'operational',
+                        url: '',
+                            publicUrl: '',
+                                key: '',
+                                    theme: 'blue'
+},
+{
+    id: 'vitaljobs',
         name: 'VitalJobs',
-        description: 'Essential workforce analytics',
-        slug: 'vitaljobs',
-        status: 'operational',
-        url: '',
-        key: '',
-        theme: 'orange'
-    }
+            description: 'Essential workforce analytics',
+                slug: 'vitaljobs',
+                    status: 'operational',
+                        url: '',
+                            publicUrl: '',
+                                key: '',
+                                    theme: 'orange'
+}
 ];
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
@@ -105,6 +108,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
     return (
         <ProjectContext.Provider value={{ projects, addProject, updateProject, deleteProject, getProject }}>
+            const DEFAULT_PROJECTS: Project[] = [
             {children}
         </ProjectContext.Provider>
     );
