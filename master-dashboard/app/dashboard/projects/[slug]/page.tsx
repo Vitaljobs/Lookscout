@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import StatCard from '@/components/StatCard';
 import LiveUsersTable from '@/components/LiveUsersTable';
 import { StatCardData } from '@/types';
-import { commonGroundAPI } from '@/lib/api/commonground';
-import { Activity, Globe, Server, Users, AlertCircle } from 'lucide-react';
+import { PulseAPI } from '@/lib/api/pulse';
+import { Activity, Globe, Server, AlertCircle } from 'lucide-react';
 import { getApiKey } from '@/lib/storage';
 
 interface PageProps {
@@ -16,19 +15,16 @@ interface PageProps {
 }
 
 export default function ProjectDetailPage({ params }: PageProps) {
-    // Unwrap params using React.use() or await in async component
-    // Since this is a client component, we handle promise unwrapping carefully
     const [slug, setSlug] = useState<string>('');
-
-    useEffect(() => {
-        params.then(p => setSlug(p.slug));
-    }, [params]);
-
     const [stats, setStats] = useState<StatCardData[]>([]);
     const [loading, setLoading] = useState(true);
     const [hasKey, setHasKey] = useState(false);
     const [isLive, setIsLive] = useState(false);
     const [errorData, setErrorData] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        params.then(p => setSlug(p.slug));
+    }, [params]);
 
     useEffect(() => {
         if (slug) {
@@ -37,18 +33,23 @@ export default function ProjectDetailPage({ params }: PageProps) {
     }, [slug]);
 
     const checkKeyAndLoadStats = async () => {
-        const key = getApiKey('commonground') || process.env.NEXT_PUBLIC_PULSE_API_KEY;
-        setHasKey(!!key);
+        // Initialize dynamic API for this project
+        const api = new PulseAPI(slug);
 
-        // Always load stats, mocking if no key provided in dev mode
-        loadStats();
+        // Check if we have a key (generic check, specific logic inside API)
+        // Accessing private property logic via debug info or similar if needed, 
+        // but here we just blindly load as the API handles fallbacks.
+        const debug = api.getDebugInfo();
+        setHasKey(debug.hasKey);
+
+        loadStats(api);
     };
 
-    const loadStats = async () => {
+    const loadStats = async (api: PulseAPI) => {
         try {
-            console.log('API Debug:', commonGroundAPI.getDebugInfo());
+            console.log('API Debug:', api.getDebugInfo());
             setLoading(true);
-            const { data, isLive, error } = await commonGroundAPI.getStats();
+            const { data, isLive, error } = await api.getStats();
             setIsLive(isLive);
             setErrorData(error);
 
@@ -108,7 +109,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
                         </div>
                     </div>
                     <p className="text-gray-400">
-                        Real-time monitoring and analytics
+                        Real-time monitoring and analytics for {slug}
                     </p>
                 </div>
 

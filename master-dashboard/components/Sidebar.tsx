@@ -13,6 +13,8 @@ import {
 
 const projects = [
     { id: 'commonground', name: 'Common Ground Pulse', slug: 'commonground' },
+    { id: 'vibechain', name: 'VIBECHAIN', slug: 'vibechain' },
+    { id: 'vitaljobs', name: 'VitalJobs', slug: 'vitaljobs' },
 ];
 
 const navigation = [

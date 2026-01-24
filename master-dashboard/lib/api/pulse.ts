@@ -57,17 +57,25 @@ const MOCK_LIVE_USERS: LiveUser[] = [
     }
 ];
 
-export class CommonGroundAPI {
+export class PulseAPI {
     private projectId: string;
 
-    constructor(projectId: string = 'commonground') {
+    constructor(projectId: string) {
         this.projectId = projectId;
     }
 
     private get apiKey(): string | null {
-        // Always try to get the latest key from storage, fallback to env
-        if (typeof window === 'undefined') return process.env.NEXT_PUBLIC_PULSE_API_KEY || null;
-        return getApiKey(this.projectId) || process.env.NEXT_PUBLIC_PULSE_API_KEY || null;
+        if (typeof window === 'undefined') return this.getEnvKey() || null;
+        return getApiKey(this.projectId) || this.getEnvKey() || null;
+    }
+
+    private getEnvKey(): string | undefined {
+        switch (this.projectId) {
+            case 'commonground': return process.env.NEXT_PUBLIC_PULSE_API_KEY;
+            case 'vibechain': return process.env.NEXT_PUBLIC_VIBECHAIN_API_KEY;
+            case 'vitaljobs': return process.env.NEXT_PUBLIC_VITALJOBS_API_KEY;
+            default: return process.env.NEXT_PUBLIC_PULSE_API_KEY;
+        }
     }
 
     private get baseUrl(): string {
@@ -76,11 +84,20 @@ export class CommonGroundAPI {
             return '/api/proxy';
         }
 
-        let url = process.env.NEXT_PUBLIC_PULSE_API_URL || 'https://api.commonground.example';
+        let url = this.getEnvUrl() || 'https://api.commonground.example';
         if (url.endsWith('/stats')) {
             url = url.substring(0, url.lastIndexOf('/stats'));
         }
         return url;
+    }
+
+    private getEnvUrl(): string | undefined {
+        switch (this.projectId) {
+            case 'commonground': return process.env.NEXT_PUBLIC_PULSE_API_URL;
+            case 'vibechain': return process.env.NEXT_PUBLIC_VIBECHAIN_API_URL;
+            case 'vitaljobs': return process.env.NEXT_PUBLIC_VITALJOBS_API_URL;
+            default: return process.env.NEXT_PUBLIC_PULSE_API_URL;
+        }
     }
 
     private async fetchWithAuth(endpoint: string, options: RequestInit = {}) {
@@ -163,4 +180,3 @@ export class CommonGroundAPI {
         };
     }
 }
-export const commonGroundAPI = new CommonGroundAPI();
