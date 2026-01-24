@@ -152,7 +152,11 @@ export class PulseAPI {
             }
         } catch (error) {
             console.warn('Falling back to mock stats due to error:', error);
-            const errorMessage = error instanceof Error ? error.message : String(error);
+            // Enhanced error reporting
+            let errorMessage = 'Unknown Error';
+            if (error instanceof Error) errorMessage = error.message;
+            else if (typeof error === 'string') errorMessage = error;
+
             return { data: MOCK_STATS, isLive: false, error: errorMessage };
         }
         return { data: MOCK_STATS, isLive: false };
