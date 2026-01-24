@@ -5,6 +5,7 @@ import StatCard from '@/components/StatCard';
 import LiveUsersTable from '@/components/LiveUsersTable';
 import { StatCardData } from '@/types';
 import { PulseAPI } from '@/lib/api/pulse';
+import MasterBarChart from '@/components/charts/MasterBarChart';
 import { Users, Activity, DollarSign, FolderKanban } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -85,6 +86,16 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
+
+      {/* Master Chart Section */}
+      <div className="card mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-white">Total Users Comparison</h3>
+        </div>
+        <div className="h-[320px] w-full flex items-center justify-center">
+          <MasterBarChart />
+        </div>
+      </div>
 
       {/* Live Users Table */}
       <div className="mb-8">

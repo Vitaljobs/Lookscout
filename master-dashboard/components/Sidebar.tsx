@@ -73,16 +73,36 @@ export default function Sidebar() {
 
                     {projectsOpen && (
                         <div className="mt-2 space-y-1">
-                            {projects.map((project) => (
-                                <Link
-                                    key={project.id}
-                                    href={`/dashboard/projects/${project.slug}`}
-                                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white rounded-lg transition-colors"
-                                >
-                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <span>{project.name}</span>
-                                </Link>
-                            ))}
+                            {projects.map((project) => {
+                                // Dynamic Color Logic
+                                const isGreen = project.slug === 'commonground';
+                                const isBlue = project.slug === 'vibechain';
+                                const isOrange = project.slug === 'vitaljobs';
+
+                                const isActive = pathname.includes(project.slug);
+
+                                let activeClass = '';
+                                if (isActive) {
+                                    if (isGreen) activeClass = 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20';
+                                    if (isBlue) activeClass = 'bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20';
+                                    if (isOrange) activeClass = 'bg-[#f59e0b]/10 text-[#f59e0b] border border-[#f59e0b]/20';
+                                }
+
+                                return (
+                                    <Link
+                                        key={project.id}
+                                        href={`/dashboard/projects/${project.slug}`}
+                                        className={`flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all ${isActive
+                                                ? activeClass
+                                                : 'text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white'
+                                            }`}
+                                    >
+                                        <div className={`w-2 h-2 rounded-full animate-pulse ${isGreen ? 'bg-[#10b981]' : isBlue ? 'bg-[#3b82f6]' : 'bg-[#f59e0b]'
+                                            }`} />
+                                        <span>{project.name}</span>
+                                    </Link>
+                                );
+                            })}
                         </div>
                     )}
                 </div>

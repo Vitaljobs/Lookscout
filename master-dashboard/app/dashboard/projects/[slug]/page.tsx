@@ -88,12 +88,24 @@ export default function ProjectDetailPage({ params }: PageProps) {
         }
     };
 
+    // Theme Logic
+    const themeColor = slug === 'commonground' ? '#10b981' :
+        slug === 'vibechain' ? '#3b82f6' :
+            slug === 'vitaljobs' ? '#f59e0b' : '#ffffff';
+
+    const themeClass = slug === 'commonground' ? 'text-green-500 bg-green-500/10 border-green-500/20' :
+        slug === 'vibechain' ? 'text-blue-500 bg-blue-500/10 border-blue-500/20' :
+            slug === 'vitaljobs' ? 'text-orange-500 bg-orange-500/10 border-orange-500/20' : '';
+
     if (!slug) return null;
 
     return (
-        <div className="p-8">
+        <div key={slug} className="p-8 animate-flicker">
             {/* Header */}
-            <div className="mb-8 flex items-center justify-between">
+            <div className={`mb-8 flex items-center justify-between border-b pb-6 transition-colors ${slug === 'commonground' ? 'border-green-500/20' :
+                    slug === 'vibechain' ? 'border-blue-500/20' :
+                        slug === 'vitaljobs' ? 'border-orange-500/20' : 'border-[var(--card-border)]'
+                }`}>
                 <div>
                     <div className="flex items-center gap-3 mb-2">
                         <h1 className="text-3xl font-bold text-white capitalize">
@@ -109,14 +121,14 @@ export default function ProjectDetailPage({ params }: PageProps) {
                         </div>
                     </div>
                     <p className="text-gray-400">
-                        Real-time monitoring and analytics for {slug}
+                        Real-time monitoring and analytics for <span style={{ color: themeColor }}>{slug}</span>
                     </p>
                 </div>
 
                 <div className="flex gap-3">
                     {loading && (
-                        <div className="px-4 py-2 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center gap-2 text-sm text-[#ccff00] animate-pulse">
-                            <div className="w-2 h-2 rounded-full bg-[#ccff00]" />
+                        <div className={`px-4 py-2 rounded-lg border flex items-center gap-2 text-sm animate-pulse ${themeClass}`}>
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: themeColor }} />
                             Processing...
                         </div>
                     )}
