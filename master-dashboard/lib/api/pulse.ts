@@ -65,7 +65,10 @@ export class PulseAPI {
     }
 
     private get apiKey(): string | null {
-        if (typeof window === 'undefined') return this.getEnvKey() || null;
+        if (typeof window !== 'undefined') {
+            const localKey = localStorage.getItem(`titan_config_${this.projectId}_key`);
+            if (localKey) return localKey;
+        }
         return getApiKey(this.projectId) || this.getEnvKey() || null;
     }
 
@@ -79,9 +82,14 @@ export class PulseAPI {
     }
 
     private get baseUrl(): string {
-        // Use local proxy when running in browser on localhost to avoid CORS
-        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-            return '/api/proxy';
+        // Use local proxy when running in browser on localhost to avoid CORS (unless overridden)
+        if (typeof window !== 'undefined') {
+            const localUrl = localStorage.getItem(`titan_config_${this.projectId}_url`);
+            if (localUrl) return localUrl;
+
+            if (window.location.hostname === 'localhost') {
+                return '/api/proxy';
+            }
         }
 
         let url = this.getEnvUrl() || 'https://api.commonground.example';

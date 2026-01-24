@@ -42,9 +42,13 @@ export default function LiveUsersTable() {
         return badges[status as keyof typeof badges] || 'badge-blue';
     };
 
-    const formatLastSeen = (date: Date) => {
+    const formatLastSeen = (date: Date | string) => {
+        if (!date) return 'Unknown';
+        const dateObj = new Date(date);
+        if (isNaN(dateObj.getTime())) return 'Unknown';
+
         const now = new Date();
-        const diff = Math.floor((now.getTime() - new Date(date).getTime()) / 60000);
+        const diff = Math.floor((now.getTime() - dateObj.getTime()) / 60000);
 
         if (diff < 1) return 'Just now';
         if (diff < 60) return `${diff}m ago`;

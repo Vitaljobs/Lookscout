@@ -1,181 +1,181 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { saveApiKey, getApiKey } from '@/lib/storage';
-import { Key, Save, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { PulseAPI } from '@/lib/api/pulse';
+import { Activity, Save, Server, ShieldCheck, AlertCircle } from 'lucide-react';
+
+const PROJECTS = [
+    { id: 'commonground', name: 'Common Ground Pulse', color: 'green' },
+    { id: 'vibechain', name: 'VIBECHAIN', color: 'blue' },
+    { id: 'vitaljobs', name: 'VitalJobs', color: 'orange' }
+];
 
 export default function SettingsPage() {
-    const [apiKey, setApiKey] = useState('');
-    const [showKey, setShowKey] = useState(false);
-    const [saved, setSaved] = useState(false);
-    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [testResults, setTestResults] = useState<Record<string, { status: 'success' | 'error' | null, msg: string }>>({});
+
+    // Form State
+    const [configs, setConfigs] = useState<Record<string, { url: string, key: string }>>({});
 
     useEffect(() => {
-        // Load existing API key
-        const existingKey = getApiKey('commonground');
-        if (existingKey) {
-            setApiKey(existingKey);
-        }
+        // Load config from LocalStorage on mount
+        const initialConfigs: Record<string, { url: string, key: string }> = {};
+        PROJECTS.forEach(p => {
+            initialConfigs[p.id] = {
+                url: localStorage.getItem(`titan_config_${p.id}_url`) || '',
+                key: localStorage.getItem(`titan_config_${p.id}_key`) || '',
+            };
+        });
+        setConfigs(initialConfigs);
     }, []);
 
-    const handleSave = () => {
-        if (!apiKey.trim()) {
-            setError('API key cannot be empty');
-            return;
+    const handleChange = (projectId: string, field: 'url' | 'key', value: string) => {
+        setConfigs(prev => ({
+            ...prev,
+            [projectId]: {
+                ...prev[projectId],
+                [field]: value
+            }
+        }));
+    };
+
+    const handleSave = (projectId: string) => {
+        const config = configs[projectId];
+        localStorage.setItem(`titan_config_${projectId}_url`, config.url);
+        localStorage.setItem(`titan_config_${projectId}_key`, config.key);
+
+        // Visual feedback
+        const btn = document.getElementById(`save-btn-${projectId}`);
+        if (btn) {
+            const originalText = btn.innerText;
+            btn.innerText = 'Saved!';
+            btn.classList.add('bg-green-600');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('bg-green-600');
+            }, 2000);
         }
+    };
+
+    const testConnection = async (projectId: string) => {
+        setTestResults(prev => ({ ...prev, [projectId]: { status: null, msg: 'Testing...' } }));
+
+        // Ensure values are saved first so PulseAPI picks them up
+        handleSave(projectId);
 
         try {
-            saveApiKey('commonground', apiKey);
-            setSaved(true);
-            setError('');
+            const api = new PulseAPI(projectId);
+            const { data, isLive, error } = await api.getStats();
 
-            setTimeout(() => {
-                setSaved(false);
-            }, 3000);
-        } catch (err) {
-            setError('Failed to save API key');
-            console.error(err);
+            if (isLive) {
+                setTestResults(prev => ({ ...prev, [projectId]: { status: 'success', msg: 'Operational (Live)' } }));
+            } else {
+                setTestResults(prev => ({
+                    ...prev,
+                    [projectId]: {
+                        status: 'error',
+                        msg: error ? `Failed: ${error}` : 'Connected but using Mock Data (Check URL)'
+                    }
+                }));
+            }
+        } catch (e) {
+            setTestResults(prev => ({ ...prev, [projectId]: { status: 'error', msg: 'Connection Failed' } }));
         }
     };
 
     return (
-        <div className="p-8">
-            {/* Header */}
+        <div className="p-8 max-w-4xl mx-auto">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
+                <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                    <SettingsIcon className="w-8 h-8 text-gray-400" />
+                    System Configuration
+                </h1>
                 <p className="text-gray-400">
-                    Manage your API keys and project configurations
+                    Manage API connections for Titan Control Tower. Configurations are stored locally in your browser.
                 </p>
             </div>
 
-            {/* API Key Section */}
-            <div className="max-w-3xl">
-                <div className="card">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                            <Key className="w-6 h-6 text-blue-500" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-semibold text-white">
-                                Common Ground Pulse API Key
+            <div className="space-y-8">
+                {PROJECTS.map((project) => (
+                    <div key={project.id} className="card border-l-4" style={{ borderLeftColor: project.color === 'green' ? '#10b981' : project.color === 'blue' ? '#3b82f6' : '#f59e0b' }}>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                {project.name}
+                                <span className="text-xs font-normal px-2 py-1 rounded bg-[var(--sidebar-bg)] text-gray-400 border border-[var(--card-border)]">
+                                    ID: {project.id}
+                                </span>
                             </h2>
-                            <p className="text-sm text-gray-400">
-                                Enter your API key to connect to Common Ground Pulse
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                API Key
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showKey ? 'text' : 'password'}
-                                    value={apiKey}
-                                    onChange={(e) => {
-                                        setApiKey(e.target.value);
-                                        setError('');
-                                        setSaved(false);
-                                    }}
-                                    placeholder="Enter your x-api-key"
-                                    className="w-full px-4 py-3 pr-12 bg-[var(--sidebar-bg)] border border-[var(--card-border)] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowKey(!showKey)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                                >
-                                    {showKey ? (
-                                        <EyeOff className="w-5 h-5" />
-                                    ) : (
-                                        <Eye className="w-5 h-5" />
-                                    )}
-                                </button>
+                            <div className="flex items-center gap-2">
+                                {testResults[project.id]?.status === 'success' && (
+                                    <span className="flex items-center gap-1 text-green-500 text-sm font-medium animate-pulse">
+                                        <ShieldCheck className="w-4 h-4" /> Operational
+                                    </span>
+                                )}
+                                {testResults[project.id]?.status === 'error' && (
+                                    <span className="flex items-center gap-1 text-red-500 text-sm font-medium">
+                                        <AlertCircle className="w-4 h-4" /> {testResults[project.id]?.msg}
+                                    </span>
+                                )}
                             </div>
-                            {error && (
-                                <div className="flex items-center gap-2 mt-2 text-red-500 text-sm">
-                                    <AlertCircle className="w-4 h-4" />
-                                    <span>{error}</span>
-                                </div>
-                            )}
-                            {saved && (
-                                <div className="flex items-center gap-2 mt-2 text-green-500 text-sm">
-                                    <CheckCircle className="w-4 h-4" />
-                                    <span>API key saved successfully!</span>
-                                </div>
-                            )}
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-400">API Endpoint URL</label>
+                                <div className="relative">
+                                    <Server className="absolute left-3 top-3 w-4 h-4 text-gray-600" />
+                                    <input
+                                        type="text"
+                                        placeholder="https://api.example.com/v1"
+                                        className="w-full bg-[var(--sidebar-bg)] border border-[var(--card-border)] rounded-lg py-2 pl-10 pr-4 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                                        value={configs[project.id]?.url || ''}
+                                        onChange={(e) => handleChange(project.id, 'url', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-400">Service API Key</label>
+                                <div className="relative">
+                                    <ShieldCheck className="absolute left-3 top-3 w-4 h-4 text-gray-600" />
+                                    <input
+                                        type="password"
+                                        placeholder="sk_live_..."
+                                        className="w-full bg-[var(--sidebar-bg)] border border-[var(--card-border)] rounded-lg py-2 pl-10 pr-4 text-white focus:outline-none focus:border-blue-500 transition-colors font-mono"
+                                        value={configs[project.id]?.key || ''}
+                                        onChange={(e) => handleChange(project.id, 'key', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-[var(--card-border)]">
                             <button
-                                onClick={handleSave}
-                                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                                onClick={() => testConnection(project.id)}
+                                className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
+                            >
+                                Test Connection
+                            </button>
+                            <button
+                                id={`save-btn-${project.id}`}
+                                onClick={() => handleSave(project.id)}
+                                className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-all flex items-center gap-2"
                             >
                                 <Save className="w-4 h-4" />
-                                Save API Key
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setApiKey('');
-                                    setError('');
-                                    setSaved(false);
-                                }}
-                                className="px-6 py-3 bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] text-gray-300 font-medium rounded-lg border border-[var(--card-border)] transition-colors"
-                            >
-                                Clear
+                                Save Logic
                             </button>
                         </div>
                     </div>
-
-                    {/* Info Box */}
-                    <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                        <h3 className="text-sm font-semibold text-blue-400 mb-2">
-                            🔐 Security Information
-                        </h3>
-                        <ul className="text-sm text-gray-400 space-y-1">
-                            <li>• Your API key is encrypted and stored locally in your browser</li>
-                            <li>• The key is never sent to any third-party servers</li>
-                            <li>• For production use, consider implementing a backend service</li>
-                        </ul>
-                    </div>
-                </div>
-
-                {/* Additional Settings */}
-                <div className="card mt-6">
-                    <h2 className="text-xl font-semibold text-white mb-4">
-                        Project Configuration
-                    </h2>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Project Name
-                            </label>
-                            <input
-                                type="text"
-                                value="Common Ground Pulse"
-                                disabled
-                                className="w-full px-4 py-3 bg-[var(--sidebar-bg)] border border-[var(--card-border)] rounded-lg text-gray-500 cursor-not-allowed"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                API Endpoint
-                            </label>
-                            <input
-                                type="text"
-                                value="https://api.commonground.example"
-                                disabled
-                                className="w-full px-4 py-3 bg-[var(--sidebar-bg)] border border-[var(--card-border)] rounded-lg text-gray-500 cursor-not-allowed"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                This will be configurable in a future update
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                ))}
             </div>
         </div>
     );
+}
+
+function SettingsIcon({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+    )
 }
