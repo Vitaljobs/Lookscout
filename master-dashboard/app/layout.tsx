@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { ProjectProvider } from '@/context/ProjectContext';
+import { AlertProvider } from '@/context/AlertContext';
+import AIAssistant from '@/components/AIAssistant';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,7 +25,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} antialiased bg-[#0f1419] text-white`}>
         <ProjectProvider>
-          {children}
+          <AlertProvider>
+            {children}
+            <AIAssistant />
+          </AlertProvider>
         </ProjectProvider>
       </body>
     </html>
