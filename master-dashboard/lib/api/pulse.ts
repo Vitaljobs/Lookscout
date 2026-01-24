@@ -134,7 +134,7 @@ export class PulseAPI {
 
             if (!response.ok) {
                 // If 404/500, throw so we fall back to mock
-                throw new Error(`API Error: ${response.statusText}`);
+                throw new Error(`API Error: ${response.status} ${response.statusText}`);
             }
 
             return await response.json();
