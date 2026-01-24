@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { LiveUser } from '@/types';
-import { commonGroundAPI } from '@/lib/api/commonground';
+import { PulseAPI } from '@/lib/api/pulse';
 import { ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function LiveUsersTable() {
@@ -18,7 +18,8 @@ export default function LiveUsersTable() {
     const loadUsers = async () => {
         try {
             setLoading(true);
-            const { data } = await commonGroundAPI.getLiveUsers();
+            const api = new PulseAPI('commonground');
+            const { data } = await api.getLiveUsers();
             setUsers(data);
         } catch (error) {
             console.error('Failed to load users:', error);
