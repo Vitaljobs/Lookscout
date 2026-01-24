@@ -210,6 +210,33 @@ export class PulseAPI {
         return ['Mindfulness Lab', 'Stress Relief', 'Sleep Better'];
     }
 
+    async getRecentActivity(): Promise<import('@/types').ActivityFeedItem[]> {
+        try {
+            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+                // Try to fetch real activity if endpoint exists
+                // For MindGarden launch, we map 'checkins' table
+                const response = await this.fetchWithAuth('/activity');
+                return response.map((r: any) => ({
+                    id: r.id,
+                    user: r.user_name || 'Anonymous',
+                    action: r.action_type || 'Checked In',
+                    metadata: { mood: r.mood_score, note: r.note },
+                    timestamp: new Date(r.created_at)
+                }));
+            }
+        } catch (error) {
+            // Fallback to mock data
+        }
+
+        // Mock Launch Data for MindGarden
+        return [
+            { id: '1', user: 'Joshua Q.', action: 'Checked In', metadata: { mood: 8, note: 'Feeling great about the launch!' }, timestamp: new Date() },
+            { id: '2', user: 'Sarah M.', action: 'New Signup', metadata: { project: 'MindGarden' }, timestamp: new Date(Date.now() - 1000 * 60 * 5) },
+            { id: '3', user: 'David K.', action: 'Completed Session', metadata: { mood: 6 }, timestamp: new Date(Date.now() - 1000 * 60 * 15) },
+            { id: '4', user: 'System', action: 'Deployment', metadata: { note: 'v1.0.2 Live' }, timestamp: new Date(Date.now() - 1000 * 60 * 60) },
+        ];
+    }
+
     getDebugInfo() {
         return {
             hasKey: !!this.apiKey,

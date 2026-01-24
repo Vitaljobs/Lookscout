@@ -27,6 +27,18 @@ export interface Project {
   stats?: CommonGroundStats;
 }
 
+export interface ActivityFeedItem {
+  id: string;
+  user: string;
+  action: string; // "Checked in", "Signed up", "Completed session"
+  metadata?: {
+    mood?: number;
+    note?: string;
+    project?: string;
+  };
+  timestamp: Date;
+}
+
 export interface StatCardData {
   title: string;
   value: string | number;

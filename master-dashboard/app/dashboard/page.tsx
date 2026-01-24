@@ -7,6 +7,8 @@ import { StatCardData } from '@/types';
 import { PulseAPI } from '@/lib/api/pulse';
 import MasterBarChart from '@/components/charts/MasterBarChart';
 import { Users, Activity, DollarSign, FolderKanban } from 'lucide-react';
+import LiveActivityFeed from '@/components/LiveActivityFeed';
+import LaunchStatsWidget from '@/components/LaunchStatsWidget';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatCardData[]>([]);
@@ -103,61 +105,52 @@ export default function DashboardPage() {
       </div>
 
       {/* Popular Lab Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="card lg:col-span-2">
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-              <Users className="w-5 h-5 text-blue-500" />
-              <div>
-                <div className="font-medium text-white">View All Users</div>
-                <div className="text-sm text-gray-400">Manage user accounts</div>
-              </div>
-            </button>
-            <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-              <Activity className="w-5 h-5 text-green-500" />
-              <div>
-                <div className="font-medium text-white">Activity Log</div>
-                <div className="text-sm text-gray-400">View recent activity</div>
-              </div>
-            </button>
-            <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-              <DollarSign className="w-5 h-5 text-yellow-500" />
-              <div>
-                <div className="font-medium text-white">Revenue Report</div>
-                <div className="text-sm text-gray-400">Financial overview</div>
-              </div>
-            </button>
-            <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-              <FolderKanban className="w-5 h-5 text-purple-500" />
-              <div>
-                <div className="font-medium text-white">Add Project</div>
-                <div className="text-sm text-gray-400">Create new project</div>
-              </div>
-            </button>
+      {/* Popular Lab & Launch Command Center */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
+        {/* Left Column: Quick Actions & Launch Stats */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <LaunchStatsWidget />
+
+          <div className="card flex-1">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Quick Actions
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
+                <Users className="w-5 h-5 text-blue-500" />
+                <div>
+                  <div className="font-medium text-white">View All Users</div>
+                  <div className="text-sm text-gray-400">Manage user accounts</div>
+                </div>
+              </button>
+              <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
+                <Activity className="w-5 h-5 text-green-500" />
+                <div>
+                  <div className="font-medium text-white">Activity Log</div>
+                  <div className="text-sm text-gray-400">View recent activity</div>
+                </div>
+              </button>
+              <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
+                <DollarSign className="w-5 h-5 text-yellow-500" />
+                <div>
+                  <div className="font-medium text-white">Revenue Report</div>
+                  <div className="text-sm text-gray-400">Financial overview</div>
+                </div>
+              </button>
+              <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
+                <FolderKanban className="w-5 h-5 text-purple-500" />
+                <div>
+                  <div className="font-medium text-white">Add Project</div>
+                  <div className="text-sm text-gray-400">Create new project</div>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="card">
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Popular Lab
-          </h3>
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                <span className="text-sm font-medium text-blue-400">Most Active</span>
-              </div>
-              <h4 className="text-xl font-bold text-white mb-1">
-                Mindfulness Lab
-              </h4>
-              <p className="text-sm text-gray-400">
-                234 active users right now
-              </p>
-            </div>
-          </div>
+        {/* Right Column: Live Feed */}
+        <div className="min-h-[400px]">
+          <LiveActivityFeed />
         </div>
       </div>
     </div>
