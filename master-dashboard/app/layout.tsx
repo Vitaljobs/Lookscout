@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
+import { ProjectProvider } from '@/context/ProjectContext';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,13 +16,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} antialiased`}>
-        {children}
+    <html lang="en">
+      <body className={`${inter.variable} antialiased bg-[#0f1419] text-white`}>
+        <ProjectProvider>
+          {children}
+        </ProjectProvider>
       </body>
     </html>
   );

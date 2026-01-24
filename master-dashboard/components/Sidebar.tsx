@@ -10,12 +10,11 @@ import {
     ChevronDown,
     Activity
 } from 'lucide-react';
+import { useProjects } from '@/context/ProjectContext';
 
-const projects = [
-    { id: 'commonground', name: 'Common Ground Pulse', slug: 'commonground' },
-    { id: 'vibechain', name: 'VIBECHAIN', slug: 'vibechain' },
-    { id: 'vitaljobs', name: 'VitalJobs', slug: 'vitaljobs' },
-];
+// const projects = ... REMOVE THIS hardcoded array if present, or just let it interpret via context
+// We should remove the hardcoded 'projects' array since we use context now
+
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -26,6 +25,14 @@ const navigation = [
 export default function Sidebar() {
     const pathname = usePathname();
     const [projectsOpen, setProjectsOpen] = useState(true);
+    const { projects } = useProjects();
+
+    // Helper for status dots
+    const getStatusColor = (status: string) => {
+        if (status === 'operational') return 'bg-green-500';
+        if (status === 'maintenance') return 'bg-red-500';
+        return 'bg-orange-500'; // degraded
+    };
 
     return (
         <div className="w-64 h-screen bg-[var(--sidebar-bg)] border-r border-[var(--card-border)] flex flex-col">
@@ -74,18 +81,24 @@ export default function Sidebar() {
                     {projectsOpen && (
                         <div className="mt-2 space-y-1">
                             {projects.map((project) => {
-                                // Dynamic Color Logic
-                                const isGreen = project.slug === 'commonground';
-                                const isBlue = project.slug === 'vibechain';
-                                const isOrange = project.slug === 'vitaljobs';
-
                                 const isActive = pathname.includes(project.slug);
+                                const isGreen = project.theme === 'green';
+                                const isBlue = project.theme === 'blue';
+                                const isOrange = project.theme === 'orange';
+                                const isPurple = project.theme === 'purple';
+                                const isPink = project.theme === 'pink';
+                                const isRed = project.theme === 'red';
 
                                 let activeClass = '';
                                 if (isActive) {
+                                    // Fallback defaults if theme logic gets complex, using hex for precision matching globals
                                     if (isGreen) activeClass = 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20';
-                                    if (isBlue) activeClass = 'bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20';
-                                    if (isOrange) activeClass = 'bg-[#f59e0b]/10 text-[#f59e0b] border border-[#f59e0b]/20';
+                                    else if (isBlue) activeClass = 'bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20';
+                                    else if (isOrange) activeClass = 'bg-[#f59e0b]/10 text-[#f59e0b] border border-[#f59e0b]/20';
+                                    else if (isPurple) activeClass = 'bg-purple-500/10 text-purple-500 border border-purple-500/20';
+                                    else if (isPink) activeClass = 'bg-pink-500/10 text-pink-500 border border-pink-500/20';
+                                    else if (isRed) activeClass = 'bg-red-500/10 text-red-500 border border-red-500/20';
+                                    else activeClass = 'bg-gray-500/10 text-white border border-gray-500/20';
                                 }
 
                                 return (
@@ -93,12 +106,11 @@ export default function Sidebar() {
                                         key={project.id}
                                         href={`/dashboard/projects/${project.slug}`}
                                         className={`flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all ${isActive
-                                                ? activeClass
-                                                : 'text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white'
+                                            ? activeClass
+                                            : 'text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white'
                                             }`}
                                     >
-                                        <div className={`w-2 h-2 rounded-full animate-pulse ${isGreen ? 'bg-[#10b981]' : isBlue ? 'bg-[#3b82f6]' : 'bg-[#f59e0b]'
-                                            }`} />
+                                        <div className={`w-2 h-2 rounded-full animate-pulse ${getStatusColor(project.status)}`} />
                                         <span>{project.name}</span>
                                     </Link>
                                 );

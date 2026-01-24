@@ -1,28 +1,38 @@
 'use client';
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { useProjects } from '@/context/ProjectContext';
 
-const data = [
-    { name: 'Common', users: 12847, color: '#10b981' }, // Green
-    { name: 'VIBECHAIN', users: 8402, color: '#3b82f6' }, // Blue
-    { name: 'VitalJobs', users: 5120, color: '#f59e0b' }, // Orange
-];
-
-const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-        return (
-            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] p-3 rounded-lg shadow-xl">
-                <p className="font-bold text-white mb-1">{label}</p>
-                <p className="text-sm text-gray-400">
-                    Users: <span className="text-white font-mono">{payload[0].value.toLocaleString()}</span>
-                </p>
-            </div>
-        );
-    }
-    return null;
+const getThemeHex = (theme: string) => {
+    const map: Record<string, string> = {
+        green: '#10b981', blue: '#3b82f6', orange: '#f59e0b', purple: '#a855f7', pink: '#ec4899', red: '#ef4444'
+    };
+    return map[theme] || '#9ca3af';
 };
 
 export default function MasterBarChart() {
+    const { projects } = useProjects();
+
+    const data = projects.map(p => ({
+        name: p.name.split(' ')[0], // Short name
+        users: Math.floor(Math.random() * 5000) + 2000, // Mock dynamic data for now
+        color: getThemeHex(p.theme)
+    }));
+
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-[var(--card-bg)] border border-[var(--card-border)] p-3 rounded-lg shadow-xl">
+                    <p className="font-bold text-white mb-1">{label}</p>
+                    <p className="text-sm text-gray-400">
+                        Users: <span className="text-white font-mono">{payload[0].value.toLocaleString()}</span>
+                    </p>
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <div className="w-full h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
