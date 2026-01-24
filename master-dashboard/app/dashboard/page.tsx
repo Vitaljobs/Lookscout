@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import StatCard from '@/components/StatCard';
 import LiveUsersTable from '@/components/LiveUsersTable';
 import { StatCardData } from '@/types';
-import { commonGroundAPI } from '@/lib/api/commonground';
+import { PulseAPI } from '@/lib/api/pulse';
 import { Users, Activity, DollarSign, FolderKanban } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -17,7 +17,9 @@ export default function DashboardPage() {
 
   const loadStats = async () => {
     try {
-      const { data } = await commonGroundAPI.getStats();
+      // Initialize with default project (or fetch from user prefs later)
+      const api = new PulseAPI('commonground');
+      const { data } = await api.getStats();
 
       const statCards: StatCardData[] = [
         {
