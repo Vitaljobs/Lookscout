@@ -114,6 +114,12 @@ export default function ProjectDetailPage({ params }: PageProps) {
                 </div>
 
                 <div className="flex gap-3">
+                    {loading && (
+                        <div className="px-4 py-2 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center gap-2 text-sm text-[#ccff00] animate-pulse">
+                            <div className="w-2 h-2 rounded-full bg-[#ccff00]" />
+                            Processing...
+                        </div>
+                    )}
                     <div className="px-4 py-2 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center gap-2 text-sm text-gray-400">
                         <div className={`w-2 h-2 rounded-full ${hasKey ? 'bg-green-500' : 'bg-red-500'}`} />
                         {hasKey ? 'API Key Active' : 'No API Key'}
