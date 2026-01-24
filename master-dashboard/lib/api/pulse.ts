@@ -105,18 +105,34 @@ export class PulseAPI {
 
     private async fetchWithAuth(endpoint: string, options: RequestInit = {}) {
         let url = `${this.targetBaseUrl}${endpoint}`;
+        const isSupabase = this.targetBaseUrl.includes('supabase.co');
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            ...options.headers as Record<string, string>,
+            ...(options.headers as Record<string, string>),
         };
 
         if (this.apiKey) {
-            if (this.apiKey.startsWith('sb_')) {
+            // Supabase requires 'apikey' and 'Authorization'
+            if (isSupabase || this.apiKey.startsWith('sb_') || this.apiKey.length > 40) {
                 headers['apikey'] = this.apiKey;
                 headers['Authorization'] = `Bearer ${this.apiKey}`;
             } else {
                 headers['x-api-key'] = this.apiKey;
+            }
+        }
+
+        // Supabase REST API URL Rewriting
+        if (isSupabase) {
+            if (endpoint === '/stats') {
+                // Fetch first row from 'stats' table
+                url = `${this.targetBaseUrl}/rest/v1/stats?select=*&limit=1`;
+            } else if (endpoint === '/live-users') {
+                // Fetch from 'live-users' table
+                url = `${this.targetBaseUrl}/rest/v1/live-users?select=*&limit=10`;
+            } else if (endpoint === '/popular-labs') {
+                // Fallback or mock for now as we don't have a known table for this
+                return ['Mindfulness Lab (Supabase)', 'Stress Relief', 'Sleep Better'];
             }
         }
 
@@ -137,7 +153,15 @@ export class PulseAPI {
                 throw new Error(`API Error: ${response.status} ${response.statusText}`);
             }
 
-            return await response.json();
+            const data = await response.json();
+
+            // Supabase returns arrays for 'select', so we need to unwrap if expecting a single object
+            if (isSupabase && Array.isArray(data)) {
+                if (endpoint === '/stats') return data[0] || {};
+                return data;
+            }
+
+            return data;
         } catch (error) {
             console.error('API request failed:', error);
             throw error;
