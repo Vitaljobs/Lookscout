@@ -22,6 +22,7 @@ export interface Project {
   name: string;
   slug: string;
   apiKey?: string;
+  publicUrl?: string; // New field for public site link
   enabled: boolean;
   stats?: CommonGroundStats;
 }

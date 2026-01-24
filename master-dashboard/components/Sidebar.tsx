@@ -8,7 +8,8 @@ import {
     FolderKanban,
     Settings,
     ChevronDown,
-    Activity
+    Activity,
+    ExternalLink
 } from 'lucide-react';
 import { useProjects } from '@/context/ProjectContext';
 
@@ -102,17 +103,30 @@ export default function Sidebar() {
                                 }
 
                                 return (
-                                    <Link
-                                        key={project.id}
-                                        href={`/dashboard/projects/${project.slug}`}
-                                        className={`flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all ${isActive
-                                            ? activeClass
-                                            : 'text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white'
-                                            }`}
-                                    >
-                                        <div className={`w-2 h-2 rounded-full animate-pulse ${getStatusColor(project.status)}`} />
-                                        <span>{project.name}</span>
-                                    </Link>
+                                    <div className={`flex items-center justify-between w-full group ${isActive ? '' : ''}`}>
+                                        <Link
+                                            key={project.id}
+                                            href={`/dashboard/projects/${project.slug}`}
+                                            className={`flex-1 flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all ${isActive
+                                                ? activeClass
+                                                : 'text-gray-400 hover:text-white'
+                                                }`}
+                                        >
+                                            <div className={`w-2 h-2 rounded-full animate-pulse ${getStatusColor(project.status)}`} />
+                                            <span>{project.name}</span>
+                                        </Link>
+                                        {project.publicUrl && (
+                                            <a
+                                                href={project.publicUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="hidden group-hover:flex items-center justify-center w-8 h-8 text-gray-400 hover:text-white transition-colors"
+                                                title={`Visit ${project.name}`}
+                                            >
+                                                <ExternalLink className="w-3 h-3" />
+                                            </a>
+                                        )}
+                                    </div>
                                 );
                             })}
                         </div>

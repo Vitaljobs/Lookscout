@@ -18,6 +18,7 @@ export default function SettingsPage() {
         slug: '',
         status: 'operational',
         url: '',
+        publicUrl: '',
         key: '',
         theme: 'blue'
     });
@@ -29,6 +30,7 @@ export default function SettingsPage() {
             slug: '',
             status: 'operational',
             url: '',
+            publicUrl: '',
             key: '',
             theme: 'blue'
         });
@@ -140,6 +142,15 @@ export default function SettingsPage() {
                             />
                         </div>
                         <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-400">Public Live URL</label>
+                            <input
+                                className="w-full bg-[var(--sidebar-bg)] border border-[var(--card-border)] rounded-lg p-2 text-white font-mono"
+                                value={formData.publicUrl || ''}
+                                onChange={e => setFormData({ ...formData, publicUrl: e.target.value })}
+                                placeholder="e.g. https://joshua.qzz.io"
+                            />
+                        </div>
+                        <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-400">Slug (URL ID)</label>
                             <input
                                 className="w-full bg-[var(--sidebar-bg)] border border-[var(--card-border)] rounded-lg p-2 text-white font-mono"
@@ -237,8 +248,9 @@ export default function SettingsPage() {
                                 </button>
                             </div>
                         </div>
-                        <div className="mt-2 text-sm text-gray-400 font-mono pl-1">
-                            {project.url ? project.url : 'No API URL Configured'}
+                        <div className="mt-2 text-sm text-gray-400 font-mono pl-1 flex flex-col gap-1">
+                            <div>API: {project.url ? project.url : 'No API URL Configured'}</div>
+                            <div>Public: {project.publicUrl ? <a href={project.publicUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{project.publicUrl}</a> : 'No Public URL'}</div>
                             {testResults[project.id] && (
                                 <span className={`ml-4 ${testResults[project.id].status === 'success' ? 'text-green-500' : 'text-red-500'}`}>
                                     [{testResults[project.id].msg}]
