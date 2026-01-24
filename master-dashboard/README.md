@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔱 Titan | Central Control Tower
 
-## Getting Started
+**Titan** is het centrale dashboard voor het real-time monitoren en beheren van meerdere platforms binnen het ecosysteem van **Lookscout**, waaronder **CommonGround**, **VIBECHAIN** en **Vitaljobs**.
 
-First, run the development server:
+![Titan Dashboard Status](https://img.shields.io/badge/Status-Live-success)
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![Supabase](https://img.shields.io/badge/Supabase-Connected-green)
 
+## 🚀 Functies
+- **Live Connection**: Directe integratie met Supabase-databases voor real-time gebruikersstatistieken.
+- **Multi-Project Overzicht**: Schakel naadloos tussen verschillende projectomgevingen via de projectkiezer.
+- **Performance Analytics**: Real-time inzicht in bezoekersaantallen, actieve sessies en systeemstatus.
+- **Geoptimaliseerde UI**: Een modern, high-performance dashboard gebouwd met Next.js en Tailwind CSS (Dark Mode).
+- **Secure API Proxy**: Ingebouwde Next.js Rewrites voor veilige CORS-handling.
+
+## 🛠 Tech Stack
+- **Framework**: [Next.js](https://nextjs.org/) (App Router, TypeScript)
+- **Database**: [Supabase](https://supabase.com/) (Real-time data)
+- **Deployment**: [Vercel](https://vercel.com/)
+- **Styling**: Tailwind CSS
+
+## ⚙️ Installatie & Ontwikkeling
+
+### 1. Kloon de repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Vitaljobs/Lookscout.git
+cd Lookscout/master-dashboard
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Omgevingsvariabelen instellen
+Maak een `.env.local` bestand aan in de `master-dashboard` map en voeg de volgende sleutels toe (verkrijgbaar via beheerder):
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```ini
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=jouw-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=jouw-supabase-anon-key
 
-## Learn More
+# Pulse API Configuration (Supabase REST)
+NEXT_PUBLIC_PULSE_API_URL=https://[project-ref].supabase.co/rest/v1
+NEXT_PUBLIC_PULSE_API_KEY=jouw-service-role-of-anon-key
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Start de dev server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) om het dashboard te bekijken.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ℹ️ Repository Details (GitHub Sidebar)
+*Gebruik deze tekst voor de "About" sectie van de repository:*
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Description:** Central Control Tower for monitoring CommonGround, VIBECHAIN & Vitaljobs.
+**Website:** https://lookscout-delta.vercel.app/
+**Topics:** `nextjs`, `supabase`, `dashboard`, `real-time-analytics`, `control-tower`, `typescript`
