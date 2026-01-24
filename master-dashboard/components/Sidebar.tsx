@@ -1,0 +1,97 @@
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+    LayoutDashboard,
+    FolderKanban,
+    Settings,
+    ChevronDown,
+    Activity
+} from 'lucide-react';
+
+const projects = [
+    { id: 'commonground', name: 'Common Ground Pulse', slug: 'commonground' },
+];
+
+const navigation = [
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Projects', href: '/projects', icon: FolderKanban },
+    { name: 'Settings', href: '/settings', icon: Settings },
+];
+
+export default function Sidebar() {
+    const pathname = usePathname();
+    const [projectsOpen, setProjectsOpen] = useState(true);
+
+    return (
+        <div className="w-64 h-screen bg-[var(--sidebar-bg)] border-r border-[var(--card-border)] flex flex-col">
+            {/* Logo */}
+            <div className="p-6 border-b border-[var(--card-border)]">
+                <div className="flex items-center gap-2">
+                    <Activity className="w-8 h-8 text-blue-500" />
+                    <h1 className="text-xl font-bold text-white">Control Tower</h1>
+                </div>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 p-4 space-y-1">
+                {navigation.map((item) => {
+                    const isActive = pathname === item.href;
+                    const Icon = item.icon;
+
+                    return (
+                        <Link
+                            key={item.name}
+                            href={item.href}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
+                                    ? 'bg-[var(--hover-bg)] text-white'
+                                    : 'text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white'
+                                }`}
+                        >
+                            <Icon className="w-5 h-5" />
+                            <span className="font-medium">{item.name}</span>
+                        </Link>
+                    );
+                })}
+
+                {/* Projects Section */}
+                <div className="pt-6">
+                    <button
+                        onClick={() => setProjectsOpen(!projectsOpen)}
+                        className="flex items-center justify-between w-full px-4 py-2 text-sm font-semibold text-gray-400 hover:text-white transition-colors"
+                    >
+                        <span>PROJECTS</span>
+                        <ChevronDown
+                            className={`w-4 h-4 transition-transform ${projectsOpen ? 'rotate-180' : ''
+                                }`}
+                        />
+                    </button>
+
+                    {projectsOpen && (
+                        <div className="mt-2 space-y-1">
+                            {projects.map((project) => (
+                                <Link
+                                    key={project.id}
+                                    href={`/projects/${project.slug}`}
+                                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white rounded-lg transition-colors"
+                                >
+                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                    <span>{project.name}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </nav>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-[var(--card-border)]">
+                <div className="text-xs text-gray-500 text-center">
+                    Master Dashboard v1.0
+                </div>
+            </div>
+        </div>
+    );
+}
