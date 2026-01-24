@@ -16,9 +16,9 @@ const projects = [
 ];
 
 const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Projects', href: '/projects', icon: FolderKanban },
-    { name: 'Settings', href: '/settings', icon: Settings },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Projects', href: '/dashboard/projects', icon: FolderKanban },
+    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
 export default function Sidebar() {
@@ -46,8 +46,8 @@ export default function Sidebar() {
                             key={item.name}
                             href={item.href}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-                                    ? 'bg-[var(--hover-bg)] text-white'
-                                    : 'text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white'
+                                ? 'bg-[var(--hover-bg)] text-white'
+                                : 'text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white'
                                 }`}
                         >
                             <Icon className="w-5 h-5" />
@@ -74,7 +74,7 @@ export default function Sidebar() {
                             {projects.map((project) => (
                                 <Link
                                     key={project.id}
-                                    href={`/projects/${project.slug}`}
+                                    href={`/dashboard/projects/${project.slug}`}
                                     className="flex items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white rounded-lg transition-colors"
                                 >
                                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />

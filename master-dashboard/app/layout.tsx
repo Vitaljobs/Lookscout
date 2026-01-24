@@ -21,12 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto bg-[var(--background)]">
-            {children}
-          </main>
-        </div>
+        {children}
       </body>
     </html>
   );

@@ -1,152 +1,85 @@
-'use client';
+import Link from 'next/link';
+import { Zap, ShieldCheck, Globe, Cpu } from 'lucide-react';
 
-import React, { useEffect, useState } from 'react';
-import StatCard from '@/components/StatCard';
-import LiveUsersTable from '@/components/LiveUsersTable';
-import { StatCardData } from '@/types';
-import { commonGroundAPI } from '@/lib/api/commonground';
-import { Users, Activity, DollarSign, FolderKanban } from 'lucide-react';
+export default function TitanLanding() {
+    return (
+        <div className="min-h-screen bg-[#050505] text-white selection:bg-[#ccff00] selection:text-black overflow-hidden relative flex flex-col font-sans">
 
-export default function DashboardPage() {
-  const [stats, setStats] = useState<StatCardData[]>([]);
-  const [loading, setLoading] = useState(true);
+            {/* Dynamic Background */}
+            <div className="absolute top-0 right-0 w-[60vw] h-[60vw] bg-[#ccff00]/5 rounded-full blur-[180px] pointer-events-none translate-x-1/3 -translate-y-1/4" />
+            <div className="absolute bottom-0 left-0 w-[40vw] h-[40vw] bg-emerald-900/10 rounded-full blur-[150px] pointer-events-none -translate-x-1/3 translate-y-1/3" />
+            <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
 
-  useEffect(() => {
-    loadStats();
-  }, []);
+            {/* Header */}
+            <nav className="fixed top-0 w-full z-50 px-6 py-6 flex justify-between items-center backdrop-blur-sm border-b border-white/5">
+                <div className="text-xl font-bold tracking-tighter flex items-center gap-2 font-mono">
+                    <Zap className="w-5 h-5 text-[#ccff00]" />
+                    TITAN_OS
+                </div>
+                <div className="hidden md:flex gap-10 text-xs font-medium tracking-widest text-gray-500 uppercase">
+                    <span className="hover:text-[#ccff00] cursor-pointer transition-colors">Protocol</span>
+                    <span className="hover:text-[#ccff00] cursor-pointer transition-colors">Network</span>
+                    <span className="hover:text-[#ccff00] cursor-pointer transition-colors">Governance</span>
+                </div>
+                <Link href="/dashboard">
+                    <button className="group px-6 py-2 bg-[#ccff00] hover:bg-[#b3e600] text-black text-xs font-bold tracking-wider uppercase rounded-full transition-all hover:shadow-[0_0_20px_rgba(204,255,0,0.3)] flex items-center gap-2">
+                        Connect
+                        <div className="w-2 h-2 bg-black rounded-full animate-pulse" />
+                    </button>
+                </Link>
+            </nav>
 
-  const loadStats = async () => {
-    try {
-      const { data } = await commonGroundAPI.getStats();
+            {/* Main Content */}
+            <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 mt-16">
 
-      const statCards: StatCardData[] = [
-        {
-          title: 'Total Users',
-          value: data.total_users,
-          change: 12.5,
-          trend: 'up',
-          badge: { text: 'Growth', color: 'green' }
-        },
-        {
-          title: 'Live Visitors',
-          value: data.active_now,
-          badge: { text: 'Live', color: 'red' }
-        },
-        {
-          title: 'Page Views (24h)',
-          value: data.page_views_24h,
-          change: 8.2,
-          trend: 'up',
-          badge: { text: 'Native', color: 'blue' }
-        },
-        {
-          title: 'Active Projects',
-          value: 1,
-          badge: { text: 'Running', color: 'orange' }
-        }
-      ];
+                {/* Status Indicator */}
+                <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-[#ccff00]/20 bg-[#ccff00]/5 backdrop-blur-md mb-12 animate-fade-in-up">
+                    <div className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ccff00] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ccff00]"></span>
+                    </div>
+                    <span className="text-[#ccff00] text-[10px] font-mono font-bold tracking-[0.2em] uppercase">System Operational</span>
+                </div>
 
-      setStats(statCards);
-    } catch (error) {
-      console.error('Failed to load stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+                {/* Hero Title */}
+                <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-8 leading-none select-none">
+                    TITAN <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">CONTROL</span>
+                </h1>
 
-  return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          Hey there, Control Tower! 👋
-        </h1>
-        <p className="text-gray-400">
-          Welcome back. Here's what's happening with your projects.
-        </p>
-      </div>
+                <p className="max-w-xl text-lg md:text-xl text-gray-400 mb-16 leading-relaxed font-light">
+                    The central nervous system for <span className="text-white font-medium">CommonGround</span>, <span className="text-white font-medium">VIBECHAIN</span>, and <span className="text-white font-medium">VitalJobs</span>.
+                    <br /> Orchestrating the future of decentralized platforms.
+                </p>
 
-      {/* Stat Cards */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="card h-32 animate-pulse">
-              <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
-              <div className="h-8 bg-gray-700 rounded w-3/4"></div>
-            </div>
-          ))}
+                {/* Primary Interaction */}
+                <div className="flex flex-col md:flex-row gap-6 items-center">
+                    <Link href="/dashboard" className="group relative">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-[#ccff00] to-emerald-500 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200" />
+                        <button className="relative px-12 py-4 bg-black border border-[#ccff00]/30 hover:border-[#ccff00] text-white font-bold rounded-full transition-all flex items-center gap-3 group-hover:text-[#ccff00]">
+                            <Cpu className="w-5 h-5" />
+                            <span>INITIALIZE DASHBOARD</span>
+                        </button>
+                    </Link>
+                </div>
+
+            </main>
+
+            {/* Footer / Stats */}
+            <footer className="relative z-10 w-full px-8 py-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600 uppercase tracking-widest font-mono">
+                <div className="flex gap-8">
+                    <div className="flex items-center gap-3">
+                        <Globe className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-400">Net: Mainnet</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <ShieldCheck className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-400">Security: Maximum</span>
+                    </div>
+                </div>
+                <div className="mt-4 md:mt-0 opacity-50">
+                    Titan OS v1.0.4 // Authorized Access Only
+                </div>
+            </footer>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <StatCard key={index} data={stat} />
-          ))}
-        </div>
-      )}
-
-      {/* Live Users Table */}
-      <div className="mb-8">
-        <LiveUsersTable />
-      </div>
-
-      {/* Popular Lab Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="card lg:col-span-2">
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-              <Users className="w-5 h-5 text-blue-500" />
-              <div>
-                <div className="font-medium text-white">View All Users</div>
-                <div className="text-sm text-gray-400">Manage user accounts</div>
-              </div>
-            </button>
-            <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-              <Activity className="w-5 h-5 text-green-500" />
-              <div>
-                <div className="font-medium text-white">Activity Log</div>
-                <div className="text-sm text-gray-400">View recent activity</div>
-              </div>
-            </button>
-            <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-              <DollarSign className="w-5 h-5 text-yellow-500" />
-              <div>
-                <div className="font-medium text-white">Revenue Report</div>
-                <div className="text-sm text-gray-400">Financial overview</div>
-              </div>
-            </button>
-            <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-              <FolderKanban className="w-5 h-5 text-purple-500" />
-              <div>
-                <div className="font-medium text-white">Add Project</div>
-                <div className="text-sm text-gray-400">Create new project</div>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <div className="card">
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Popular Lab
-          </h3>
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                <span className="text-sm font-medium text-blue-400">Most Active</span>
-              </div>
-              <h4 className="text-xl font-bold text-white mb-1">
-                Mindfulness Lab
-              </h4>
-              <p className="text-sm text-gray-400">
-                234 active users right now
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
