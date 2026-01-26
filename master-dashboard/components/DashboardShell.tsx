@@ -8,9 +8,9 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="flex h-screen overflow-hidden bg-[#0f1419]">
-            {/* Mobile Header */}
-            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#1e2329] border-b border-gray-800 flex items-center justify-between px-4 z-40 shadow-lg">
+        <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-[#0f1419]">
+            {/* Mobile Header (Relative, taking up space) */}
+            <div className="md:hidden flex-none h-16 bg-[#1e2329] border-b border-gray-800 flex items-center justify-between px-4 z-40 shadow-lg relative">
                 <div className="flex items-center">
                     <button
                         onClick={() => setSidebarOpen(true)}
@@ -18,7 +18,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                     >
                         <Menu className="w-6 h-6" />
                     </button>
-                    <span className="ml-2 font-bold text-white text-lg">Control Tower <span className="text-xs text-gray-400 font-normal ml-1">v1.0.2</span></span>
+                    <span className="ml-2 font-bold text-white text-lg">Control Tower <span className="text-xs text-gray-400 font-normal ml-1">v1.0.3</span></span>
                 </div>
             </div>
 
@@ -40,7 +40,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             )}
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto w-full pt-20 pb-10 md:pt-0 md:pb-0 bg-[#0f1419]">
+            <main className="flex-1 overflow-y-auto w-full bg-[#0f1419]">
                 {children}
             </main>
         </div>
