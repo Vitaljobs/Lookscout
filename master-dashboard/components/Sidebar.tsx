@@ -9,7 +9,8 @@ import {
     Settings,
     ChevronDown,
     Activity,
-    ExternalLink
+    ExternalLink,
+    X
 } from 'lucide-react';
 import { useProjects } from '@/context/ProjectContext';
 
@@ -23,10 +24,14 @@ const navigation = [
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
     const [projectsOpen, setProjectsOpen] = useState(true);
     const { projects } = useProjects();
+
+    const handleNavClick = () => {
+        if (onClose) onClose();
+    };
 
     // Helper for status dots
     const getStatusColor = (status: string) => {
@@ -36,7 +41,15 @@ export default function Sidebar() {
     };
 
     return (
-        <div className="w-64 h-screen bg-[var(--sidebar-bg)] border-r border-[var(--card-border)] flex flex-col">
+        <div className="w-64 h-full bg-[var(--sidebar-bg)] border-r border-[var(--card-border)] flex flex-col relative">
+            {/* Close Button (Mobile Only) */}
+            <button
+                onClick={onClose}
+                className="absolute top-4 right-4 md:hidden text-gray-400 hover:text-white"
+            >
+                <X className="w-6 h-6" />
+            </button>
+
             {/* Logo */}
             <div className="p-6 border-b border-[var(--card-border)]">
                 <div className="flex items-center gap-2">
@@ -46,7 +59,7 @@ export default function Sidebar() {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 p-4 space-y-1">
+            <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                 {navigation.map((item) => {
                     const isActive = pathname === item.href;
                     const Icon = item.icon;
@@ -55,6 +68,7 @@ export default function Sidebar() {
                         <Link
                             key={item.name}
                             href={item.href}
+                            onClick={handleNavClick}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
                                 ? 'bg-[var(--hover-bg)] text-white'
                                 : 'text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white'
@@ -107,6 +121,7 @@ export default function Sidebar() {
                                         <Link
                                             key={project.id}
                                             href={`/dashboard/projects/${project.slug}`}
+                                            onClick={handleNavClick}
                                             className={`flex-1 flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all ${isActive
                                                 ? activeClass
                                                 : 'text-gray-400 hover:text-white'
@@ -137,7 +152,7 @@ export default function Sidebar() {
             {/* Footer */}
             <div className="p-4 border-t border-[var(--card-border)]">
                 <div className="text-xs text-gray-500 text-center font-mono">
-                    Master Dashboard v1.0.0
+                    Master Dashboard v1.0.1
                 </div>
             </div>
         </div>
