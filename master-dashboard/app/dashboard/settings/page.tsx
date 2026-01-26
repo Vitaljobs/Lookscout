@@ -254,6 +254,12 @@ export default function SettingsPage() {
                     </div>
                 ))}
             </div>
+
+            <div className="mt-8 pt-8 border-t border-[var(--card-border)] text-center">
+                <p className="text-xs text-gray-500 font-mono">
+                    Master Dashboard v1.0.1
+                </p>
+            </div>
         </div>
     );
 }

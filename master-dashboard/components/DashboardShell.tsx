@@ -38,7 +38,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             )}
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto w-full pt-16 md:pt-0">
+            <main className="flex-1 overflow-y-auto w-full pt-16 md:pt-0 bg-[#0f1419]">
                 {children}
             </main>
         </div>
