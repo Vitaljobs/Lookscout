@@ -87,6 +87,19 @@ export class PulseAPI {
 
     private get targetBaseUrl(): string {
         if (typeof window !== 'undefined') {
+            // New logic: Read from consolidated titan_projects
+            try {
+                const projectsStr = localStorage.getItem('titan_projects');
+                if (projectsStr) {
+                    const projects = JSON.parse(projectsStr);
+                    const project = projects.find((p: any) => p.id === this.projectId);
+                    if (project && project.url) return project.url;
+                }
+            } catch (e) {
+                console.warn('Failed to read project config for URL', e);
+            }
+
+            // Fallback for legacy (if any)
             const localUrl = localStorage.getItem(`titan_config_${this.projectId}_url`);
             if (localUrl) return localUrl;
         }
