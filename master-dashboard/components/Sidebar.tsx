@@ -136,9 +136,8 @@ export default function Sidebar() {
 
             {/* Footer */}
             <div className="p-4 border-t border-[var(--card-border)]">
-                <div className="flex flex-col items-center gap-1 text-xs text-gray-500">
-                    <span className="font-mono">v0.1.0</span>
-                    <span className="text-[10px] opacity-70">Build: {new Date().toISOString().split('T')[0]}</span>
+                <div className="text-xs text-gray-500 text-center font-mono">
+                    Master Dashboard v1.0.0
                 </div>
             </div>
         </div>
