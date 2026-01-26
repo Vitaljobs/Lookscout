@@ -10,14 +10,16 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     return (
         <div className="flex h-screen overflow-hidden bg-[#0f1419]">
             {/* Mobile Header */}
-            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#1e2329] border-b border-gray-800 flex items-center px-4 z-40">
-                <button
-                    onClick={() => setSidebarOpen(true)}
-                    className="p-2 text-gray-400 hover:text-white"
-                >
-                    <Menu className="w-6 h-6" />
-                </button>
-                <span className="ml-3 font-bold text-white text-lg">Control Tower</span>
+            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#1e2329] border-b border-gray-800 flex items-center justify-between px-4 z-40 shadow-lg">
+                <div className="flex items-center">
+                    <button
+                        onClick={() => setSidebarOpen(true)}
+                        className="p-2 -ml-2 text-gray-400 hover:text-white"
+                    >
+                        <Menu className="w-6 h-6" />
+                    </button>
+                    <span className="ml-2 font-bold text-white text-lg">Control Tower <span className="text-xs text-gray-400 font-normal ml-1">v1.0.2</span></span>
+                </div>
             </div>
 
             {/* Sidebar with Mobile State */}
@@ -38,7 +40,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             )}
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto w-full pt-16 md:pt-0 bg-[#0f1419]">
+            <main className="flex-1 overflow-y-auto w-full pt-20 pb-10 md:pt-0 md:pb-0 bg-[#0f1419]">
                 {children}
             </main>
         </div>
