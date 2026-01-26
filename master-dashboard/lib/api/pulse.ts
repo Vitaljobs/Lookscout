@@ -65,11 +65,15 @@ export class PulseAPI {
     }
 
     private get apiKey(): string | null {
+        // Prioritize SecureStorage via helper
+        const secureKey = getApiKey(this.projectId);
+        if (secureKey) return secureKey;
+
         if (typeof window !== 'undefined') {
             const localKey = localStorage.getItem(`titan_config_${this.projectId}_key`);
             if (localKey) return localKey;
         }
-        return getApiKey(this.projectId) || this.getEnvKey() || null;
+        return this.getEnvKey() || null;
     }
 
     private getEnvKey(): string | undefined {

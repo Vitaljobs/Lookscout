@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { saveApiKey, getApiKey, removeApiKey } from '@/lib/storage';
 
 export type ProjectStatus = 'operational' | 'maintenance' | 'degraded';
 export type ProjectTheme = 'green' | 'blue' | 'orange' | 'purple' | 'pink' | 'red';
@@ -72,10 +73,23 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         const saved = localStorage.getItem('titan_projects');
         if (saved) {
             try {
-                setProjects(JSON.parse(saved));
+                const parsed: Project[] = JSON.parse(saved);
+                // Hydrate with secure keys
+                const hydrated = parsed.map(p => ({
+                    ...p,
+                    key: getApiKey(p.id) || p.key || ''
+                }));
+                setProjects(hydrated);
             } catch (e) {
                 console.error('Failed to parse projects', e);
             }
+        } else {
+            // First run: Check secure storage for default projects
+            const hydrated = DEFAULT_PROJECTS.map(p => ({
+                ...p,
+                key: getApiKey(p.id) || p.key || ''
+            }));
+            setProjects(hydrated);
         }
         setIsLoaded(true);
     }, []);
@@ -83,6 +97,8 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     // Save to LocalStorage on change
     useEffect(() => {
         if (isLoaded) {
+            // Save project config (excluding sensitive key if we wanted, but keeping for now)
+            // Ideally we strip the key before saving to plain localStorage, but for now we sync both
             localStorage.setItem('titan_projects', JSON.stringify(projects));
         }
     }, [projects, isLoaded]);
@@ -92,14 +108,23 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
             ...data,
             id: data.slug // Use slug as ID for simplicity
         };
+
+        if (newProject.key) {
+            saveApiKey(newProject.id, newProject.key);
+        }
+
         setProjects(prev => [...prev, newProject]);
     };
 
     const updateProject = (id: string, updates: Partial<Project>) => {
+        if (updates.key !== undefined) {
+            saveApiKey(id, updates.key);
+        }
         setProjects(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
     };
 
     const deleteProject = (id: string) => {
+        removeApiKey(id);
         setProjects(prev => prev.filter(p => p.id !== id));
     };
 

@@ -92,13 +92,7 @@ export default function SettingsPage() {
         }
     };
 
-    // Helper for local configs (keep syncing to local storage for PulseAPI compatibility)
-    useEffect(() => {
-        projects.forEach(p => {
-            localStorage.setItem(`titan_config_${p.id}_url`, p.url);
-            localStorage.setItem(`titan_config_${p.id}_key`, p.key);
-        });
-    }, [projects]);
+
 
     return (
         <div className="p-8 max-w-5xl mx-auto">
