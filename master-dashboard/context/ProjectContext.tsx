@@ -74,11 +74,19 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         if (saved) {
             try {
                 const parsed: Project[] = JSON.parse(saved);
-                // Hydrate with secure keys
-                const hydrated = parsed.map(p => ({
-                    ...p,
-                    key: getApiKey(p.id) || p.key || ''
-                }));
+                // Hydrate with secure keys, falling back to Env Vars if storage is empty
+                const hydrated = parsed.map(p => {
+                    const defaultP = DEFAULT_PROJECTS.find(d => d.id === p.id);
+                    // 1. Secure Storage (Session) 2. Local Storage (Persisted) 3. Env Var (Default)
+                    const effectiveKey = getApiKey(p.id) || p.key || defaultP?.key || '';
+                    const effectiveUrl = p.url || defaultP?.url || '';
+
+                    return {
+                        ...p,
+                        key: effectiveKey,
+                        url: effectiveUrl
+                    };
+                });
                 setProjects(hydrated);
             } catch (e) {
                 console.error('Failed to parse projects', e);
