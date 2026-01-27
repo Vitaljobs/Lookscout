@@ -46,9 +46,9 @@ const DEFAULT_PROJECTS: Project[] = [
         description: 'Blockchain-based vibe tracking',
         slug: 'vibechain',
         status: 'operational',
-        url: process.env.NEXT_PUBLIC_VIBECHAIN_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL || '',
+        url: process.env.NEXT_PUBLIC_VIBECHAIN_URL || process.env.NEXT_PUBLIC_VIBECHAIN_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL || '',
         publicUrl: '',
-        key: process.env.NEXT_PUBLIC_VIBECHAIN_API_KEY || process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
+        key: process.env.NEXT_PUBLIC_VIBECHAIN_KEY || process.env.NEXT_PUBLIC_VIBECHAIN_API_KEY || process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
         theme: 'blue'
     },
     {
@@ -57,9 +57,9 @@ const DEFAULT_PROJECTS: Project[] = [
         description: 'Essential workforce analytics',
         slug: 'vitaljobs',
         status: 'operational',
-        url: process.env.NEXT_PUBLIC_VITALJOBS_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL || '',
+        url: process.env.NEXT_PUBLIC_VITALJOBS_URL || process.env.NEXT_PUBLIC_VITALJOBS_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL || '',
         publicUrl: '',
-        key: process.env.NEXT_PUBLIC_VITALJOBS_API_KEY || process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
+        key: process.env.NEXT_PUBLIC_VITALJOBS_KEY || process.env.NEXT_PUBLIC_VITALJOBS_API_KEY || process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
         theme: 'orange'
     }
 ];
