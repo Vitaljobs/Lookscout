@@ -35,9 +35,9 @@ const DEFAULT_PROJECTS: Project[] = [
         description: 'Real-time social sentiment monitoring',
         slug: 'commonground',
         status: 'operational',
-        url: '',
+        url: process.env.NEXT_PUBLIC_PULSE_API_URL || '',
         publicUrl: '',
-        key: '',
+        key: process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
         theme: 'green'
     },
     {
@@ -46,9 +46,9 @@ const DEFAULT_PROJECTS: Project[] = [
         description: 'Blockchain-based vibe tracking',
         slug: 'vibechain',
         status: 'operational',
-        url: '',
+        url: process.env.NEXT_PUBLIC_VIBECHAIN_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL || '',
         publicUrl: '',
-        key: '',
+        key: process.env.NEXT_PUBLIC_VIBECHAIN_API_KEY || process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
         theme: 'blue'
     },
     {
@@ -57,9 +57,9 @@ const DEFAULT_PROJECTS: Project[] = [
         description: 'Essential workforce analytics',
         slug: 'vitaljobs',
         status: 'operational',
-        url: '',
+        url: process.env.NEXT_PUBLIC_VITALJOBS_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL || '',
         publicUrl: '',
-        key: '',
+        key: process.env.NEXT_PUBLIC_VITALJOBS_API_KEY || process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
         theme: 'orange'
     }
 ];
