@@ -1,6 +1,5 @@
 import { CommonGroundStats, LiveUser } from '@/types';
 import { getApiKey } from '../storage';
-import { getProjectConfig } from '../project-config';
 
 // Mock data for development
 const MOCK_STATS: CommonGroundStats = {
@@ -66,21 +65,17 @@ export class PulseAPI {
     }
 
     private get apiKey(): string | null {
-        // 1. Check Hardcoded Config (Prioritized for persistence)
-        const config = getProjectConfig(this.projectId);
-        if (config && config.key) return config.key;
-
-        // 2. Prioritize SecureStorage via helper
+        // 1. Prioritize SecureStorage via helper (Settings Page interactions)
         const secureKey = getApiKey(this.projectId);
         if (secureKey) return secureKey;
 
-        // 3. Check LocalStorage (Legacy)
+        // 2. Check LocalStorage (Legacy)
         if (typeof window !== 'undefined') {
             const localKey = localStorage.getItem(`titan_config_${this.projectId}_key`);
             if (localKey) return localKey;
         }
 
-        // 4. Fallback to Env
+        // 3. Fallback to Env
         return this.getEnvKey() || null;
     }
 
@@ -94,12 +89,8 @@ export class PulseAPI {
     }
 
     private get targetBaseUrl(): string {
-        // 1. Check Hardcoded Config
-        const config = getProjectConfig(this.projectId);
-        if (config && config.url) return config.url;
-
         if (typeof window !== 'undefined') {
-            // New logic: Read from consolidated titan_projects
+            // New logic: Read from consolidated titan_projects local cache
             try {
                 const projectsStr = localStorage.getItem('titan_projects');
                 if (projectsStr) {
