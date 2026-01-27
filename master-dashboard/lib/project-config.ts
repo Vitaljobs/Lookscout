@@ -5,17 +5,16 @@ export interface ProjectConfig {
 
 export const PROJECT_CONFIG: Record<string, ProjectConfig> = {
     'commonground': {
-        url: 'https://gzedshdaekxeccomkxkn.supabase.co/rest/v1',
-        key: 'sb_publishable_jFJVJgP161jS6QW45A4IVQ_UZlCk7bh'
+        url: 'https://cwhcxazrmayjhaadtjqs.supabase.co',
+        key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3aGN4YXpybWF5amhhYWR0anFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxODI0MjcsImV4cCI6MjA4NDc1ODQyN30.D0hr9a0O581o44erXMxtWqXbIhEzZ5yJ1t4b5CNhulg'
     },
-    // Placeholders for other projects
     'vibechain': {
-        url: '',
-        key: ''
+        url: 'https://cwhcxazrmayjhaadtjqs.supabase.co',
+        key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3aGN4YXpybWF5amhhYWR0anFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxODI0MjcsImV4cCI6MjA4NDc1ODQyN30.D0hr9a0O581o44erXMxtWqXbIhEzZ5yJ1t4b5CNhulg'
     },
     'vitaljobs': {
-        url: '',
-        key: ''
+        url: 'https://cwhcxazrmayjhaadtjqs.supabase.co',
+        key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3aGN4YXpybWF5amhhYWR0anFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxODI0MjcsImV4cCI6MjA4NDc1ODQyN30.D0hr9a0O581o44erXMxtWqXbIhEzZ5yJ1t4b5CNhulg'
     }
 };
 
