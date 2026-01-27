@@ -108,9 +108,15 @@ export class PulseAPI {
         }
 
         let url = this.getEnvUrl() || 'https://api.commonground.example';
+
+        // Clean up URL: remove trailing /stats or /rest/v1 to ensure we have a clean base
         if (url.endsWith('/stats')) {
             url = url.substring(0, url.lastIndexOf('/stats'));
         }
+        if (url.endsWith('/rest/v1')) {
+            url = url.substring(0, url.lastIndexOf('/rest/v1'));
+        }
+
         return url;
     }
 
