@@ -148,10 +148,11 @@ export default function AIAssistant() {
                     responseText = `📊 **Database Query Resultaat**\n\nTotal Users in ecosysteem: **${total.toLocaleString()}**\n\nDetails:\n${growthDetails}`;
                 }
                 // COMMAND: AFFIRMATIVE / HEALING (Ok, Ja, Doe maar, Cache optimaliseren, Fix)
-                else if (lowerInput === 'ok' || lowerInput === 'ja' || lowerInput === 'doe maar' || lowerInput === 'yes' || lowerInput.includes('graag') || lowerInput.includes('cache') || lowerInput.includes('optimaliseer') || lowerInput.includes('fix') || lowerInput.includes('repareer')) {
-                    // Check if previous message was an alert (Mock context awareness)
-                    const lastMsg = messages[messages.length - 1];
-                    if (lastMsg && lastMsg.type === 'alert') {
+                else if (lowerInput === 'ok' || lowerInput === 'ja' || lowerInput === 'doe maar' || lowerInput === 'yes' || lowerInput.includes('graag') || lowerInput.includes('cache') || lowerInput.includes('casch') || lowerInput.includes('optimal') || lowerInput.includes('fix') || lowerInput.includes('repareer')) {
+                    // Check if RECENT message was an alert (Persistence fix: Look back 3 messages)
+                    const recentAlert = [...messages].reverse().slice(0, 3).find(m => m.type === 'alert');
+
+                    if (recentAlert) {
                         responseText = "✅ **Actie Uitgevoerd**: Cache is geflusht en load-balancers zijn opnieuw gekalibreerd. De latency zakt nu terug naar normaal (42ms).";
                     } else {
                         responseText = "Top! Heb je nog andere vragen of commando's?";
