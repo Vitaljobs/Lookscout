@@ -11,22 +11,30 @@ export default function LiveUsersTable() {
     const [currentPage, setCurrentPage] = useState(1);
     const usersPerPage = 5;
 
-    useEffect(() => {
-        loadUsers();
-    }, []);
-
     const loadUsers = async () => {
         try {
-            setLoading(true);
+            // Only set loading on first load to avoid flickering
+            if (users.length === 0) setLoading(true);
+
             const api = new PulseAPI('commonground');
             const { data } = await api.getLiveUsers();
-            setUsers(data);
+
+            // Sort by most recent
+            const sorted = data.sort((a, b) => new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime());
+            setUsers(sorted);
         } catch (error) {
             console.error('Failed to load users:', error);
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        loadUsers();
+        // Poll for live activity every 5 seconds
+        const interval = setInterval(loadUsers, 5000);
+        return () => clearInterval(interval);
+    }, []);
 
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
