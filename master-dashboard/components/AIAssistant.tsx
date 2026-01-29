@@ -158,12 +158,26 @@ export default function AIAssistant() {
                         responseText = "Top! Heb je nog andere vragen of commando's?";
                     }
                 }
+                // COMMAND: UPDATE (Update / Updates)
+                else if (lowerInput.includes('update')) {
+                    let updateMsg = "**Project Updates Overzicht** 📋\n\n";
+                    for (const p of projects) {
+                        // Mock update status messages based on project state
+                        let statusNote = "Stabiel & Online";
+                        if (p.name.includes('Common')) statusNote = "v1.2.0 Live - User Growth +12%";
+                        if (p.name.includes('VIBE')) statusNote = "API Latency Optimized";
+                        if (p.name.includes('Vital')) statusNote = "New Job Matching Algo Active";
+
+                        updateMsg += `- **${p.name}**: ${statusNote}\n`;
+                    }
+                    responseText = updateMsg + "\nCheck het nieuwe 'Updates' bord op je dashboard voor meer details.";
+                }
                 // GENERAL CHAT
                 else if (lowerInput.includes('hallo') || lowerInput.includes('hoi') || lowerInput.includes('hi')) {
-                    responseText = "Hallo, Control Tower. Ik sta klaar. Probeer commando's als 'Status Rapport', 'Voorspel groei' of 'Blokkeer gebruiker'.";
+                    responseText = "Hallo, Control Tower. Ik sta klaar. Probeer commando's als 'Status Rapport', 'Voorspel groei', 'Update' of 'Blokkeer gebruiker'.";
                 }
                 else {
-                    responseText = "Ik begreep dat niet helemaal. Ik spreek nu Nederlands! Probeer:\n- 'Blokkeer gebruiker X'\n- 'Status rapport'\n- 'Voorspel groei'\n- 'Security uitleg'";
+                    responseText = "Ik begreep dat niet helemaal. Ik spreek nu Nederlands! Probeer:\n- 'Update'\n- 'Blokkeer gebruiker X'\n- 'Status rapport'\n- 'Voorspel groei'";
                 }
 
                 setMessages(prev => [...prev, { role: 'assistant', content: responseText, timestamp: new Date() }]);
