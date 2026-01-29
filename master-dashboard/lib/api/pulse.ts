@@ -148,178 +148,187 @@ export class PulseAPI {
             }
         }
 
-        // Supabase REST API URL Rewriting
-        if (isSupabase) {
-            if (endpoint === '/stats') {
-                // Fetch first row from 'stats' table
-                url = `${this.targetBaseUrl}/rest/v1/stats?select=*&limit=1`;
-            } else if (endpoint === '/live-users') {
-                // Fetch from 'live-users' table
-                url = `${this.targetBaseUrl}/rest/v1/live-users?select=*&limit=10`;
-            } else if (endpoint === '/popular-labs') {
-                // Fallback or mock for now as we don't have a known table for this
-                return ['Mindfulness Lab (Supabase)', 'Stress Relief', 'Sleep Better'];
-            }
+        if (endpoint === '/stats') {
+            // Fetch first row from 'stats' table
+            url = `${this.targetBaseUrl}/rest/v1/stats?select=*&limit=1`;
+        } else if (endpoint === '/live-users') {
+            // Fetch from 'live-users' table
+            url = `${this.targetBaseUrl}/rest/v1/live-users?select=*&limit=10`;
+        } else if (endpoint === '/popular-labs') {
+            // Fallback or mock for now as we don't have a known table for this
+            return ['Mindfulness Lab (Supabase)', 'Stress Relief', 'Sleep Better'];
         }
+    } else {
+    // Universal Pulse Adapter (Next.js Route Handler)
+    // Maps abstract endpoints to query parameters
+    if (endpoint === '/stats') {
+        url = `${this.targetBaseUrl}?type=stats`;
+    } else if (endpoint === '/live-users') {
+        url = `${this.targetBaseUrl}?type=live-users`;
+    } else if (endpoint === '/users/block') {
+        // POST is handled differently, usually keeps path or logic inside action
+        url = `${this.targetBaseUrl}`; // logic handled in body
+    }
+}
 
-        // Use Proxy on Client Side to avoid CORS
-        if (typeof window !== 'undefined') {
-            headers['X-Proxy-Target'] = url;
-            url = '/api/proxy';
-        }
+// Use Proxy on Client Side to avoid CORS
+if (typeof window !== 'undefined') {
+    headers['X-Proxy-Target'] = url;
+    url = '/api/proxy';
+}
 
-        try {
-            const response = await fetch(url, {
-                ...options,
-                headers,
-            });
+try {
+    const response = await fetch(url, {
+        ...options,
+        headers,
+    });
 
-            if (!response.ok) {
-                // If 404/500, throw so we fall back to mock
-                throw new Error(`API Error: ${response.status} ${response.statusText}`);
-            }
-
-            const data = await response.json();
-
-            // Supabase returns arrays for 'select', so we need to unwrap if expecting a single object
-            if (isSupabase && Array.isArray(data)) {
-                if (endpoint === '/stats') return data[0] || {};
-                return data;
-            }
-
-            return data;
-        } catch (error) {
-            console.error('API request failed:', error);
-            throw error;
-        }
+    if (!response.ok) {
+        // If 404/500, throw so we fall back to mock
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
 
-    async getStats(): Promise<{ data: CommonGroundStats; isLive: boolean; error?: string }> {
-        try {
-            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
-                const data = await this.fetchWithAuth('/stats');
-                return { data, isLive: true };
-            }
-        } catch (error) {
-            console.warn('Falling back to mock stats due to error:', error);
-            // Enhanced error reporting
-            let errorMessage = 'Unknown Error';
-            if (error instanceof Error) errorMessage = error.message;
-            else if (typeof error === 'string') errorMessage = error;
+    const data = await response.json();
 
-            return { data: MOCK_STATS, isLive: false, error: errorMessage };
-        }
-        return { data: MOCK_STATS, isLive: false };
+    // Supabase returns arrays for 'select', so we need to unwrap if expecting a single object
+    if (isSupabase && Array.isArray(data)) {
+        if (endpoint === '/stats') return data[0] || {};
+        return data;
     }
 
-    async getLiveUsers(): Promise<{ data: LiveUser[]; isLive: boolean }> {
-        try {
-            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
-                // Assuming /live-users endpoint exists, otherwise fallback
-                const data = await this.fetchWithAuth('/live-users');
-                return { data, isLive: true };
-            }
-        } catch (error) {
-            console.warn('Falling back to mock live users:', error);
-        }
-        return { data: MOCK_LIVE_USERS, isLive: false };
+    return data;
+} catch (error) {
+    console.error('API request failed:', error);
+    throw error;
+}
     }
 
-    async getPopularLabs(): Promise<string[]> {
-        try {
-            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
-                return await this.fetchWithAuth('/popular-labs');
-            }
+    async getStats(): Promise < { data: CommonGroundStats; isLive: boolean; error?: string } > {
+    try {
+        if(this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+    const data = await this.fetchWithAuth('/stats');
+    return { data, isLive: true };
+}
         } catch (error) {
-            console.warn('Falling back to mock popular labs:', error);
-        }
-        return ['Mindfulness Lab', 'Stress Relief', 'Sleep Better'];
+    console.warn('Falling back to mock stats due to error:', error);
+    // Enhanced error reporting
+    let errorMessage = 'Unknown Error';
+    if (error instanceof Error) errorMessage = error.message;
+    else if (typeof error === 'string') errorMessage = error;
+
+    return { data: MOCK_STATS, isLive: false, error: errorMessage };
+}
+return { data: MOCK_STATS, isLive: false };
     }
 
-    async getRecentActivity(): Promise<import('@/types').ActivityFeedItem[]> {
-        try {
-            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
-                // Try to fetch real activity if endpoint exists
-                // For MindGarden launch, we map 'checkins' table
-                const response = await this.fetchWithAuth('/activity');
-                return response.map((r: any) => ({
-                    id: r.id,
-                    user: r.user_name || 'Anonymous',
-                    action: r.action_type || 'Checked In',
-                    metadata: { mood: r.mood_score, note: r.note },
-                    timestamp: new Date(r.created_at)
-                }));
-            }
+    async getLiveUsers(): Promise < { data: LiveUser[]; isLive: boolean } > {
+    try {
+        if(this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+    // Assuming /live-users endpoint exists, otherwise fallback
+    const data = await this.fetchWithAuth('/live-users');
+    return { data, isLive: true };
+}
         } catch (error) {
-            // Fallback to mock data
-        }
-
-        // Mock Launch Data for MindGarden
-        return [
-            { id: '1', user: 'Joshua Q.', action: 'Checked In', metadata: { mood: 8, note: 'Feeling great about the launch!' }, timestamp: new Date() },
-            { id: '2', user: 'Sarah M.', action: 'New Signup', metadata: { project: 'MindGarden' }, timestamp: new Date(Date.now() - 1000 * 60 * 5) },
-            { id: '3', user: 'David K.', action: 'Completed Session', metadata: { mood: 6 }, timestamp: new Date(Date.now() - 1000 * 60 * 15) },
-            { id: '4', user: 'System', action: 'Deployment', metadata: { note: 'v1.0.2 Live' }, timestamp: new Date(Date.now() - 1000 * 60 * 60) },
-        ];
+    console.warn('Falling back to mock live users:', error);
+}
+return { data: MOCK_LIVE_USERS, isLive: false };
     }
 
-    async getSecurityEvents(): Promise<{ id: string; type: string; severity: 'low' | 'medium' | 'high' | 'critical'; message: string; timestamp: Date; project: string }[]> {
-        try {
-            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
-                const response = await this.fetchWithAuth('/security-events');
-                return response.map((r: any) => ({
-                    ...r,
-                    timestamp: new Date(r.created_at)
-                }));
-            }
+    async getPopularLabs(): Promise < string[] > {
+    try {
+        if(this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+    return await this.fetchWithAuth('/popular-labs');
+}
         } catch (error) {
-            // Fallback to mock
-        }
-
-        // Realistic Mock Security Data
-        const events: any[] = [];
-        const types = ['SQL Injection Attempt', 'Brute Force Login', 'Invalid API Token', 'Cross-Site Scripting'];
-        const severities = ['high', 'medium', 'low', 'critical'];
-
-        // Generate a few random recent events
-        for (let i = 0; i < Math.floor(Math.random() * 3); i++) {
-            events.push({
-                id: `sec-${Date.now()}-${i}`,
-                type: types[Math.floor(Math.random() * types.length)],
-                severity: severities[Math.floor(Math.random() * severities.length)],
-                message: `Blocked suspicious request from ${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.1.1`,
-                timestamp: new Date(Date.now() - Math.floor(Math.random() * 3600000)),
-                project: this.projectId
-            });
-        }
-        return events;
+    console.warn('Falling back to mock popular labs:', error);
+}
+return ['Mindfulness Lab', 'Stress Relief', 'Sleep Better'];
     }
 
-    async blockUser(userId: string): Promise<{ success: boolean; message: string }> {
-        // In a real scenario, this would POST to an administration endpoint
-        try {
-            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
-                // await this.fetchWithAuth('/users/block', { method: 'POST', body: JSON.stringify({ userId }) });
-                // Simulate API delay
-                await new Promise(r => setTimeout(r, 800));
-                return { success: true, message: `User ${userId} has been blocked on ${this.projectId}.` };
-            }
+    async getRecentActivity(): Promise < import('@/types').ActivityFeedItem[] > {
+    try {
+        if(this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+    // Try to fetch real activity if endpoint exists
+    // For MindGarden launch, we map 'checkins' table
+    const response = await this.fetchWithAuth('/activity');
+    return response.map((r: any) => ({
+        id: r.id,
+        user: r.user_name || 'Anonymous',
+        action: r.action_type || 'Checked In',
+        metadata: { mood: r.mood_score, note: r.note },
+        timestamp: new Date(r.created_at)
+    }));
+}
+        } catch (error) {
+    // Fallback to mock data
+}
+
+// Mock Launch Data for MindGarden
+return [
+    { id: '1', user: 'Joshua Q.', action: 'Checked In', metadata: { mood: 8, note: 'Feeling great about the launch!' }, timestamp: new Date() },
+    { id: '2', user: 'Sarah M.', action: 'New Signup', metadata: { project: 'MindGarden' }, timestamp: new Date(Date.now() - 1000 * 60 * 5) },
+    { id: '3', user: 'David K.', action: 'Completed Session', metadata: { mood: 6 }, timestamp: new Date(Date.now() - 1000 * 60 * 15) },
+    { id: '4', user: 'System', action: 'Deployment', metadata: { note: 'v1.0.2 Live' }, timestamp: new Date(Date.now() - 1000 * 60 * 60) },
+];
+    }
+
+    async getSecurityEvents(): Promise < { id: string; type: string; severity: 'low' | 'medium' | 'high' | 'critical'; message: string; timestamp: Date; project: string }[] > {
+    try {
+        if(this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+    const response = await this.fetchWithAuth('/security-events');
+    return response.map((r: any) => ({
+        ...r,
+        timestamp: new Date(r.created_at)
+    }));
+}
+        } catch (error) {
+    // Fallback to mock
+}
+
+// Realistic Mock Security Data
+const events: any[] = [];
+const types = ['SQL Injection Attempt', 'Brute Force Login', 'Invalid API Token', 'Cross-Site Scripting'];
+const severities = ['high', 'medium', 'low', 'critical'];
+
+// Generate a few random recent events
+for (let i = 0; i < Math.floor(Math.random() * 3); i++) {
+    events.push({
+        id: `sec-${Date.now()}-${i}`,
+        type: types[Math.floor(Math.random() * types.length)],
+        severity: severities[Math.floor(Math.random() * severities.length)],
+        message: `Blocked suspicious request from ${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.1.1`,
+        timestamp: new Date(Date.now() - Math.floor(Math.random() * 3600000)),
+        project: this.projectId
+    });
+}
+return events;
+    }
+
+    async blockUser(userId: string): Promise < { success: boolean; message: string } > {
+    // In a real scenario, this would POST to an administration endpoint
+    try {
+        if(this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+    // await this.fetchWithAuth('/users/block', { method: 'POST', body: JSON.stringify({ userId }) });
+    // Simulate API delay
+    await new Promise(r => setTimeout(r, 800));
+    return { success: true, message: `User ${userId} has been blocked on ${this.projectId}.` };
+}
         } catch (e) {
-            // fallback
-        }
+    // fallback
+}
 
-        // Mock success
-        await new Promise(r => setTimeout(r, 800));
-        return { success: true, message: `[SIMULATION] User ${userId} successfully blocked on ${this.projectId}.` };
+// Mock success
+await new Promise(r => setTimeout(r, 800));
+return { success: true, message: `[SIMULATION] User ${userId} successfully blocked on ${this.projectId}.` };
     }
 
-    getDebugInfo() {
-        return {
-            hasKey: !!this.apiKey,
-            keyStart: this.apiKey ? this.apiKey.substring(0, 4) + '...' : 'None',
-            baseUrl: this.targetBaseUrl,
-            isDefaultUrl: this.targetBaseUrl === 'https://api.commonground.example',
-            projectId: this.projectId
-        };
-    }
+getDebugInfo() {
+    return {
+        hasKey: !!this.apiKey,
+        keyStart: this.apiKey ? this.apiKey.substring(0, 4) + '...' : 'None',
+        baseUrl: this.targetBaseUrl,
+        isDefaultUrl: this.targetBaseUrl === 'https://api.commonground.example',
+        projectId: this.projectId
+    };
+}
 }
