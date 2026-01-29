@@ -234,6 +234,13 @@ export default function AIAssistant() {
                             </div>
                         </div>
                     </div>
+                    {/* Minimize/Close Button in Header */}
+                    <button
+                        onClick={() => setIsOpen(false)}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
                 </div>
 
                 {/* Messages */}
