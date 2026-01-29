@@ -219,7 +219,7 @@ export default function AIAssistant() {
             </button>
 
             {/* Chat Window */}
-            <div className={`fixed bottom-24 right-6 w-[380px] h-[500px] bg-[#151a21] border border-[var(--card-border)] rounded-2xl shadow-2xl flex flex-col z-50 transition-all duration-300 origin-bottom-right ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}>
+            <div className={`fixed bottom-24 right-6 w-[380px] max-w-[calc(100vw-3rem)] h-[500px] max-h-[calc(100vh-8rem)] bg-[#151a21] border border-[var(--card-border)] rounded-2xl shadow-2xl flex flex-col z-50 transition-all duration-300 origin-bottom-right ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}>
                 {/* Header */}
                 <div className="p-4 border-b border-[var(--card-border)] flex items-center justify-between bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded-t-2xl">
                     <div className="flex items-center gap-3">
