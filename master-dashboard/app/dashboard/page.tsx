@@ -5,7 +5,7 @@ import StatCard from '@/components/StatCard';
 import LiveUsersTable from '@/components/LiveUsersTable';
 import { StatCardData } from '@/types';
 import { PulseAPI } from '@/lib/api/pulse';
-import MasterBarChart from '@/components/charts/MasterBarChart';
+import MasterAreaChart from '@/components/charts/MasterAreaChart';
 import { Users, Activity, DollarSign, FolderKanban } from 'lucide-react';
 import LiveActivityFeed from '@/components/LiveActivityFeed';
 import LaunchStatsWidget from '@/components/LaunchStatsWidget';
