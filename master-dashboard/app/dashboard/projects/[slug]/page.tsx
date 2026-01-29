@@ -103,8 +103,8 @@ export default function ProjectDetailPage({ params }: PageProps) {
         <div key={slug} className="p-8 animate-flicker">
             {/* Header */}
             <div className={`mb-8 flex items-center justify-between border-b pb-6 transition-colors ${slug === 'commonground' ? 'border-green-500/20' :
-                    slug === 'vibechain' ? 'border-blue-500/20' :
-                        slug === 'vitaljobs' ? 'border-orange-500/20' : 'border-[var(--card-border)]'
+                slug === 'vibechain' ? 'border-blue-500/20' :
+                    slug === 'vitaljobs' ? 'border-orange-500/20' : 'border-[var(--card-border)]'
                 }`}>
                 <div>
                     <div className="flex items-center gap-3 mb-2">
@@ -158,7 +158,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                {/* Main Chart Area Placeholder */}
+                {/* Main Chart Area */}
                 <div className="card lg:col-span-2 min-h-[400px]">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-semibold text-white">Traffic Overview</h3>
@@ -168,8 +168,8 @@ export default function ProjectDetailPage({ params }: PageProps) {
                             <option>Last 30 Days</option>
                         </select>
                     </div>
-                    <div className="h-full flex items-center justify-center border-2 border-dashed border-[var(--card-border)] rounded-lg">
-                        <p className="text-gray-500">Traffic Chart Visualization (Ready for Recharts)</p>
+                    <div className="h-[320px] w-full">
+                        <ProjectAreaChart slug={slug} theme={slug === 'commonground' ? 'green' : slug === 'vibechain' ? 'blue' : 'orange'} />
                     </div>
                 </div>
 
