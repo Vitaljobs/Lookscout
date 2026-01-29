@@ -127,7 +127,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                                                 : 'text-gray-400 hover:text-white'
                                                 }`}
                                         >
-                                            <div className={`w-2 h-2 rounded-full animate-pulse ${getStatusColor(project.status)} shadow-[0_0_8px_currentColor]`} />
+                                            <div className={`w-3 h-3 rounded-full animate-pulse ${getStatusColor(project.status)} shadow-[0_0_12px_currentColor]`} />
                                             <span className={isActive ? 'text-electric-blue font-semibold shadow-neon-text' : ''}>{project.name}</span>
                                         </Link>
                                         {project.publicUrl && (
@@ -152,7 +152,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             {/* Footer */}
             <div className="p-4 border-t border-[var(--card-border)]">
                 <div className="text-xs text-gray-500 text-center font-mono">
-                    Master Dashboard v1.0.7
+                    Master Dashboard v1.0.8
                 </div>
             </div>
         </div>

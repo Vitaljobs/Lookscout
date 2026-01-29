@@ -3,30 +3,43 @@
 import React from 'react';
 import { Rocket, TrendingUp, Users } from 'lucide-react';
 
+import { useProjects } from '@/context/ProjectContext';
+import { PulseAPI } from '@/lib/api/pulse';
+
 export default function LaunchStatsWidget() {
+    const { projects } = useProjects();
     const [stats, setStats] = React.useState<{ velocity: number; total: number; isLive: boolean }>({
         velocity: 0,
         total: 0,
         isLive: false
     });
 
-    // Calculate simple velocity based on page views (approx 1 signup per 500 views heuristic or just use mock baseline + variance if no real signup stream)
-    // Since we don't have a 'signups' table endpoint yet, we'll derive a proxy metric from page_views_24h / 24h * 0.05 conversion rate
-
     React.useEffect(() => {
         const fetchStats = async () => {
             try {
-                // Use Common Ground as the primary launch metric source
-                const api = new (await import('@/lib/api/pulse')).PulseAPI('commonground');
-                const { data, isLive } = await api.getStats();
+                let totalUsers = 0;
+                let totalViews = 0;
+                let anyLive = false;
 
-                // Estimated Velocity: Page Views / 24h / 20 (approx 5% conversion/action rate per hour)
-                const estimatedVelocity = Math.floor((data.page_views_24h || 0) / 24 / 20);
+                await Promise.all(projects.map(async (p) => {
+                    try {
+                        const api = new PulseAPI(p.id);
+                        const { data, isLive } = await api.getStats();
+                        totalUsers += (data.total_users || 0);
+                        totalViews += (data.page_views_24h || 0);
+                        if (isLive) anyLive = true;
+                    } catch (e) {
+                        // ignore failed fetch for sum
+                    }
+                }));
+
+                // Estimated Velocity: Total Page Views / 24h / 20
+                const estimatedVelocity = Math.floor(totalViews / 24 / 20);
 
                 setStats({
-                    velocity: estimatedVelocity > 0 ? estimatedVelocity : 48, // Fallback to 48 if no data
-                    total: data.total_users || 1284,
-                    isLive
+                    velocity: estimatedVelocity > 0 ? estimatedVelocity : 48,
+                    total: totalUsers > 0 ? totalUsers : 1284, // Fallback baseline if all 0
+                    isLive: anyLive
                 });
             } catch (e) {
                 console.error(e);
@@ -36,7 +49,7 @@ export default function LaunchStatsWidget() {
         fetchStats();
         const interval = setInterval(fetchStats, 60000); // Update every minute
         return () => clearInterval(interval);
-    }, []);
+    }, [projects]);
 
     return (
         <div className="grid grid-cols-2 gap-4">
