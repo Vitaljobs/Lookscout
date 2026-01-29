@@ -63,7 +63,7 @@ function NotificationBell() {
             <div className="absolute inset-0 bg-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
             <Bell className="w-6 h-6" />
             {alertCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold border border-[#0f1419] animate-pulse">
+                <span className="absolute top-1 right-1 w-4 h-4 bg-blue-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold border border-[#0f1419] animate-pulse">
                     {alertCount}
                 </span>
             )}

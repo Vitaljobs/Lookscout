@@ -92,10 +92,10 @@ export default function DashboardPage() {
       {/* Master Chart Section */}
       <div className="card mb-8">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-white">Total Users Comparison</h3>
+          <h3 className="text-lg font-semibold text-white">Combined Traffic Volume (24h)</h3>
         </div>
         <div className="h-[320px] w-full flex items-center justify-center">
-          <MasterBarChart />
+          <MasterAreaChart />
         </div>
       </div>
 
