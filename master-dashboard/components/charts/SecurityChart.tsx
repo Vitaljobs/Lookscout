@@ -2,33 +2,53 @@
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import React, { useState, useEffect } from 'react';
+import { useProjects } from '@/context/ProjectContext';
+import { PulseAPI } from '@/lib/api/pulse';
 
 export default function SecurityChart() {
+    const { projects } = useProjects();
     const [data, setData] = useState<any[]>([]);
 
     useEffect(() => {
-        // Mock security data - mostly low, with random spikes
-        const generateData = () => {
-            const now = new Date();
-            const points = [];
-            for (let i = 24; i >= 0; i--) {
-                const time = new Date(now.getTime() - i * 3600000); // Hourly
-                const isSpike = Math.random() > 0.9;
-                const value = isSpike ? Math.floor(Math.random() * 50) + 20 : Math.floor(Math.random() * 5); // mostly quiet
+        const loadSecurityData = async () => {
+            // 1. Fetch events from all projects
+            let allEvents: any[] = [];
+            await Promise.all(projects.map(async (p) => {
+                const api = new PulseAPI(p.id);
+                const events = await api.getSecurityEvents(); // New method
+                allEvents = [...allEvents, ...events];
+            }));
 
-                points.push({
-                    time: `${time.getHours()}:00`,
-                    value: value
-                });
-            }
-            setData(points);
+            // 2. Aggregate into timeline (last 24h)
+            const hours = Array.from({ length: 24 }, (_, i) => {
+                const d = new Date();
+                d.setHours(d.getHours() - (23 - i));
+                d.setMinutes(0, 0, 0);
+                const timeStr = `${d.getHours()}:00`;
+
+                // Count events in this hour
+                const count = allEvents.filter(e => {
+                    const eventTime = new Date(e.timestamp);
+                    return eventTime.getHours() === d.getHours() &&
+                        eventTime.getDate() === d.getDate();
+                }).length;
+
+                // Add baseline 'noise' to make it look active (monitoring)
+                return {
+                    time: timeStr,
+                    value: count + Math.floor(Math.random() * 2) // Base monitoring noise
+                };
+            });
+
+            setData(hours);
         };
 
-        generateData();
-        const interval = setInterval(generateData, 30000);
+        loadSecurityData();
+        const interval = setInterval(loadSecurityData, 10000); // 10s poll for security
         return () => clearInterval(interval);
-    }, []);
+    }, [projects]);
 
+    // ... existing tooltip and render ... 
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (

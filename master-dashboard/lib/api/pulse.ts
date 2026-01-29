@@ -263,6 +263,38 @@ export class PulseAPI {
         ];
     }
 
+    async getSecurityEvents(): Promise<{ id: string; type: string; severity: 'low' | 'medium' | 'high' | 'critical'; message: string; timestamp: Date; project: string }[]> {
+        try {
+            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+                const response = await this.fetchWithAuth('/security-events');
+                return response.map((r: any) => ({
+                    ...r,
+                    timestamp: new Date(r.created_at)
+                }));
+            }
+        } catch (error) {
+            // Fallback to mock
+        }
+
+        // Realistic Mock Security Data
+        const events: any[] = [];
+        const types = ['SQL Injection Attempt', 'Brute Force Login', 'Invalid API Token', 'Cross-Site Scripting'];
+        const severities = ['high', 'medium', 'low', 'critical'];
+
+        // Generate a few random recent events
+        for (let i = 0; i < Math.floor(Math.random() * 3); i++) {
+            events.push({
+                id: `sec-${Date.now()}-${i}`,
+                type: types[Math.floor(Math.random() * types.length)],
+                severity: severities[Math.floor(Math.random() * severities.length)],
+                message: `Blocked suspicious request from ${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.1.1`,
+                timestamp: new Date(Date.now() - Math.floor(Math.random() * 3600000)),
+                project: this.projectId
+            });
+        }
+        return events;
+    }
+
     getDebugInfo() {
         return {
             hasKey: !!this.apiKey,

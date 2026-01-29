@@ -19,7 +19,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                     >
                         <Menu className="w-6 h-6" />
                     </button>
-                    <span className="ml-2 font-bold text-white text-lg">Control Tower <span className="text-xs text-gray-400 font-normal ml-1">v1.0.8</span></span>
+                    <span className="ml-2 font-bold text-white text-lg">Control Tower <span className="text-xs text-gray-400 font-normal ml-1">v1.0.9</span></span>
                 </div>
             </div>
 
