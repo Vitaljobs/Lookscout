@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
-import { Menu } from 'lucide-react';
+import { Menu, Bell } from 'lucide-react';
+import { useAlerts } from '@/context/AlertContext';
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -39,10 +40,33 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                 />
             )}
 
+            {/* Desktop Notification Bell */}
+            <div className="hidden md:block absolute top-6 right-8 z-30">
+                <NotificationBell />
+            </div>
+
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto w-full bg-[#0f1419]">
+            <main className="flex-1 overflow-y-auto w-full bg-[#0f1419] relative">
                 {children}
             </main>
         </div>
     );
+}
+
+function NotificationBell() {
+    const { alerts } = useAlerts();
+    // Count warnings and errors
+    const alertCount = alerts.filter(a => a.type === 'error' || a.type === 'warning').length;
+
+    return (
+        <button className="relative p-2 text-gray-400 hover:text-white transition-colors group">
+            <div className="absolute inset-0 bg-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Bell className="w-6 h-6" />
+            {alertCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold border border-[#0f1419] animate-pulse">
+                    {alertCount}
+                </span>
+            )}
+        </button>
+    )
 }
