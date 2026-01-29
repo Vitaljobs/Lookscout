@@ -147,6 +147,16 @@ export default function AIAssistant() {
                     }
                     responseText = `📊 **Database Query Resultaat**\n\nTotal Users in ecosysteem: **${total.toLocaleString()}**\n\nDetails:\n${growthDetails}`;
                 }
+                // COMMAND: AFFIRMATIVE / HEALING (Ok, Ja, Doe maar)
+                else if (lowerInput === 'ok' || lowerInput === 'ja' || lowerInput === 'doe maar' || lowerInput === 'yes' || lowerInput.includes('graag')) {
+                    // Check if previous message was an alert (Mock context awareness)
+                    const lastMsg = messages[messages.length - 1];
+                    if (lastMsg && lastMsg.type === 'alert') {
+                        responseText = "✅ **Actie Uitgevoerd**: Cache is geflusht en load-balancers zijn opnieuw gekalibreerd. De latency zakt nu terug naar normaal (42ms).";
+                    } else {
+                        responseText = "Top! Heb je nog andere vragen of commando's?";
+                    }
+                }
                 // GENERAL CHAT
                 else if (lowerInput.includes('hallo') || lowerInput.includes('hoi') || lowerInput.includes('hi')) {
                     responseText = "Hallo, Control Tower. Ik sta klaar. Probeer commando's als 'Status Rapport', 'Voorspel groei' of 'Blokkeer gebruiker'.";
