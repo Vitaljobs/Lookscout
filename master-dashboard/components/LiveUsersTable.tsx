@@ -9,6 +9,7 @@ import { ArrowUpDown, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 interface GlobalUser extends LiveUser {
     source: string;
     sourceTheme: string;
+    projectId: string;
 }
 
 export default function GlobalUserTable() {
@@ -32,7 +33,8 @@ export default function GlobalUserTable() {
                     const projectUsers = data.map(u => ({
                         ...u,
                         source: p.name,
-                        sourceTheme: p.theme
+                        sourceTheme: p.theme,
+                        projectId: p.id
                     }));
                     allUsers.push(...projectUsers);
                 } catch (e) {
@@ -94,6 +96,23 @@ export default function GlobalUserTable() {
         const hours = Math.floor(diff / 60);
         if (hours < 24) return `${hours}h ago`;
         return `${Math.floor(hours / 24)}d ago`;
+    };
+
+    const handleManage = async (user: GlobalUser) => {
+        // Simple confirmation for now
+        const shouldBlock = window.confirm(`ACTIE: Wil je gebruiker ${user.name} blokkeren van ${user.source}?\n\nDit zal de toegang direct intrekken.`);
+
+        if (shouldBlock) {
+            try {
+                const api = new PulseAPI(user.projectId);
+                const result = await api.blockUser(user.id);
+                alert(result.message || `Gebruiker ${user.name} is succesvol geblokkeerd.`);
+                // Refresh list to potentially show status change (if API supported it)
+                loadUsers();
+            } catch (e) {
+                alert("Fout bij blokkeren: " + e);
+            }
+        }
     };
 
     if (loading && users.length === 0) {
@@ -168,7 +187,10 @@ export default function GlobalUserTable() {
                             </td>
                             <td className="text-gray-400 text-xs">{formatLastSeen(user.lastSeen)}</td>
                             <td>
-                                <button className="px-3 py-1.5 rounded-md bg-[var(--card-border)] hover:bg-blue-600 text-white text-xs font-medium transition-colors flex items-center gap-1">
+                                <button
+                                    onClick={() => handleManage(user)}
+                                    className="px-3 py-1.5 rounded-md bg-[var(--card-border)] hover:bg-blue-600 text-white text-xs font-medium transition-colors flex items-center gap-1 active:scale-95"
+                                >
                                     <Settings className="w-3 h-3" />
                                     Manage
                                 </button>
