@@ -39,11 +39,16 @@ export default function MasterAreaChart() {
                 const dataPoint: any = { time: timeStr };
 
                 activeProjects.forEach(p => {
-                    // Distribute total views across 24h with a random curve, preserving total roughly
-                    // base value = total / 24, plus noise
-                    const base = p.totalViews / 24;
-                    const noise = (Math.random() - 0.5) * base * 0.5; // +/- 25% noise
-                    dataPoint[p.name.split(' ')[0]] = Math.max(0, Math.floor(base + noise));
+                    // Distribute total views across 24h with a random curve
+                    // If totalViews is 0 but we want to show it's 'alive', add a tiny visual heartbeat (0-2)
+                    // unless it's strictly offline. But since these are 'Active' projects, we animate them.
+
+                    let base = p.totalViews / 24;
+                    if (base === 0) base = 0.5; // Artificial heartbeat base
+
+                    const noise = (Math.random() - 0.5) * Math.max(base, 1) * 0.8;
+                    const val = Math.max(0, Math.floor(base + noise));
+                    dataPoint[p.name.split(' ')[0]] = val;
                 });
 
                 return dataPoint;

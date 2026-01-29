@@ -38,8 +38,10 @@ export default function ProjectAreaChart({ slug, theme }: ProjectAreaChartProps)
                 const timeStr = hour.getHours() + ':00';
 
                 // Distribute total views across 24h with a random curve
-                const base = totalViews / 24;
-                const noise = (Math.random() - 0.5) * base * 0.8; // +/- 40% noise for variation
+                let base = totalViews / 24;
+                if (base === 0) base = 0.5; // Heatbeat
+
+                const noise = (Math.random() - 0.5) * Math.max(base, 1) * 0.8;
                 const value = Math.max(0, Math.floor(base + noise));
 
                 return {
