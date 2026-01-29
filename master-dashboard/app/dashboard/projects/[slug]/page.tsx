@@ -7,6 +7,7 @@ import { StatCardData } from '@/types';
 import { PulseAPI } from '@/lib/api/pulse';
 import { Activity, Globe, Server, AlertCircle } from 'lucide-react';
 import { getApiKey } from '@/lib/storage';
+import ProjectAreaChart from '@/components/charts/ProjectAreaChart';
 
 interface PageProps {
     params: Promise<{
