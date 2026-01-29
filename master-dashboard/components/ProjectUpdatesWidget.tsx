@@ -31,7 +31,7 @@ export default function ProjectUpdatesWidget() {
             <div className="space-y-4">
                 {projects.map((p) => (
                     <div key={p.id} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--sidebar-bg)] border border-[var(--card-border)] hover:border-blue-500/30 transition-colors">
-                        <div className={`mt-1 w-2 h-2 rounded-full ${p.status === 'active' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-500'}`} />
+                        <div className={`mt-1 w-2 h-2 rounded-full ${p.status === 'operational' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-500'}`} />
                         <div>
                             <div className="text-sm font-bold text-white flex items-center gap-2">
                                 {p.name}
