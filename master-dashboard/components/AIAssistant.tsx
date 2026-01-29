@@ -87,8 +87,33 @@ export default function AIAssistant() {
 
                 // DUTCH COMMANDS
 
+                // COMMAND: UPDATE (Update / Updates)
+                if (lowerInput.includes('update')) {
+                    const specificProject = projects.find(p => lowerInput.includes(p.name.toLowerCase()) || lowerInput.includes(p.id));
+
+                    let updateMsg = specificProject
+                        ? `**Update voor ${specificProject.name}** 📋\n\n`
+                        : "**Project Updates Overzicht** 📋\n\n";
+
+                    const getProjectStatus = (name: string) => {
+                        if (name.includes('Common')) return "v1.2.0 Live - User Growth +12%";
+                        if (name.includes('VIBE')) return "API Latency Optimized";
+                        if (name.includes('Vital')) return "New Job Matching Algo Active";
+                        return "Stabiel & Online";
+                    };
+
+                    if (specificProject) {
+                        updateMsg += `- **${specificProject.name}**: ${getProjectStatus(specificProject.name)}`;
+                    } else {
+                        for (const p of projects) {
+                            updateMsg += `- **${p.name}**: ${getProjectStatus(p.name)}\n`;
+                        }
+                        updateMsg += "\nCheck het nieuwe 'Updates' bord op je dashboard voor meer details.";
+                    }
+                    responseText = updateMsg;
+                }
                 // COMMAND: BLOCK USER (Blokkeer)
-                if (lowerInput.includes('block') || lowerInput.includes('blok') || lowerInput.includes('ban')) {
+                else if (lowerInput.includes('block') || lowerInput.includes('blok') || lowerInput.includes('ban')) {
                     const projectSearch = projects.find(p => lowerInput.includes(p.name.toLowerCase()) || lowerInput.includes(p.id));
                     const userMatch = lowerInput.match(/user\s+(\w+)/i) || lowerInput.match(/gebruiker\s+(\w+)/i) || lowerInput.match(/@(\w+)/i) || lowerInput.match(/blokkeer\s+(\w+)/i);
                     const userName = userMatch ? userMatch[1] : 'Unknown';
@@ -157,20 +182,6 @@ export default function AIAssistant() {
                     } else {
                         responseText = "Top! Heb je nog andere vragen of commando's?";
                     }
-                }
-                // COMMAND: UPDATE (Update / Updates)
-                else if (lowerInput.includes('update')) {
-                    let updateMsg = "**Project Updates Overzicht** 📋\n\n";
-                    for (const p of projects) {
-                        // Mock update status messages based on project state
-                        let statusNote = "Stabiel & Online";
-                        if (p.name.includes('Common')) statusNote = "v1.2.0 Live - User Growth +12%";
-                        if (p.name.includes('VIBE')) statusNote = "API Latency Optimized";
-                        if (p.name.includes('Vital')) statusNote = "New Job Matching Algo Active";
-
-                        updateMsg += `- **${p.name}**: ${statusNote}\n`;
-                    }
-                    responseText = updateMsg + "\nCheck het nieuwe 'Updates' bord op je dashboard voor meer details.";
                 }
                 // GENERAL CHAT
                 else if (lowerInput.includes('hallo') || lowerInput.includes('hoi') || lowerInput.includes('hi')) {
