@@ -113,7 +113,7 @@ export default function GlobalUserTable() {
                     <div>
                         <h2 className="text-xl font-bold text-white flex items-center gap-2">
                             Global User Table
-                            <span className="px-2 py-0.5 rounded text-xs bg-blue-500 text-white">v1.0.9</span>
+                            <span className="px-2 py-0.5 rounded text-xs bg-blue-500 text-white">v1.1.0</span>
                         </h2>
                         <p className="text-sm text-gray-400 mt-1">Real-time user sessions across all connected platforms</p>
                     </div>

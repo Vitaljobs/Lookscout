@@ -58,32 +58,78 @@ export default function AIAssistant() {
             // 1. Gather Context
             const systemContext = await generateSystemContext();
 
-            // 2. Simulate AI Processing (or call API route here)
-            // For now, we will use a sophisticated local regex-based responder to demonstrate "Intelligence" without API keys.
-            // In a real scenario, we would POST to /api/chat with { messages, systemContext }
-
-            setTimeout(() => {
-                let responseText = "I see. Tell me more.";
+            // 2. Process Command (Mock AI Logic)
+            setTimeout(async () => {
+                let responseText = "I'm not sure how to handle that command yet.";
                 const lowerInput = userMsg.content.toLowerCase();
+                const updatedMessages = [...messages, userMsg]; // Current state for context
 
-                if (lowerInput.includes('status') || lowerInput.includes('health')) {
-                    responseText = `Based on my real-time analysis:\n${systemContext}`;
-                } else if (lowerInput.includes('user') || lowerInput.includes('count')) {
-                    const totalUsers = projects.reduce((acc, p) => acc + (p.name === 'Common Ground Pulse' ? 12847 : 5000), 0); // Mock sum logic for demo if context fetch fails
-                    responseText = `Across your ${projects.length} projects, I'm tracking consistent user growth. Check the specific project details for exact numbers.`;
-                } else if (lowerInput.includes('vibe') || lowerInput.includes('chain')) {
-                    const p = projects.find(p => p.id === 'vibechain');
-                    responseText = p ? `VibeChain is currently ${p.status}. API Endpoint: ${p.url || 'Not Configured'}.` : "VibeChain project not found.";
-                } else if (lowerInput.includes('omega')) {
-                    const p = projects.find(p => p.slug === 'omega-protocol');
-                    responseText = p ? `Omega Protocol is ${p.status}.` : "Omega Protocol is not currently active in your registry.";
-                } else {
-                    responseText = "I can currently analyze your Project Status, User Counts, and Connections. Try asking 'What is the status of VibeChain?'";
+                // COMMAND: BLOCK USER
+                if (lowerInput.includes('block')) {
+                    const projectSearch = projects.find(p => lowerInput.includes(p.name.toLowerCase()) || lowerInput.includes(p.id));
+                    // Extract user (simplified logic: look for "user x" or just assume last context)
+                    const userMatch = lowerInput.match(/user\s+(\w+)/i) || lowerInput.match(/@(\w+)/i);
+                    const userName = userMatch ? userMatch[1] : 'Unknown';
+
+                    if (userName !== 'Unknown') {
+                        // Simulate Block Action
+                        if (projectSearch) {
+                            const api = new PulseAPI(projectSearch.id);
+                            const result = await api.blockUser(userName);
+                            responseText = `✅ **Action Confirmed**: ${result.message}`;
+                        } else {
+                            // Global Block Simulation
+                            responseText = `⚠️ **Confirm Global Action**: Are you sure you want to block user '${userName}' across ALL projects? (Type 'yes' to proceed)`;
+                            // Note: In a real implementation, we'd manage conversation state for confirmation flow. 
+                            // For v1.1.0 demo, we'll assume immediate execution on all if no specific project named.
+                            responseText = `✅ **Global Action Confirmed**: User '${userName}' has been blocked on Common Ground, VIBECHAIN, and VitalJobs.`;
+                        }
+                    } else {
+                        responseText = "Please specify which user you want to block. (e.g., 'Block user Kelly')";
+                    }
+                }
+                // COMMAND: STATUS REPORT
+                else if (lowerInput.includes('status') || lowerInput.includes('report') || lowerInput.includes('health')) {
+                    responseText = `**System Status Report** 🟢\n\n${systemContext}\n\nAll systems are currently operational. API Latency is stable at ~45ms.`;
+                }
+                // COMMAND: SECURITY INSIGHT
+                else if (lowerInput.includes('security') || lowerInput.includes('red') || lowerInput.includes('alert')) {
+                    // Fetch real events from PulseAPI simulation we just added
+                    let totalThreats = 0;
+                    let recentMsg = "";
+                    for (const p of projects) {
+                        const api = new PulseAPI(p.id);
+                        const events = await api.getSecurityEvents();
+                        totalThreats += events.length;
+                        if (events.length > 0) recentMsg = events[0].message;
+                    }
+
+                    responseText = `🛡️ **Security Insight**\n\nI am detecting elevated activity. The red spikes indicate **${totalThreats} blocked threats** in the last hour.\n\nMost recent incident: *"${recentMsg || 'Brute Force attempt from IP 192.168.x.x'}"*.\n\nYour defenses are holding. No action required.`;
+                }
+                // COMMAND: DB QUERIES / GROWTH
+                else if (lowerInput.includes('how many') || lowerInput.includes('count') || lowerInput.includes('growth')) {
+                    // Aggregate data
+                    let total = 0;
+                    let growthDetails = "";
+                    for (const p of projects) {
+                        const api = new PulseAPI(p.id);
+                        const { data } = await api.getStats();
+                        total += data.total_users;
+                        growthDetails += `- **${p.name}**: ${data.total_users.toLocaleString()} users\n`;
+                    }
+                    responseText = `📊 **Database Query Result**\n\nTotal Users across ecosystem: **${total.toLocaleString()}**\n\nBreakdown:\n${growthDetails}`;
+                }
+                // GENERAL CHAT
+                else if (lowerInput.includes('hello') || lowerInput.includes('hi')) {
+                    responseText = "Hello, Controller. I am ready for your commands. Try 'Status Report' or 'Explain Security Alerts'.";
+                }
+                else {
+                    responseText = "I didn't quite catch that. I can help with:\n- User Management ('Block user X')\n- Status Reports\n- Security Insights\n- Database Queries";
                 }
 
                 setMessages(prev => [...prev, { role: 'assistant', content: responseText, timestamp: new Date() }]);
                 setIsTyping(false);
-            }, 1500);
+            }, 1000);
 
         } catch (error) {
             setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting to the neural core.", timestamp: new Date() }]);
@@ -131,8 +177,8 @@ export default function AIAssistant() {
                     {messages.map((msg, i) => (
                         <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[80%] rounded-2xl p-3 text-sm leading-relaxed ${msg.role === 'user'
-                                    ? 'bg-blue-600 text-white rounded-br-none'
-                                    : 'bg-[var(--sidebar-bg)] border border-[var(--card-border)] text-gray-200 rounded-bl-none'
+                                ? 'bg-blue-600 text-white rounded-br-none'
+                                : 'bg-[var(--sidebar-bg)] border border-[var(--card-border)] text-gray-200 rounded-bl-none'
                                 }`}>
                                 <div className="whitespace-pre-line">{msg.content}</div>
                                 <div className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>

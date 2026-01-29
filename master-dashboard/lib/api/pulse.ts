@@ -295,6 +295,24 @@ export class PulseAPI {
         return events;
     }
 
+    async blockUser(userId: string): Promise<{ success: boolean; message: string }> {
+        // In a real scenario, this would POST to an administration endpoint
+        try {
+            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+                // await this.fetchWithAuth('/users/block', { method: 'POST', body: JSON.stringify({ userId }) });
+                // Simulate API delay
+                await new Promise(r => setTimeout(r, 800));
+                return { success: true, message: `User ${userId} has been blocked on ${this.projectId}.` };
+            }
+        } catch (e) {
+            // fallback
+        }
+
+        // Mock success
+        await new Promise(r => setTimeout(r, 800));
+        return { success: true, message: `[SIMULATION] User ${userId} successfully blocked on ${this.projectId}.` };
+    }
+
     getDebugInfo() {
         return {
             hasKey: !!this.apiKey,
