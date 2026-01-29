@@ -147,8 +147,8 @@ export default function AIAssistant() {
                     }
                     responseText = `📊 **Database Query Resultaat**\n\nTotal Users in ecosysteem: **${total.toLocaleString()}**\n\nDetails:\n${growthDetails}`;
                 }
-                // COMMAND: AFFIRMATIVE / HEALING (Ok, Ja, Doe maar)
-                else if (lowerInput === 'ok' || lowerInput === 'ja' || lowerInput === 'doe maar' || lowerInput === 'yes' || lowerInput.includes('graag')) {
+                // COMMAND: AFFIRMATIVE / HEALING (Ok, Ja, Doe maar, Cache optimaliseren, Fix)
+                else if (lowerInput === 'ok' || lowerInput === 'ja' || lowerInput === 'doe maar' || lowerInput === 'yes' || lowerInput.includes('graag') || lowerInput.includes('cache') || lowerInput.includes('optimaliseer') || lowerInput.includes('fix') || lowerInput.includes('repareer')) {
                     // Check if previous message was an alert (Mock context awareness)
                     const lastMsg = messages[messages.length - 1];
                     if (lastMsg && lastMsg.type === 'alert') {
