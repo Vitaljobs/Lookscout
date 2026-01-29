@@ -9,17 +9,19 @@ type Message = {
     role: 'user' | 'assistant';
     content: string;
     timestamp: Date;
+    type?: 'text' | 'alert' | 'prediction';
 };
 
 export default function AIAssistant() {
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([
-        { role: 'assistant', content: 'Hello! I am Titan AI. I have access to all your connected projects. How can I help you?', timestamp: new Date() }
+        { role: 'assistant', content: 'Hallo! Ik ben Titan AI. Ik heb toegang tot al je projecten. Waarmee kan ik helpen?', timestamp: new Date() }
     ]);
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { projects } = useProjects();
+    const hasCheckedAlerts = useRef(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -29,18 +31,37 @@ export default function AIAssistant() {
         scrollToBottom();
     }, [messages, isOpen]);
 
+    // Smart Alerts Component
+    useEffect(() => {
+        if (!hasCheckedAlerts.current && projects.length > 0) {
+            hasCheckedAlerts.current = true;
+            setTimeout(() => {
+                // Simulate a smart alert discovery (Mock)
+                const randomIssue = Math.random() > 0.7;
+                if (randomIssue) {
+                    setMessages(prev => [...prev, {
+                        role: 'assistant',
+                        content: "⚠️ **Smart Alert**: Ik detecteer een ongewone piek in API latency op **VitalJobs** (124ms). Zal ik de cache optimaliseren?",
+                        timestamp: new Date(),
+                        type: "alert"
+                    }]);
+                }
+            }, 3000);
+        }
+    }, [projects]);
+
     const generateSystemContext = async () => {
         // Build a snapshot of the current system state
-        let context = "Current System Status:\n";
+        let context = "Huidige Systeem Status:\n";
 
         for (const p of projects) {
             // We fetch fresh stats for the context to be accurate
             try {
                 const api = new PulseAPI(p.id);
                 const { data, isLive } = await api.getStats();
-                context += `- ${p.name}: ${p.status.toUpperCase()} (${isLive ? 'Live' : 'Mock Connection'}). Users: ${data.total_users}, Active: ${data.active_now}.\n`;
+                context += `- ${p.name}: ${p.status.toUpperCase()} (${isLive ? 'Live' : 'Mock'}). Gebruikers: ${data.total_users}, Actief: ${data.active_now}.\n`;
             } catch (e) {
-                context += `- ${p.name}: Connection Error.\n`;
+                context += `- ${p.name}: Verbindingsfout.\n`;
             }
         }
         return context;
@@ -60,15 +81,16 @@ export default function AIAssistant() {
 
             // 2. Process Command (Mock AI Logic)
             setTimeout(async () => {
-                let responseText = "I'm not sure how to handle that command yet.";
+                let responseText = "Ik begrijp dat commando nog niet helemaal.";
                 const lowerInput = userMsg.content.toLowerCase();
-                const updatedMessages = [...messages, userMsg]; // Current state for context
+                // const updatedMessages = [...messages, userMsg]; // Current state for context
 
-                // COMMAND: BLOCK USER
-                if (lowerInput.includes('block')) {
+                // DUTCH COMMANDS
+
+                // COMMAND: BLOCK USER (Blokkeer)
+                if (lowerInput.includes('block') || lowerInput.includes('blok') || lowerInput.includes('ban')) {
                     const projectSearch = projects.find(p => lowerInput.includes(p.name.toLowerCase()) || lowerInput.includes(p.id));
-                    // Extract user (simplified logic: look for "user x" or just assume last context)
-                    const userMatch = lowerInput.match(/user\s+(\w+)/i) || lowerInput.match(/@(\w+)/i);
+                    const userMatch = lowerInput.match(/user\s+(\w+)/i) || lowerInput.match(/gebruiker\s+(\w+)/i) || lowerInput.match(/@(\w+)/i) || lowerInput.match(/blokkeer\s+(\w+)/i);
                     const userName = userMatch ? userMatch[1] : 'Unknown';
 
                     if (userName !== 'Unknown') {
@@ -76,24 +98,24 @@ export default function AIAssistant() {
                         if (projectSearch) {
                             const api = new PulseAPI(projectSearch.id);
                             const result = await api.blockUser(userName);
-                            responseText = `✅ **Action Confirmed**: ${result.message}`;
+                            responseText = `✅ **Actie Bevestigd**: ${userName} is geblokkeerd op ${projectSearch.name}.`;
                         } else {
                             // Global Block Simulation
-                            responseText = `⚠️ **Confirm Global Action**: Are you sure you want to block user '${userName}' across ALL projects? (Type 'yes' to proceed)`;
+                            // responseText = `⚠️ **Confirm Global Action**: Are you sure you want to block user '${userName}' across ALL projects? (Type 'yes' to proceed)`;
                             // Note: In a real implementation, we'd manage conversation state for confirmation flow. 
                             // For v1.1.0 demo, we'll assume immediate execution on all if no specific project named.
-                            responseText = `✅ **Global Action Confirmed**: User '${userName}' has been blocked on Common Ground, VIBECHAIN, and VitalJobs.`;
+                            responseText = `✅ **Global Action Confirmed**: Gebruiker '${userName}' is preventief geblokkeerd op Common Ground, VIBECHAIN en VitalJobs.`;
                         }
                     } else {
-                        responseText = "Please specify which user you want to block. (e.g., 'Block user Kelly')";
+                        responseText = "Welke gebruiker moet ik blokkeren? (bijv. 'Blokkeer gebruiker Kelly')";
                     }
                 }
-                // COMMAND: STATUS REPORT
-                else if (lowerInput.includes('status') || lowerInput.includes('report') || lowerInput.includes('health')) {
-                    responseText = `**System Status Report** 🟢\n\n${systemContext}\n\nAll systems are currently operational. API Latency is stable at ~45ms.`;
+                // COMMAND: STATUS REPORT (Status / Gezondheid)
+                else if (lowerInput.includes('status') || lowerInput.includes('report') || lowerInput.includes('gezond') || lowerInput.includes('health')) {
+                    responseText = `**Systeem Status Rapport** 🟢\n\n${systemContext}\n\nAlle systemen zijn operationeel. API Latency is stabiel rond de ~45ms.`;
                 }
-                // COMMAND: SECURITY INSIGHT
-                else if (lowerInput.includes('security') || lowerInput.includes('red') || lowerInput.includes('alert')) {
+                // COMMAND: SECURITY INSIGHT (Security / Veiligheid / Rood)
+                else if (lowerInput.includes('security') || lowerInput.includes('rood') || lowerInput.includes('alert') || lowerInput.includes('veilig')) {
                     // Fetch real events from PulseAPI simulation we just added
                     let totalThreats = 0;
                     let recentMsg = "";
@@ -104,27 +126,33 @@ export default function AIAssistant() {
                         if (events.length > 0) recentMsg = events[0].message;
                     }
 
-                    responseText = `🛡️ **Security Insight**\n\nI am detecting elevated activity. The red spikes indicate **${totalThreats} blocked threats** in the last hour.\n\nMost recent incident: *"${recentMsg || 'Brute Force attempt from IP 192.168.x.x'}"*.\n\nYour defenses are holding. No action required.`;
+                    responseText = `🛡️ **Security Insight**\n\nIk zie verhoogde activiteit. De rode pieken geven aan dat er **${totalThreats} dreigingen** zijn geblokkeerd in het afgelopen uur.\n\nMeest recente incident: *"${recentMsg || 'Brute Force poging vanaf IP 192.168.x.x'}"*.\n\nJe verdediging houdt stand. Geen actie vereist.`;
                 }
-                // COMMAND: DB QUERIES / GROWTH
-                else if (lowerInput.includes('how many') || lowerInput.includes('count') || lowerInput.includes('growth')) {
-                    // Aggregate data
+                // COMMAND: PREDICTIVE GROWTH (Voorspel / Trend / Groei)
+                else if (lowerInput.includes('voorspel') || lowerInput.includes('trend') || lowerInput.includes('toekomst') || lowerInput.includes('groei') || lowerInput.includes('analyst')) {
+                    const totalUsers = projects.reduce((acc, p) => acc + (p.name === 'Common Ground Pulse' ? 12847 : 5000), 0);
+                    const predicted = Math.floor(totalUsers * 1.15); // +15% mock growth
+
+                    responseText = `🔮 **De Analyst: Toekomstprognose**\n\nOp basis van de huidige groeicurve (+12.5% avg):\n\n- **Vandaag:** ${totalUsers.toLocaleString()} gebruikers\n- **Prognose Vrijdag:** ~${predicted.toLocaleString()} gebruikers\n\nIk detecteer een sterke organische instroom op *Common Ground*. Advies: Schaal database-resources bij voor het weekend.`;
+                }
+                // COMMAND: DB QUERIES (Hoeveel / Aantal)
+                else if (lowerInput.includes('hoeveel') || lowerInput.includes('aantal') || lowerInput.includes('count')) {
                     let total = 0;
                     let growthDetails = "";
                     for (const p of projects) {
                         const api = new PulseAPI(p.id);
                         const { data } = await api.getStats();
                         total += data.total_users;
-                        growthDetails += `- **${p.name}**: ${data.total_users.toLocaleString()} users\n`;
+                        growthDetails += `- **${p.name}**: ${data.total_users.toLocaleString()} gebruikers\n`;
                     }
-                    responseText = `📊 **Database Query Result**\n\nTotal Users across ecosystem: **${total.toLocaleString()}**\n\nBreakdown:\n${growthDetails}`;
+                    responseText = `📊 **Database Query Resultaat**\n\nTotal Users in ecosysteem: **${total.toLocaleString()}**\n\nDetails:\n${growthDetails}`;
                 }
                 // GENERAL CHAT
-                else if (lowerInput.includes('hello') || lowerInput.includes('hi')) {
-                    responseText = "Hello, Controller. I am ready for your commands. Try 'Status Report' or 'Explain Security Alerts'.";
+                else if (lowerInput.includes('hallo') || lowerInput.includes('hoi') || lowerInput.includes('hi')) {
+                    responseText = "Hallo, Control Tower. Ik sta klaar. Probeer commando's als 'Status Rapport', 'Voorspel groei' of 'Blokkeer gebruiker'.";
                 }
                 else {
-                    responseText = "I didn't quite catch that. I can help with:\n- User Management ('Block user X')\n- Status Reports\n- Security Insights\n- Database Queries";
+                    responseText = "Ik begreep dat niet helemaal. Ik spreek nu Nederlands! Probeer:\n- 'Blokkeer gebruiker X'\n- 'Status rapport'\n- 'Voorspel groei'\n- 'Security uitleg'";
                 }
 
                 setMessages(prev => [...prev, { role: 'assistant', content: responseText, timestamp: new Date() }]);
@@ -132,7 +160,7 @@ export default function AIAssistant() {
             }, 1000);
 
         } catch (error) {
-            setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting to the neural core.", timestamp: new Date() }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: "Mijn neurale kern maakt geen verbinding.", timestamp: new Date() }]);
             setIsTyping(false);
         }
     };
@@ -163,10 +191,10 @@ export default function AIAssistant() {
                             <Sparkles className="w-5 h-5 text-blue-400" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-white">Titan AI</h3>
+                            <h3 className="font-bold text-white">Titan AI v1.2</h3>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                <span className="text-xs text-gray-400">Online & Monitoring</span>
+                                <span className="text-xs text-gray-400">NL Module Actief</span>
                             </div>
                         </div>
                     </div>
@@ -176,9 +204,11 @@ export default function AIAssistant() {
                 <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-700">
                     {messages.map((msg, i) => (
                         <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] rounded-2xl p-3 text-sm leading-relaxed ${msg.role === 'user'
+                            <div className={`max-w-[85%] rounded-2xl p-3 text-sm leading-relaxed ${msg.role === 'user'
                                 ? 'bg-blue-600 text-white rounded-br-none'
-                                : 'bg-[var(--sidebar-bg)] border border-[var(--card-border)] text-gray-200 rounded-bl-none'
+                                : msg.type === 'alert'
+                                    ? 'bg-red-500/10 border border-red-500/50 text-red-200 rounded-bl-none'
+                                    : 'bg-[var(--sidebar-bg)] border border-[var(--card-border)] text-gray-200 rounded-bl-none'
                                 }`}>
                                 <div className="whitespace-pre-line">{msg.content}</div>
                                 <div className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>
@@ -204,7 +234,7 @@ export default function AIAssistant() {
                     <div className="flex items-center gap-2 bg-[var(--sidebar-bg)] border border-[var(--card-border)] rounded-full px-4 py-2 focus-within:border-blue-500 transition-colors">
                         <input
                             className="flex-1 bg-transparent border-none focus:outline-none text-sm text-white placeholder-gray-500"
-                            placeholder="Ask about your projects..."
+                            placeholder="Vraag iets aan Titan..."
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}

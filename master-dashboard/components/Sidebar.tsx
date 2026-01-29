@@ -152,7 +152,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             {/* Footer */}
             <div className="p-4 border-t border-[var(--card-border)]">
                 <div className="text-xs text-gray-500 text-center font-mono">
-                    Master Dashboard v1.1.0
+                    Master Dashboard v1.2.0
                 </div>
             </div>
         </div>
