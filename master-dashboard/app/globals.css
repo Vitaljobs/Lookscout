@@ -13,6 +13,20 @@
   --accent-red: #ef4444;
   --accent-orange: #f59e0b;
   --text-muted: #9ca3af;
+  --electric-blue: #00f3ff;
+  --neon-shadow: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3);
+}
+
+.text-electric-blue {
+  color: var(--electric-blue);
+}
+
+.bg-electric-blue {
+  background-color: var(--electric-blue);
+}
+
+.shadow-neon {
+  box-shadow: var(--neon-shadow);
 }
 
 @theme inline {

@@ -63,13 +63,15 @@ export default function MasterAreaChart() {
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-[var(--card-bg)] border border-[var(--card-border)] p-3 rounded-lg shadow-xl">
-                    <p className="font-bold text-white mb-2">{label}</p>
+                <div className="bg-[var(--card-bg)] border border-[var(--electric-blue)] p-4 rounded-lg shadow-[0_0_20px_rgba(0,243,255,0.2)]">
+                    <p className="font-bold text-[var(--electric-blue)] mb-3 text-lg border-b border-gray-800 pb-2">{label}</p>
                     {payload.map((p: any) => (
-                        <div key={p.name} className="flex items-center gap-2 text-sm">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                            <span className="text-gray-400 capitalize">{p.name}:</span>
-                            <span className="text-white font-mono">{p.value}</span>
+                        <div key={p.name} className="flex items-center justify-between gap-6 text-sm mb-1 last:mb-0">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: p.color, color: p.color }} />
+                                <span className="text-gray-300 capitalize font-medium">{p.name}</span>
+                            </div>
+                            <span className="text-white font-mono font-bold">{p.value} <span className="text-xs text-gray-500 font-normal">views</span></span>
                         </div>
                     ))}
                 </div>

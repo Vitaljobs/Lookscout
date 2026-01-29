@@ -7,6 +7,7 @@ import { useProjects } from '@/context/ProjectContext';
 import { StatCardData } from '@/types';
 import { PulseAPI } from '@/lib/api/pulse';
 import MasterAreaChart from '@/components/charts/MasterAreaChart';
+import TrendWidget from '@/components/TrendWidget';
 import { Users, Activity, DollarSign, FolderKanban } from 'lucide-react';
 import LiveActivityFeed from '@/components/LiveActivityFeed';
 import LaunchStatsWidget from '@/components/LaunchStatsWidget';
@@ -99,7 +100,14 @@ export default function DashboardPage() {
       <div className="card mb-8">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-white">Combined Traffic Volume (24h)</h3>
+          <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-mono border border-blue-500/20">Live Update</span>
         </div>
+
+        {/* Daily Insights */}
+        <div className="mb-6 px-4">
+          <TrendWidget />
+        </div>
+
         <div className="h-[320px] w-full flex items-center justify-center">
           <MasterAreaChart />
         </div>
