@@ -39,7 +39,7 @@ export default function ProjectAreaChart({ slug, theme }: ProjectAreaChartProps)
 
                 // Distribute total views across 24h with a random curve
                 let base = totalViews / 24;
-                if (base === 0) base = 0.5; // Heatbeat
+                if (base === 0) base = 2; // Visible heartbeat
 
                 const noise = (Math.random() - 0.5) * Math.max(base, 1) * 0.8;
                 const value = Math.max(0, Math.floor(base + noise));

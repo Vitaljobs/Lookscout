@@ -40,11 +40,9 @@ export default function MasterAreaChart() {
 
                 activeProjects.forEach(p => {
                     // Distribute total views across 24h with a random curve
-                    // If totalViews is 0 but we want to show it's 'alive', add a tiny visual heartbeat (0-2)
-                    // unless it's strictly offline. But since these are 'Active' projects, we animate them.
-
+                    // If totalViews is 0, we use a 'heartbeat' base of 2 to ensure visible activity (floor(2) = 2)
                     let base = p.totalViews / 24;
-                    if (base === 0) base = 0.5; // Artificial heartbeat base
+                    if (base === 0) base = 2; // Visible heartbeat
 
                     const noise = (Math.random() - 0.5) * Math.max(base, 1) * 0.8;
                     const val = Math.max(0, Math.floor(base + noise));
