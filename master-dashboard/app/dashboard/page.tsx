@@ -74,134 +74,136 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold text-white mb-2">
           Hey there, Control Tower! 👋
         </h1>
-      </p>
-    </div>
-
-      {/* Status Central */ }
-  <div className="flex flex-wrap items-center gap-6 mb-8 p-4 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-lg relative overflow-hidden">
-    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-500"></div>
-    <div className="flex items-center gap-3">
-      <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">System Status</span>
-      <div className="h-4 w-[1px] bg-gray-700"></div>
-    </div>
-    {projects.map(p => (
-      <div key={p.id} className="flex items-center gap-3 bg-[var(--sidebar-bg)] px-4 py-2 rounded-lg border border-[var(--card-border)]">
-        <div className={`w-3 h-3 rounded-full animate-[pulse_1.5s_infinite] ${p.status === 'operational' ? 'bg-green-500 shadow-[0_0_12px_#22c55e]' : 'bg-red-500 shadow-[0_0_12px_#ef4444]'}`}></div>
-        <span className={`font-semibold ${p.status === 'operational' ? 'text-white' : 'text-red-400'}`}>{p.name}</span>
+        <p className="text-gray-400">
+          Welcome back. Here's what's happening with your projects.
+        </p>
       </div>
-    ))}
-  </div>
 
-  {/* Stat Cards */ }
-  {
-    loading ? (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="card h-32 animate-pulse">
-            <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
-            <div className="h-8 bg-gray-700 rounded w-3/4"></div>
+      {/* Status Central */}
+      <div className="flex flex-wrap items-center gap-6 mb-8 p-4 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-500"></div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">System Status</span>
+          <div className="h-4 w-[1px] bg-gray-700"></div>
+        </div>
+        {projects.map(p => (
+          <div key={p.id} className="flex items-center gap-3 bg-[var(--sidebar-bg)] px-4 py-2 rounded-lg border border-[var(--card-border)]">
+            <div className={`w-3 h-3 rounded-full animate-[pulse_1.5s_infinite] ${p.status === 'operational' ? 'bg-green-500 shadow-[0_0_12px_#22c55e]' : 'bg-red-500 shadow-[0_0_12px_#ef4444]'}`}></div>
+            <span className={`font-semibold ${p.status === 'operational' ? 'text-white' : 'text-red-400'}`}>{p.name}</span>
           </div>
         ))}
       </div>
-    ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <StatCard key={index} data={stat} />
-        ))}
-      </div>
-    )
-  }
-  {/* Split Row: Master Chart & Security Watch */ }
-  <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-    <div className="lg:col-span-3 card">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white">Combined Traffic Volume (24h)</h3>
-        <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-mono border border-blue-500/20">Live Update</span>
-      </div>
 
-      <div className="mb-6 px-4">
-        <TrendWidget />
-      </div>
+      {/* Stat Cards */}
+      {
+        loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="card h-32 animate-pulse">
+                <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
+                <div className="h-8 bg-gray-700 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {stats.map((stat, index) => (
+              <StatCard key={index} data={stat} />
+            ))}
+          </div>
+        )
+      }
+      {/* Split Row: Master Chart & Security Watch */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+        <div className="lg:col-span-3 card">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-white">Combined Traffic Volume (24h)</h3>
+            <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-mono border border-blue-500/20">Live Update</span>
+          </div>
 
-      <div className="h-[320px] w-full flex items-center justify-center">
-        <MasterAreaChart />
-      </div>
-    </div>
+          <div className="mb-6 px-4">
+            <TrendWidget />
+          </div>
 
-    {/* Security Watch */}
-    <div className="card border-red-500/20 bg-gradient-to-b from-[var(--element-bg)] to-red-950/10">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <ShieldAlert className="w-5 h-5 text-red-500 animate-pulse" />
-          <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider">Security Watch</h3>
+          <div className="h-[320px] w-full flex items-center justify-center">
+            <MasterAreaChart />
+          </div>
         </div>
-        <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-      </div>
-      <div className="h-[200px] w-full">
-        <SecurityChart />
-      </div>
-      <div className="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-        <div className="flex justify-between items-center text-xs">
-          <span className="text-red-300">Status</span>
-          <span className="font-bold text-red-400">MONITORING</span>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  {/* Live Users Table */ }
-  <div className="mb-8">
-    <LiveUsersTable />
-  </div>
-
-  {/* Popular Lab & Launch Command Center */ }
-  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
-    {/* Left Column: Quick Actions & Launch Stats */}
-    <div className="lg:col-span-2 flex flex-col gap-6">
-      <LaunchStatsWidget />
-
-      <div className="card flex-1">
-        <h3 className="text-lg font-semibold text-white mb-4">
-          Quick Actions
-        </h3>
-        <div className="grid grid-cols-2 gap-4">
-          <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-            <Users className="w-5 h-5 text-blue-500" />
-            <div>
-              <div className="font-medium text-white">View All Users</div>
-              <div className="text-sm text-gray-400">Manage user accounts</div>
+        {/* Security Watch */}
+        <div className="card border-red-500/20 bg-gradient-to-b from-[var(--element-bg)] to-red-950/10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-red-500 animate-pulse" />
+              <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider">Security Watch</h3>
             </div>
-          </button>
-          <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-            <Activity className="w-5 h-5 text-green-500" />
-            <div>
-              <div className="font-medium text-white">Activity Log</div>
-              <div className="text-sm text-gray-400">View recent activity</div>
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+          </div>
+          <div className="h-[200px] w-full">
+            <SecurityChart />
+          </div>
+          <div className="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-red-300">Status</span>
+              <span className="font-bold text-red-400">MONITORING</span>
             </div>
-          </button>
-          <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-            <DollarSign className="w-5 h-5 text-yellow-500" />
-            <div>
-              <div className="font-medium text-white">Revenue Report</div>
-              <div className="text-sm text-gray-400">Financial overview</div>
-            </div>
-          </button>
-          <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
-            <FolderKanban className="w-5 h-5 text-purple-500" />
-            <div>
-              <div className="font-medium text-white">Add Project</div>
-              <div className="text-sm text-gray-400">Create new project</div>
-            </div>
-          </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    {/* Right Column: Live Feed */}
-    <div className="min-h-[400px]">
-      <LiveActivityFeed />
-    </div>
-  </div>
+      {/* Live Users Table */}
+      <div className="mb-8">
+        <LiveUsersTable />
+      </div>
+
+      {/* Popular Lab & Launch Command Center */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
+        {/* Left Column: Quick Actions & Launch Stats */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <LaunchStatsWidget />
+
+          <div className="card flex-1">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Quick Actions
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
+                <Users className="w-5 h-5 text-blue-500" />
+                <div>
+                  <div className="font-medium text-white">View All Users</div>
+                  <div className="text-sm text-gray-400">Manage user accounts</div>
+                </div>
+              </button>
+              <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
+                <Activity className="w-5 h-5 text-green-500" />
+                <div>
+                  <div className="font-medium text-white">Activity Log</div>
+                  <div className="text-sm text-gray-400">View recent activity</div>
+                </div>
+              </button>
+              <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
+                <DollarSign className="w-5 h-5 text-yellow-500" />
+                <div>
+                  <div className="font-medium text-white">Revenue Report</div>
+                  <div className="text-sm text-gray-400">Financial overview</div>
+                </div>
+              </button>
+              <button className="flex items-center gap-3 p-4 rounded-lg bg-[var(--sidebar-bg)] hover:bg-[var(--hover-bg)] transition-colors text-left">
+                <FolderKanban className="w-5 h-5 text-purple-500" />
+                <div>
+                  <div className="font-medium text-white">Add Project</div>
+                  <div className="text-sm text-gray-400">Create new project</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Live Feed */}
+        <div className="min-h-[400px]">
+          <LiveActivityFeed />
+        </div>
+      </div>
     </div >
   );
 }
