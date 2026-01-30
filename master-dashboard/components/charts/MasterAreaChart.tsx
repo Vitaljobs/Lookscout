@@ -119,6 +119,17 @@ export default function MasterAreaChart() {
                             stackId="1" // Stack them
                         />
                     ))}
+                    {/* Forecast Line (Dashed) */}
+                    <Area
+                        type="monotone"
+                        dataKey="forecast"
+                        stroke="#00f3ff"
+                        fill="none"
+                        strokeDasharray="5 5"
+                        strokeWidth={2}
+                        dot={{ r: 0 }}
+                        name="AI Forecast (6h)"
+                    />
                 </AreaChart>
             </ResponsiveContainer>
         </div>

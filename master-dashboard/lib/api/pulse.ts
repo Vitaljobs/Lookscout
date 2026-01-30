@@ -200,14 +200,20 @@ export class PulseAPI {
 
             return data;
         } catch (error) {
-            console.error('API request failed:', error);
+            console.warn('API request failed (falling back to mock):', error);
             throw error;
         }
     }
 
     async getStats(): Promise<{ data: CommonGroundStats; isLive: boolean; error?: string }> {
         try {
-            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+            // If URL is the default placeholder, don't fetch, just fallback
+            if (this.targetBaseUrl === 'https://api.commonground.example') {
+                // console.debug('Using mock data for default project');
+                return { data: MOCK_STATS, isLive: false };
+            }
+
+            if (this.apiKey) {
                 const data = await this.fetchWithAuth('/stats');
                 return { data, isLive: true };
             }
@@ -225,7 +231,11 @@ export class PulseAPI {
 
     async getLiveUsers(): Promise<{ data: LiveUser[]; isLive: boolean }> {
         try {
-            if (this.apiKey && this.targetBaseUrl !== 'https://api.commonground.example') {
+            if (this.targetBaseUrl === 'https://api.commonground.example') {
+                return { data: MOCK_LIVE_USERS, isLive: false };
+            }
+
+            if (this.apiKey) {
                 // Assuming /live-users endpoint exists, otherwise fallback
                 const data = await this.fetchWithAuth('/live-users');
                 return { data, isLive: true };

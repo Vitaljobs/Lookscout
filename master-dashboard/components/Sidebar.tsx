@@ -41,7 +41,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     };
 
     return (
-        <div className="w-64 h-full bg-[var(--sidebar-bg)] border-r border-[var(--card-border)] flex flex-col relative">
+        <div className="w-64 h-full bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border-r border-[var(--glass-border)] flex flex-col relative transition-all duration-300">
             {/* Close Button (Mobile Only) */}
             <button
                 onClick={onClose}
@@ -117,9 +117,8 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                                 }
 
                                 return (
-                                    <div className={`flex items-center justify-between w-full group ${isActive ? '' : ''}`}>
+                                    <div key={project.id} className={`flex items-center justify-between w-full group ${isActive ? '' : ''}`}>
                                         <Link
-                                            key={project.id}
                                             href={`/dashboard/projects/${project.slug}`}
                                             onClick={handleNavClick}
                                             className={`flex-1 flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all ${isActive

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
+import CommandMenu from './CommandMenu';
 import { Menu, Bell } from 'lucide-react';
 import { useAlerts } from '@/context/AlertContext';
 
@@ -10,6 +11,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
     return (
         <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-[#0f1419]">
+            <CommandMenu />
             {/* Mobile Header (Relative, taking up space) */}
             <div className="md:hidden flex-none h-16 bg-[#1e2329] border-b border-gray-800 flex items-center justify-between px-4 z-40 shadow-lg relative">
                 <div className="flex items-center">

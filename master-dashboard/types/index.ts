@@ -24,6 +24,8 @@ export interface Project {
   apiKey?: string;
   publicUrl?: string; // New field for public site link
   enabled: boolean;
+  status: 'operational' | 'maintenance' | 'degraded';
+  theme: 'blue' | 'green' | 'orange' | 'purple' | 'pink' | 'red';
   stats?: CommonGroundStats;
 }
 

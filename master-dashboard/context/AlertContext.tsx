@@ -51,8 +51,9 @@ export function AlertProvider({ children }: { children: ReactNode }) {
                         const api = new PulseAPI(p.id);
                         const { isLive, error } = await api.getStats();
 
-                        if (!isLive && p.status === 'operational') {
-                            addAlert(`Connection to ${p.name} lost! ${error ? `(${error})` : ''}`, 'error', p.id);
+                        // Only alert if there's an actual error, not just a graceful fallback to mock data
+                        if (!isLive && p.status === 'operational' && error) {
+                            addAlert(`Connection to ${p.name} lost! (${error})`, 'error', p.id);
                         } else if (error) {
                             addAlert(`Error in ${p.name}: ${error}`, 'warning', p.id);
                         }
@@ -79,8 +80,8 @@ export function AlertProvider({ children }: { children: ReactNode }) {
                     <div
                         key={alert.id}
                         className={`pointer-events-auto min-w-[300px] p-4 rounded-lg shadow-2xl border flex items-start gap-3 transition-all animate-in slide-in-from-right duration-300 ${alert.type === 'error' ? 'bg-red-900/90 border-red-500/50 text-white' :
-                                alert.type === 'warning' ? 'bg-yellow-900/90 border-yellow-500/50 text-white' :
-                                    'bg-green-900/90 border-green-500/50 text-white'
+                            alert.type === 'warning' ? 'bg-yellow-900/90 border-yellow-500/50 text-white' :
+                                'bg-green-900/90 border-green-500/50 text-white'
                             }`}
                     >
                         {alert.type === 'error' && <XCircle className="w-5 h-5 text-red-400 shrink-0" />}

@@ -12,6 +12,9 @@ import SecurityChart from '@/components/charts/SecurityChart';
 import { Users, Activity, DollarSign, FolderKanban, ShieldAlert } from 'lucide-react';
 import LiveActivityFeed from '@/components/LiveActivityFeed';
 import LaunchStatsWidget from '@/components/LaunchStatsWidget';
+import GlobalPulseMap from '@/components/GlobalPulseMap';
+import ReputationCounter from '@/components/ReputationCounter';
+import AntigravityMonitor from '@/components/AntigravityMonitor';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatCardData[]>([]);
@@ -151,15 +154,19 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Live Users Table */}
+      {/* Live Global Pulse Map (Replaces static table) */}
       <div className="mb-8">
-        <LiveUsersTable />
+        <GlobalPulseMap />
       </div>
 
       {/* Popular Lab & Launch Command Center */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
         {/* Left Column: Quick Actions & Launch Stats */}
         <div className="lg:col-span-2 flex flex-col gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ReputationCounter />
+            <AntigravityMonitor />
+          </div>
           <LaunchStatsWidget />
 
           <div className="card flex-1">

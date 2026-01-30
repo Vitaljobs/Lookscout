@@ -30,6 +30,9 @@ export default function GlobalUserTable() {
                 try {
                     const api = new PulseAPI(p.id);
                     const { data } = await api.getLiveUsers();
+
+                    if (!data || !Array.isArray(data)) return;
+
                     const projectUsers = data.map(u => ({
                         ...u,
                         source: p.name,

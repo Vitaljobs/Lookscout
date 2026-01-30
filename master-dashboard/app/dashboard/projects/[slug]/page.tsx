@@ -5,9 +5,11 @@ import StatCard from '@/components/StatCard';
 import LiveUsersTable from '@/components/LiveUsersTable';
 import { StatCardData } from '@/types';
 import { PulseAPI } from '@/lib/api/pulse';
-import { Activity, Globe, Server, AlertCircle } from 'lucide-react';
-import { getApiKey } from '@/lib/storage';
 import ProjectAreaChart from '@/components/charts/ProjectAreaChart';
+import SecurityChart from '@/components/charts/SecurityChart';
+import GlobalPulseMap from '@/components/GlobalPulseMap';
+import ReputationCounter from '@/components/ReputationCounter';
+import { Activity, Globe, Server, AlertCircle, ShieldAlert } from 'lucide-react';
 
 interface PageProps {
     params: Promise<{
@@ -158,24 +160,55 @@ export default function ProjectDetailPage({ params }: PageProps) {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* v2.0 Features Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
                 {/* Main Chart Area */}
-                <div className="card lg:col-span-2 min-h-[400px]">
+                <div className="card lg:col-span-3 min-h-[400px]">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-semibold text-white">Traffic Overview</h3>
-                        <select className="bg-[var(--sidebar-bg)] text-gray-400 text-sm border border-[var(--card-border)] rounded-md px-2 py-1 outline-none">
-                            <option>Last 24 Hours</option>
-                            <option>Last 7 Days</option>
-                            <option>Last 30 Days</option>
-                        </select>
+                        <div className="flex items-center gap-2">
+                            <div className="text-xs text-[var(--electric-blue)] bg-[var(--electric-blue)]/10 px-2 py-1 rounded border border-[var(--electric-blue)]/20 animate-pulse">
+                                AI Forecast Active
+                            </div>
+                            <select className="bg-[var(--sidebar-bg)] text-gray-400 text-sm border border-[var(--card-border)] rounded-md px-2 py-1 outline-none">
+                                <option>Last 24 Hours</option>
+                                <option>Last 7 Days</option>
+                            </select>
+                        </div>
                     </div>
+                    {/* Using MasterAreaChart style for project but keeping project data logic if possible, 
+                        or we can reuse MasterAreaChart if it supports single project mode or just sticking to ProjectAreaChart for now 
+                        but wrapping it in better UI 
+                    */}
                     <div className="h-[320px] w-full">
                         <ProjectAreaChart slug={slug} theme={slug === 'commonground' ? 'green' : slug === 'vibechain' ? 'blue' : 'orange'} />
                     </div>
                 </div>
 
-                {/* Infrastructure Stats */}
+                {/* Security Watch (New) */}
+                <div className="card border-red-500/20 bg-gradient-to-b from-[var(--element-bg)] to-red-950/10">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <ShieldAlert className="w-5 h-5 text-red-500 animate-pulse" />
+                            <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider">Security</h3>
+                        </div>
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                    </div>
+                    <div className="h-[200px] w-full">
+                        <SecurityChart />
+                    </div>
+                </div>
+            </div>
+
+            {/* Live Global Pulse Map (Replaces static table) */}
+            <div className="mb-8">
+                <GlobalPulseMap />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                {/* Reputation & Infrastructure */}
                 <div className="space-y-6">
+                    <ReputationCounter />
                     <div className="card">
                         <h3 className="text-lg font-semibold text-white mb-4">Infrastructure</h3>
                         <div className="space-y-4">
@@ -202,10 +235,12 @@ export default function ProjectDetailPage({ params }: PageProps) {
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Live Users Table */}
-            <LiveUsersTable />
+                {/* Live Users Table (Keep as secondary data view below map) */}
+                <div className="lg:col-span-2">
+                    <LiveUsersTable />
+                </div>
+            </div>
         </div>
     );
 }
