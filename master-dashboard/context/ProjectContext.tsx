@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { saveApiKey, getApiKey, removeApiKey } from '@/lib/storage';
 
+import { CommonGroundStats } from '@/types';
+
 export type ProjectStatus = 'operational' | 'maintenance' | 'degraded';
 export type ProjectTheme = 'green' | 'blue' | 'orange' | 'purple' | 'pink' | 'red';
 
@@ -16,6 +18,7 @@ export interface Project {
     publicUrl?: string;
     key: string;
     theme: ProjectTheme;
+    stats?: CommonGroundStats;
 }
 
 interface ProjectContextType {
