@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     });
 
     if (verification.verified && verification.registrationInfo) {
-        const { credentialPublicKey, credentialID, counter } = verification.registrationInfo;
+        const { credentialPublicKey, credentialID, counter } = verification.registrationInfo as any;
 
         // Save to DB
         const { error } = await supabase.from('user_credentials').insert({

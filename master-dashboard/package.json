@@ -1,6 +1,6 @@
 {
   "name": "master-dashboard",
-  "version": "3.4.1-universal",
+  "version": "3.4.2-universal",
   "private": true,
   "scripts": {
     "dev": "next dev",
