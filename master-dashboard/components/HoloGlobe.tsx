@@ -40,11 +40,13 @@ export type AlertLevel = 'normal' | 'warning' | 'critical';
 interface HoloGlobeProps {
     alertLevel?: AlertLevel;
     alertMessage?: string | null;
+    projectId?: string;
 }
 
-export default function HoloGlobe({ alertLevel = 'normal', alertMessage }: HoloGlobeProps) {
+export default function HoloGlobe({ alertLevel = 'normal', alertMessage, projectId }: HoloGlobeProps) {
     const globeEl = useRef<GlobeMethods | undefined>(undefined);
-    const { selectedProjectId } = useProjects();
+    const { selectedProjectId: contextProjectId } = useProjects();
+    const selectedProjectId = projectId || contextProjectId;
     const [mounted, setMounted] = useState(false);
 
     // Mock Data Generation
@@ -196,8 +198,8 @@ export default function HoloGlobe({ alertLevel = 'normal', alertMessage }: HoloG
                 <div className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full animate-ping ${glowColor}`} />
                     <h3 className={`text-sm font-bold tracking-widest uppercase ${alertLevel === 'critical' ? 'text-red-400' :
-                            alertLevel === 'warning' ? 'text-orange-400' :
-                                'text-blue-400'
+                        alertLevel === 'warning' ? 'text-orange-400' :
+                            'text-blue-400'
                         }`}>
                         {alertLevel === 'critical' ? 'CRITICAL ALERT DETECTED' :
                             alertLevel === 'warning' ? 'ANOMALY DETECTED' :
@@ -205,8 +207,8 @@ export default function HoloGlobe({ alertLevel = 'normal', alertMessage }: HoloG
                     </h3>
                 </div>
                 <p className={`text-xs mt-1 font-mono ${alertLevel === 'critical' ? 'text-red-500' :
-                        alertLevel === 'warning' ? 'text-orange-500' :
-                            'text-blue-500/60'
+                    alertLevel === 'warning' ? 'text-orange-500' :
+                        'text-blue-500/60'
                     }`}>
                     {alertMessage || (selectedProjectId ? `TRACKING: ${selectedProjectId.toUpperCase()}` : 'GLOBAL TRAFFIC MONITORING')}
                 </p>

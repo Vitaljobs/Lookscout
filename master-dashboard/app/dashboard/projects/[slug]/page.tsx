@@ -7,7 +7,7 @@ import { StatCardData } from '@/types';
 import { PulseAPI } from '@/lib/api/pulse';
 import ProjectAreaChart from '@/components/charts/ProjectAreaChart';
 import SecurityChart from '@/components/charts/SecurityChart';
-import GlobalPulseMap from '@/components/GlobalPulseMap';
+import HoloGlobe from '@/components/HoloGlobe';
 import ReputationCounter from '@/components/ReputationCounter';
 import { Activity, Globe, Server, AlertCircle, ShieldAlert } from 'lucide-react';
 
@@ -202,7 +202,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
 
             {/* Live Global Pulse Map (Replaces static table) */}
             <div className="mb-8">
-                <GlobalPulseMap />
+                <HoloGlobe projectId={slug} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
