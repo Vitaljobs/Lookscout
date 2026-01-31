@@ -52,6 +52,26 @@ export default function LiveActivityFeed({ projectId }: { projectId?: string }) 
         return `${diff}m ago`;
     };
 
+    // Sentiment Intelligence Analysis (Simple Dictionary-based)
+    const analyzeSentiment = (item: ActivityFeedItem) => {
+        const text = `${item.action} ${item.metadata?.note || ''} ${item.metadata?.mood || ''}`.toLowerCase();
+
+        // Positive Signals
+        const positiveWords = ['success', 'win', 'growth', 'up', 'perfect', 'good', 'completed', 'deployed', 'signup', 'checked in', '8', '9', '10'];
+        if (positiveWords.some(w => text.includes(w)) || (item.metadata?.mood && item.metadata.mood >= 7)) {
+            return { color: 'bg-green-500', label: 'Positive' };
+        }
+
+        // Negative Signals
+        const negativeWords = ['fail', 'error', 'down', 'block', 'bad', 'slow', 'alert', 'critical', '1', '2', '3'];
+        if (negativeWords.some(w => text.includes(w)) || (item.metadata?.mood && item.metadata.mood <= 4)) {
+            return { color: 'bg-red-500', label: 'Negative' };
+        }
+
+        // Neutral (Default)
+        return { color: 'bg-gray-500', label: 'Neutral' };
+    };
+
     return (
         <div className="card h-full flex flex-col">
             <div className="flex items-center justify-between mb-4">
@@ -59,43 +79,52 @@ export default function LiveActivityFeed({ projectId }: { projectId?: string }) 
                     <Zap className="w-5 h-5 text-yellow-500" />
                     Live Activity
                 </h3>
-                <span className="text-xs px-2 py-1 rounded bg-green-500/10 text-green-500 animate-pulse">
-                    LIVE
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-gray-500 border border-gray-700 px-1.5 py-0.5 rounded">SENTIMENT AI ACTIVE</span>
+                    <span className="text-xs px-2 py-1 rounded bg-green-500/10 text-green-500 animate-pulse">
+                        LIVE
+                    </span>
+                </div>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-thin scrollbar-thumb-gray-700">
                 {loading ? (
                     <div className="text-center text-gray-500 text-sm py-8">Connecting to stream...</div>
                 ) : (
-                    activities.map((item) => (
-                        <div key={item.id} className="flex gap-3 items-start p-3 rounded-lg bg-[var(--sidebar-bg)] border border-[var(--card-border)] animate-in slide-in-from-right duration-300">
-                            <div className="mt-1">
-                                {getIcon(item.action)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-sm font-medium text-white truncate">{item.user}</p>
-                                    <span className="text-xs text-gray-500">{getTimeAgo(item.timestamp)}</span>
+                    activities.map((item) => {
+                        const sentiment = analyzeSentiment(item);
+                        return (
+                            <div key={item.id} className="relative flex gap-3 items-start p-3 rounded-lg bg-[var(--sidebar-bg)] border border-[var(--card-border)] animate-in slide-in-from-right duration-300 overflow-hidden group">
+                                {/* Sentiment Indicator Bar */}
+                                <div className={`absolute left-0 top-0 bottom-0 w-1 ${sentiment.color} opacity-60 group-hover:opacity-100 transition-opacity`}></div>
+
+                                <div className="mt-1 ml-2">
+                                    {getIcon(item.action)}
                                 </div>
-                                <p className="text-xs text-gray-400">{item.action}</p>
-                                {item.metadata?.note && (
-                                    <p className="text-xs text-gray-300 mt-1 italic">"{item.metadata.note}"</p>
-                                )}
-                                {item.metadata?.mood && (
-                                    <div className="mt-1 flex items-center gap-1">
-                                        <div className="h-1.5 flex-1 bg-gray-700 rounded-full max-w-[60px] overflow-hidden">
-                                            <div
-                                                className="h-full bg-gradient-to-r from-red-500 to-green-500"
-                                                style={{ width: `${(item.metadata.mood / 10) * 100}%` }}
-                                            />
-                                        </div>
-                                        <span className="text-[10px] text-gray-400">{item.metadata.mood}/10</span>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-medium text-white truncate">{item.user}</p>
+                                        <span className="text-xs text-gray-500">{getTimeAgo(item.timestamp)}</span>
                                     </div>
-                                )}
+                                    <p className="text-xs text-gray-400">{item.action}</p>
+                                    {item.metadata?.note && (
+                                        <p className="text-xs text-gray-300 mt-1 italic">"{item.metadata.note}"</p>
+                                    )}
+                                    {item.metadata?.mood && (
+                                        <div className="mt-1 flex items-center gap-1">
+                                            <div className="h-1.5 flex-1 bg-gray-700 rounded-full max-w-[60px] overflow-hidden">
+                                                <div
+                                                    className="h-full bg-gradient-to-r from-red-500 to-green-500"
+                                                    style={{ width: `${(item.metadata.mood / 10) * 100}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-[10px] text-gray-400">{item.metadata.mood}/10</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        )
+                    })
                 )}
                 {activities.length === 0 && !loading && (
                     <div className="text-center text-gray-500 text-sm py-4">No recent activity</div>
