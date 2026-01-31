@@ -1,6 +1,6 @@
 {
   "name": "master-dashboard",
-  "version": "3.3.0",
+  "version": "3.4.0-universal",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^13.2.2",
+    "@simplewebauthn/server": "^13.2.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.91.1",
     "clsx": "^2.1.1",

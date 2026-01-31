@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useProjects, Project, ProjectStatus, ProjectTheme } from '@/context/ProjectContext';
 import { PulseAPI } from '@/lib/api/pulse';
-import { Activity, Save, Server, ShieldCheck, AlertCircle, Plus, Trash2, X, Edit3 } from 'lucide-react';
+import { Activity, Save, Server, ShieldCheck, AlertCircle, Plus, Trash2, X, Edit3, Settings, Shield, User, Bell, Monitor, Lock } from 'lucide-react';
+import EnrollmentWizard from '@/components/EnrollmentWizard';
 
 export default function SettingsPage() {
     const { projects, addProject, updateProject, deleteProject } = useProjects();
