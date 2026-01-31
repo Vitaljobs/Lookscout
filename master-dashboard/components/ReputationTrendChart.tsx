@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Loader2 } from 'lucide-react';
 import { ReputationDataPoint } from '@/types/support';
+import { createClient } from '@/utils/supabase/client';
 
 // Mock data generator for 30 days of reputation history
 const generateMockData = (): ReputationDataPoint[] => {
@@ -31,17 +32,66 @@ const generateMockData = (): ReputationDataPoint[] => {
 };
 
 export default function ReputationTrendChart() {
-    const data = useMemo(() => generateMockData(), []);
+    const [data, setData] = useState<ReputationDataPoint[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [isLiveData, setIsLiveData] = useState(false);
+    const supabase = createClient();
 
-    const chartData = data.map(point => ({
-        date: point.timestamp.toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' }),
-        score: point.score,
-    }));
+    useEffect(() => {
+        loadReputationData();
+    }, []);
+
+    const loadReputationData = async () => {
+        try {
+            const { data: historyData, error } = await supabase
+                .from('reputation_history')
+                .select('*')
+                .order('created_at', { ascending: true })
+                .limit(30);
+
+            if (error) throw error;
+
+            if (historyData && historyData.length > 0) {
+                const formattedData: ReputationDataPoint[] = historyData.map((item) => ({
+                    timestamp: new Date(item.created_at),
+                    score: item.score,
+                    change: item.change || 0,
+                    reason: item.reason,
+                }));
+                setData(formattedData);
+                setIsLiveData(true);
+            } else {
+                setData(generateMockData());
+                setIsLiveData(false);
+            }
+        } catch (error) {
+            console.error('Error loading reputation data:', error);
+            setData(generateMockData());
+            setIsLiveData(false);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const chartData = useMemo(() => {
+        return data.map(point => ({
+            date: point.timestamp.toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' }),
+            score: point.score,
+        }));
+    }, [data]);
 
     const currentScore = data[data.length - 1]?.score || 0;
     const previousScore = data[data.length - 8]?.score || 0;
     const weeklyGrowth = currentScore - previousScore;
     const growthPercentage = ((weeklyGrowth / previousScore) * 100).toFixed(1);
+
+    if (loading) {
+        return (
+            <div className="card relative overflow-hidden flex items-center justify-center h-[400px]">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+            </div>
+        );
+    }
 
     return (
         <div className="card relative overflow-hidden">
@@ -56,6 +106,9 @@ export default function ReputationTrendChart() {
                             Reputation Trend
                         </h3>
                         <p className="text-sm text-gray-400 mt-1">Echo Score groei over tijd</p>
+                        {!isLiveData && (
+                            <p className="text-xs text-yellow-500 mt-1">⚠️ Mock data (geen live sync)</p>
+                        )}
                     </div>
                     <div className="text-right">
                         <div className="text-2xl font-bold text-white">{currentScore.toLocaleString()}</div>
