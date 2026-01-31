@@ -23,6 +23,8 @@ export interface Project {
 
 interface ProjectContextType {
     projects: Project[];
+    selectedProjectId: string | null;
+    selectProject: (id: string | null) => void;
     addProject: (project: Omit<Project, 'id'>) => void;
     updateProject: (id: string, updates: Partial<Project>) => void;
     deleteProject: (id: string) => void;
@@ -69,6 +71,7 @@ const DEFAULT_PROJECTS: Project[] = [
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
     const [projects, setProjects] = useState<Project[]>(DEFAULT_PROJECTS);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
 
     // Load from LocalStorage on mount
@@ -114,6 +117,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         }
     }, [projects, isLoaded]);
 
+    const selectProject = (id: string | null) => {
+        setSelectedProjectId(id);
+    };
+
     const addProject = (data: Omit<Project, 'id'>) => {
         const newProject: Project = {
             ...data,
@@ -144,7 +151,15 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <ProjectContext.Provider value={{ projects, addProject, updateProject, deleteProject, getProject }}>
+        <ProjectContext.Provider value={{
+            projects,
+            selectedProjectId,
+            selectProject,
+            addProject,
+            updateProject,
+            deleteProject,
+            getProject
+        }}>
             {children}
         </ProjectContext.Provider>
     );

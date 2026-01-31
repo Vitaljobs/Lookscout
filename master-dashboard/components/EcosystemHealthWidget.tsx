@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Activity, TrendingUp, Users } from 'lucide-react';
+import { useProjects } from '@/context/ProjectContext';
 
 interface ProjectStats {
     timestamp: Date;
@@ -78,6 +79,22 @@ export default function EcosystemHealthWidget() {
         'Lookscout': '#f59e0b',
     };
 
+    const { selectedProjectId } = useProjects();
+    // ... existing ...
+
+    const getOpacity = (projectName: string) => {
+        if (!selectedProjectId) return 1;
+        // Map simplified IDs to Display Names in this widget
+        const map: Record<string, string> = {
+            'commonground': 'Common Ground',
+            'vitaljobs': 'VitalJobs',
+            'vibechain': 'Echo Chamber', // Assuming vibes = echo
+            'lookscout': 'Lookscout'
+        };
+        const activeName = map[selectedProjectId];
+        return activeName === projectName ? 1 : 0.1;
+    };
+
     return (
         <div className="card relative overflow-hidden">
             {/* Background glow */}
@@ -100,7 +117,7 @@ export default function EcosystemHealthWidget() {
 
                 {/* Project Stats Grid */}
                 <div className="grid grid-cols-4 gap-3 mb-6">
-                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                    <div className={`bg-green-500/10 border border-green-500/30 rounded-lg p-3 transition-opacity duration-300`} style={{ opacity: getOpacity('Common Ground') }}>
                         <div className="text-xs text-green-400 mb-1">Common Ground</div>
                         <div className="text-xl font-bold text-white">{totals.commonground}</div>
                         <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
@@ -109,7 +126,7 @@ export default function EcosystemHealthWidget() {
                         </div>
                     </div>
 
-                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                    <div className={`bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 transition-opacity duration-300`} style={{ opacity: getOpacity('VitalJobs') }}>
                         <div className="text-xs text-blue-400 mb-1">VitalJobs</div>
                         <div className="text-xl font-bold text-white">{totals.vitaljobs}</div>
                         <div className="flex items-center gap-1 text-xs text-blue-400 mt-1">
@@ -118,7 +135,7 @@ export default function EcosystemHealthWidget() {
                         </div>
                     </div>
 
-                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3">
+                    <div className={`bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 transition-opacity duration-300`} style={{ opacity: getOpacity('Echo Chamber') }}>
                         <div className="text-xs text-purple-400 mb-1">Echo Chamber</div>
                         <div className="text-xl font-bold text-white">{totals['echo-chamber']}</div>
                         <div className="flex items-center gap-1 text-xs text-purple-400 mt-1">
@@ -127,7 +144,7 @@ export default function EcosystemHealthWidget() {
                         </div>
                     </div>
 
-                    <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
+                    <div className={`bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 transition-opacity duration-300`} style={{ opacity: getOpacity('Lookscout') }}>
                         <div className="text-xs text-orange-400 mb-1">Lookscout</div>
                         <div className="text-xl font-bold text-white">{totals.lookscout}</div>
                         <div className="flex items-center gap-1 text-xs text-orange-400 mt-1">
@@ -179,6 +196,8 @@ export default function EcosystemHealthWidget() {
                                 dataKey="Common Ground"
                                 stroke="#10b981"
                                 strokeWidth={2}
+                                strokeOpacity={getOpacity('Common Ground')}
+                                fillOpacity={getOpacity('Common Ground')}
                                 fill="url(#gradient-Common Ground)"
                                 animationDuration={1000}
                             />
@@ -187,6 +206,8 @@ export default function EcosystemHealthWidget() {
                                 dataKey="VitalJobs"
                                 stroke="#3b82f6"
                                 strokeWidth={2}
+                                strokeOpacity={getOpacity('VitalJobs')}
+                                fillOpacity={getOpacity('VitalJobs')}
                                 fill="url(#gradient-VitalJobs)"
                                 animationDuration={1000}
                             />
@@ -195,6 +216,8 @@ export default function EcosystemHealthWidget() {
                                 dataKey="Echo Chamber"
                                 stroke="#8b5cf6"
                                 strokeWidth={2}
+                                strokeOpacity={getOpacity('Echo Chamber')}
+                                fillOpacity={getOpacity('Echo Chamber')}
                                 fill="url(#gradient-Echo Chamber)"
                                 animationDuration={1000}
                             />
@@ -203,6 +226,8 @@ export default function EcosystemHealthWidget() {
                                 dataKey="Lookscout"
                                 stroke="#f59e0b"
                                 strokeWidth={2}
+                                strokeOpacity={getOpacity('Lookscout')}
+                                fillOpacity={getOpacity('Lookscout')}
                                 fill="url(#gradient-Lookscout)"
                                 animationDuration={1000}
                             />

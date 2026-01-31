@@ -18,29 +18,32 @@ import AntigravityMonitor from '@/components/AntigravityMonitor';
 import SupportHub from '@/components/SupportHub';
 import ReputationTrendChart from '@/components/ReputationTrendChart';
 import SecurityWidget from '@/components/SecurityWidget';
+import DashboardHeader from '@/components/DashboardHeader';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatCardData[]>([]);
   const [loading, setLoading] = useState(true);
-  const { projects } = useProjects();
+  const { projects, selectedProjectId } = useProjects();
 
   useEffect(() => {
     loadStats();
-  }, [projects]); // Reload when projects load
+  }, [projects, selectedProjectId]); // Reload when projects or selection changes
 
   const loadStats = async () => {
     try {
-      // Initialize with default project (or fetch from user prefs later)
-      const api = new PulseAPI('commonground');
+      const targetProjectId = selectedProjectId || 'commonground'; // Default for stats API or use aggregation
+      const api = new PulseAPI(targetProjectId);
       const { data } = await api.getStats();
 
-      // Calculate total stats across all projects if possible, or just use Common Ground as proxy for now
-      // But for "Active Projects" we have the real list
-      const activeProjectsCount = projects.filter(p => p.status === 'operational').length;
+      // If filtering, active projects is 1 (if operational) or 0
+      // If global, sum of operational
+      const activeProjectsCount = selectedProjectId
+        ? (projects.find(p => p.id === selectedProjectId)?.status === 'operational' ? 1 : 0)
+        : projects.filter(p => p.status === 'operational').length;
 
       const statCards: StatCardData[] = [
         {
-          title: 'Total Users',
+          title: selectedProjectId ? 'Project Users' : 'Total Users',
           value: data.total_users || 0,
           change: 12.5,
           trend: 'up',
@@ -59,8 +62,8 @@ export default function DashboardPage() {
           badge: { text: 'Native', color: 'blue' }
         },
         {
-          title: 'Active Projects',
-          value: activeProjectsCount || 3, // Fallback to 3 if context empty for some reason
+          title: selectedProjectId ? 'Status' : 'Active Projects',
+          value: selectedProjectId ? 'Active' : activeProjectsCount || 3,
           badge: { text: 'Running', color: 'orange' }
         }
       ];
@@ -76,14 +79,7 @@ export default function DashboardPage() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          Hey there, Control Tower! 👋
-        </h1>
-        <p className="text-gray-400">
-          Welcome back. Here's what's happening with your projects.
-        </p>
-      </div>
+      <DashboardHeader />
 
       {/* Status Central */}
       <div className="flex flex-wrap items-center gap-6 mb-8 p-4 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-lg relative overflow-hidden">
@@ -93,7 +89,7 @@ export default function DashboardPage() {
           <div className="h-4 w-[1px] bg-gray-700"></div>
         </div>
         {projects.map(p => (
-          <div key={p.id} className="flex items-center gap-3 bg-[var(--sidebar-bg)] px-4 py-2 rounded-lg border border-[var(--card-border)]">
+          <div key={p.id} className={`flex items-center gap-3 bg-[var(--sidebar-bg)] px-4 py-2 rounded-lg border border-[var(--card-border)] ${selectedProjectId === p.id ? 'border-blue-500/50 bg-blue-500/10' : 'opacity-80'}`}>
             <div className={`w-3 h-3 rounded-full animate-[pulse_1.5s_infinite] ${p.status === 'operational' ? 'bg-green-500 shadow-[0_0_12px_#22c55e]' : 'bg-red-500 shadow-[0_0_12px_#ef4444]'}`}></div>
             <span className={`font-semibold ${p.status === 'operational' ? 'text-white' : 'text-red-400'}`}>{p.name}</span>
           </div>

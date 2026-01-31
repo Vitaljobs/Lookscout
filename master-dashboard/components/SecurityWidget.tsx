@@ -6,7 +6,10 @@ import { SecurityEvent, BlockedIP } from '@/types/support';
 import { ShieldAlert, AlertTriangle, Ban, CheckCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { useProjects } from '@/context/ProjectContext';
+
 export default function SecurityWidget() {
+    const { selectedProjectId } = useProjects();
     const [events, setEvents] = useState<SecurityEvent[]>([]);
     const [blockedIPs, setBlockedIPs] = useState<BlockedIP[]>([]);
     const [loading, setLoading] = useState(true);
@@ -24,6 +27,9 @@ export default function SecurityWidget() {
                     event: '*',
                     schema: 'public',
                     table: 'security_events',
+                    // We can't easily filter subscription by dynamic value in this hook structure without reconnecting.
+                    // For now, receive all, and let reload filter. Ideally filter subscription server side.
+                    // Or check payload client side.
                 },
                 () => {
                     loadSecurityData();
@@ -34,20 +40,32 @@ export default function SecurityWidget() {
         return () => {
             supabase.removeChannel(eventsChannel);
         };
-    }, []);
+    }, [selectedProjectId]);
 
     const loadSecurityData = async () => {
         try {
             // Load recent security events
-            const { data: eventsData, error: eventsError } = await supabase
+            let eventsQuery = supabase
                 .from('security_events')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .limit(10);
 
+            if (selectedProjectId) {
+                eventsQuery = eventsQuery.eq('project_source', selectedProjectId);
+            }
+
+            const { data: eventsData, error: eventsError } = await eventsQuery;
+
             if (eventsError) throw eventsError;
 
-            // Load blocked IPs
+            // Load blocked IPs - Filtered logic if we had project_source on blocked_ips (assuming global for now or adding filter if applicable)
+            // Assuming blocked_ips might be global or we want to see all blocks. 
+            // If user wants context, maybe we filter if we had source column. blocked_ips table usually is firewall level, so global. 
+            // BUT for 'Contextual Intelligence' let's keep it global unless schema has source. 
+            // Checking schema... blocked_ips has no project_source visible in previous views, so keeping global for now.
+            // Wait, security_events DOES have project_source.
+
             const { data: blockedData, error: blockedError } = await supabase
                 .from('blocked_ips')
                 .select('*')

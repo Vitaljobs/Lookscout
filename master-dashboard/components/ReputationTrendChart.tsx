@@ -5,9 +5,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, Loader2 } from 'lucide-react';
 import { ReputationDataPoint } from '@/types/support';
 import { createClient } from '@/utils/supabase/client';
+import { useProjects } from '@/context/ProjectContext';
 
 // Mock data generator for 30 days of reputation history
 const generateMockData = (): ReputationDataPoint[] => {
+    // ... same mock data ...
     const data: ReputationDataPoint[] = [];
     const now = new Date();
     let score = 1250;
@@ -32,6 +34,7 @@ const generateMockData = (): ReputationDataPoint[] => {
 };
 
 export default function ReputationTrendChart() {
+    const { selectedProjectId } = useProjects();
     const [data, setData] = useState<ReputationDataPoint[]>([]);
     const [loading, setLoading] = useState(true);
     const [isLiveData, setIsLiveData] = useState(false);
@@ -39,15 +42,21 @@ export default function ReputationTrendChart() {
 
     useEffect(() => {
         loadReputationData();
-    }, []);
+    }, [selectedProjectId]);
 
     const loadReputationData = async () => {
         try {
-            const { data: historyData, error } = await supabase
+            let query = supabase
                 .from('reputation_history')
                 .select('*')
                 .order('created_at', { ascending: true })
                 .limit(30);
+
+            if (selectedProjectId) {
+                query = query.eq('project_source', selectedProjectId);
+            }
+
+            const { data: historyData, error } = await query;
 
             if (error) throw error;
 

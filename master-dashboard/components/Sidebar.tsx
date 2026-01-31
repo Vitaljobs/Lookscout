@@ -27,7 +27,7 @@ const navigation = [
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
     const [projectsOpen, setProjectsOpen] = useState(true);
-    const { projects } = useProjects();
+    const { projects, selectedProjectId, selectProject } = useProjects();
 
     const handleNavClick = () => {
         if (onClose) onClose();
@@ -68,8 +68,11 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                         <Link
                             key={item.name}
                             href={item.href}
-                            onClick={handleNavClick}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
+                            onClick={() => {
+                                handleNavClick();
+                                if (item.href === '/dashboard') selectProject(null);
+                            }}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive && !selectedProjectId
                                 ? 'bg-[var(--hover-bg)] text-white'
                                 : 'text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white'
                                 }`}
@@ -117,18 +120,24 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                                 }
 
                                 return (
-                                    <div key={project.id} className={`flex items-center justify-between w-full group ${isActive ? '' : ''}`}>
-                                        <Link
-                                            href={`/dashboard/projects/${project.slug}`}
-                                            onClick={handleNavClick}
-                                            className={`flex-1 flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all ${isActive
+                                    <div key={project.id} className={`flex items-center justify-between w-full group`}>
+                                        <button
+                                            onClick={() => {
+                                                selectProject(project.id);
+                                                handleNavClick();
+                                                // If we are not on dashboard, go there
+                                                if (pathname !== '/dashboard') {
+                                                    // router.push('/dashboard') - need to import useRouter
+                                                }
+                                            }}
+                                            className={`flex-1 flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all text-left ${selectedProjectId === project.id
                                                 ? activeClass
                                                 : 'text-gray-400 hover:text-white'
                                                 }`}
                                         >
                                             <div className={`w-3 h-3 rounded-full animate-pulse ${getStatusColor(project.status)} shadow-[0_0_12px_currentColor]`} />
-                                            <span className={isActive ? 'text-electric-blue font-semibold shadow-neon-text' : ''}>{project.name}</span>
-                                        </Link>
+                                            <span className={selectedProjectId === project.id ? 'text-electric-blue font-semibold shadow-neon-text' : ''}>{project.name}</span>
+                                        </button>
                                         {project.publicUrl && (
                                             <a
                                                 href={project.publicUrl}
@@ -151,7 +160,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             {/* Footer */}
             <div className="p-4 border-t border-[var(--card-border)]">
                 <div className="text-xs text-gray-500 text-center font-mono">
-                    Titan Neural v2.5.0
+                    Titan Contextual v2.5.1
                 </div>
             </div>
         </div>
