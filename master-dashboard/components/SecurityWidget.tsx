@@ -117,6 +117,7 @@ export default function SecurityWidget() {
                 borderColor: isAlertState ? "rgba(220, 38, 38, 0.5)" : "rgba(220, 38, 38, 0.2)"
             }}
             transition={{ duration: 0.5 }}
+            id="security-widget"
             className="card bg-gradient-to-b from-[var(--element-bg)] to-red-950/10 relative overflow-hidden"
         >
             {/* Background glow */}

@@ -1,24 +1,30 @@
-'use client';
-
 import React from 'react';
 import { useProjects } from '@/context/ProjectContext';
-import { ChevronRight, LayoutDashboard, X } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { ChevronRight, LayoutGrid, Mic } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTitanVoice } from '@/hooks/useTitanVoice';
 
 export default function DashboardHeader() {
     const { selectedProjectId, projects, selectProject } = useProjects();
-    const selectedProject = projects.find(p => p.id === selectedProjectId);
+    const pathname = usePathname();
+    const { isListening, toggleListening, transcript, lastCommand } = useTitanVoice();
+
+    // Find current project name
+    const currentProject = projects.find(p => p.id === selectedProjectId);
 
     return (
-        <div className="mb-6">
-            <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+        <div className="flex items-center justify-between mb-8 p-4 bg-black/40 border-b border-white/5 backdrop-blur-md rounded-xl sticky top-0 z-40">
+            {/* Left: Breadcrumbs & Indicator */}
+            <div className="flex items-center gap-4">
                 <div
-                    className="flex items-center gap-1 hover:text-white cursor-pointer transition-colors"
+                    className="flex items-center gap-2 text-sm text-gray-400 hover:text-white cursor-pointer transition-colors"
                     onClick={() => selectProject(null)}
                 >
-                    <LayoutDashboard className="w-4 h-4" />
-                    <span>Control Tower</span>
+                    <LayoutGrid className="w-4 h-4" />
+                    <span className="font-mono tracking-widest uppercase">Control Tower</span>
                 </div>
+
                 {selectedProjectId && (
                     <>
                         <ChevronRight className="w-4 h-4 text-gray-600" />
@@ -27,42 +33,54 @@ export default function DashboardHeader() {
                             animate={{ opacity: 1, x: 0 }}
                             className="flex items-center gap-2"
                         >
-                            <span className="text-white font-medium">{selectedProject?.name || 'Unknown Project'}</span>
-                            <button
-                                onClick={() => selectProject(null)}
-                                className="p-1 hover:bg-white/10 rounded-full transition-colors"
-                            >
-                                <X className="w-3 h-3" />
-                            </button>
+                            <span className="text-white font-bold tracking-wide">{currentProject?.name}</span>
+                            <span className="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded uppercase tracking-wider">
+                                Focus Mode
+                            </span>
                         </motion.div>
                     </>
                 )}
             </div>
 
-            <div className="flex justify-between items-end">
-                <div>
-                    <h1 className="text-3xl font-bold text-white mb-1">
-                        {selectedProjectId ? selectedProject?.name : 'Titan Overview'}
-                    </h1>
-                    <p className="text-gray-400">
-                        {selectedProjectId
-                            ? selectedProject?.description
-                            : 'Monitoring active neural networks and system health'}
-                    </p>
+            {/* Right: Voice Command & Context Actions */}
+            <div className="flex items-center gap-6">
+
+                {/* Voice Feedback */}
+                <AnimatePresence>
+                    {(isListening || lastCommand) && (
+                        <motion.div
+                            initial={{ opacity: 0, width: 0 }}
+                            animate={{ opacity: 1, width: 'auto' }}
+                            exit={{ opacity: 0, width: 0 }}
+                            className="overflow-hidden whitespace-nowrap"
+                        >
+                            <span className="text-xs font-mono text-blue-400">
+                                {lastCommand ? `> ${lastCommand}` : transcript || "Listening..."}
+                            </span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Mic Toggle */}
+                <button
+                    onClick={toggleListening}
+                    className={`relative p-2 rounded-full transition-all ${isListening
+                            ? 'bg-blue-500/20 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+                            : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                        }`}
+                >
+                    <Mic className={`w-5 h-5 ${isListening ? 'animate-pulse' : ''}`} />
+                    {isListening && (
+                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-ping" />
+                    )}
+                </button>
+
+                <div className="h-6 w-[1px] bg-white/10"></div>
+
+                <div className="flex items-center gap-2 text-xs font-mono text-gray-500">
+                    <div className={`w-2 h-2 rounded-full ${selectedProjectId ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></div>
+                    {selectedProjectId ? 'CONTEXT_ACTIVE' : 'GLOBAL_VIEW'}
                 </div>
-                {selectedProjectId && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className={`px-3 py-1 rounded-full text-xs font-bold border ${selectedProject?.theme === 'green' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                selectedProject?.theme === 'blue' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                    selectedProject?.theme === 'purple' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                                        'bg-orange-500/10 text-orange-400 border-orange-500/20'
-                            }`}
-                    >
-                        FOCUS MODE ACTIVE
-                    </motion.div>
-                )}
             </div>
         </div>
     );

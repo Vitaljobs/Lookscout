@@ -160,7 +160,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             {/* Footer */}
             <div className="p-4 border-t border-[var(--card-border)]">
                 <div className="text-xs text-gray-500 text-center font-mono">
-                    Titan Biometric v3.1.0-beta
+                    Titan Neural v3.2.0-beta
                 </div>
             </div>
         </div>
