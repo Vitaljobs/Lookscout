@@ -95,8 +95,12 @@ export default function SettingsPage() {
 
 
 
+    const [showEnrollment, setShowEnrollment] = useState(false);
+
     return (
         <div className="p-8 max-w-5xl mx-auto">
+            {showEnrollment && <EnrollmentWizard />}
+
             <div className="mb-8 flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
@@ -113,6 +117,28 @@ export default function SettingsPage() {
                 >
                     <Plus className="w-4 h-4" /> Add Project
                 </button>
+            </div>
+
+            {/* Biometric Security Section */}
+            <div className="card mb-8 bg-blue-950/20 border-blue-500/20">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                    <ShieldCheck className="w-5 h-5 text-blue-400" />
+                    Biometric Security
+                </h2>
+
+                <div className="flex items-center justify-between p-4 bg-black/40 rounded-lg border border-white/5">
+                    <div>
+                        <div className="font-medium text-white">Master Face Profile</div>
+                        <div className="text-sm text-gray-400">Universal Access Identity</div>
+                    </div>
+                    <button
+                        onClick={() => setShowEnrollment(true)}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded flex items-center gap-2 text-sm font-bold"
+                    >
+                        <Monitor className="w-4 h-4" />
+                        Start Master Enrollment
+                    </button>
+                </div>
             </div>
 
             {/* Editor Form */}
