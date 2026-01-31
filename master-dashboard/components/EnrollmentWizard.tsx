@@ -13,12 +13,32 @@ export default function EnrollmentWizard() {
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const [modelLoaded, setModelLoaded] = useState(false);
+
     useEffect(() => {
-        if (step !== 'start' && step !== 'success') {
+        const loadModels = async () => {
+            const faceapi = (await import('face-api.js'));
+            try {
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                    faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+                ]);
+                setModelLoaded(true);
+            } catch (err) {
+                console.error("Model load failed", err);
+                setError("Failed to load AI models");
+            }
+        };
+        loadModels();
+    }, []);
+
+    useEffect(() => {
+        if (step !== 'start' && step !== 'success' && modelLoaded) {
             startCamera();
         }
         return () => stopCamera();
-    }, [step]);
+    }, [step, modelLoaded]);
 
     const startCamera = async () => {
         try {
@@ -40,17 +60,25 @@ export default function EnrollmentWizard() {
     };
 
     const captureAndAdvance = async () => {
-        // Here we would run: const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
-        // and store detection.descriptor
+        if (!videoRef.current) return;
 
-        // For Prototype: We Generate a random 128-float descriptor to simulate "success"
-        const mockDescriptor = Array(128).fill(0).map(() => Math.random());
+        const faceapi = (await import('face-api.js'));
+        const detection = await faceapi.detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+
+        if (!detection) {
+            setError("No face detected. Please position properly.");
+            return;
+        }
+
+        setError(null); // Clear previous errors
 
         if (step === 'center') setStep('left');
         else if (step === 'left') setStep('right');
         else if (step === 'right') {
             setStep('processing');
-            await saveProfile(mockDescriptor);
+            // We use the descriptor from the LAST capture (Right) as the profile for now.
+            // In a pro version we'd average them.
+            await saveProfile(Array.from(detection.descriptor));
         }
     };
 
@@ -65,7 +93,9 @@ export default function EnrollmentWizard() {
             if (res.ok) {
                 setStep('success');
             } else {
-                setError('Failed to save to cloud');
+                const data = await res.json();
+                console.error("Enrollment failed:", data);
+                setError(data.error || 'Failed to save to cloud');
             }
         } catch (err) {
             setError('Network error');

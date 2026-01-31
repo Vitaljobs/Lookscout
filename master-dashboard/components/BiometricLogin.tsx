@@ -67,38 +67,46 @@ export default function BiometricLogin() {
 
     const triggerAuth = async () => {
         try {
-            // NOTE: In production we use faceapi.computeFaceDescriptor(video)
-            // For Prototype/Demo: We send a mock descriptor to prove the API connection
-            // The API compares this mock with DB (which will likely match nothing unless we mock the DB match too)
-            // BUT: If the user just Enrolled, we want it to work.
-            // Since we mocked enrollment with Random data, verification will fail with Random data.
-            // SOLUTION: For this demo, let's create a "Magic Descriptor" or trust the client side simulation 
-            // combined with a server "Handshake".
+            if (!videoRef.current) return;
 
-            // To make it functional for the user now:
-            // 1. We send a descriptor.
-            // 2. Server checks it.
-            // 3. If server returns match OR if we are in "Demo Mode", allow.
+            // Real AI Inference
+            const faceapi = (await import('face-api.js'));
 
-            const mockDescriptor = Array(128).fill(0).map(() => Math.random());
+            // Ensure models are loaded (should be done on mount, but double check)
+            if (!faceapi.nets.faceRecognitionNet.params) {
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                    faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+                ]);
+            }
+
+            const detection = await faceapi.detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+
+            if (!detection) {
+                // If no face found during the "Identifying" snapshot
+                setStatus('denied');
+                console.warn("Auth failed: No face detected");
+                return;
+            }
+
+            // Convert Float32Array to number[]
+            const descriptor = Array.from(detection.descriptor);
 
             const res = await fetch('/api/biometric/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ descriptor: mockDescriptor }),
+                body: JSON.stringify({ descriptor }),
             });
 
-            // For Demo Continuity: We treat "Unauthorized" as "Denied" but if API is 200/OK we pass.
-            // Since random vs random math implies failure...
-            // We will fallback to the existing "Success" simulation logic if the API call completes (even if no match),
-            // UNLESS the user wants strict security.
-            // User asked: "Server-side Verification".
-            // So:
             const data = await res.json();
 
-            // Overriding "Match False" for the purpose of the Demo Walkthrough unless enrolled properly
-            // Effectively: The system "Simulates" a match.
-            setStatus('success');
+            if (data.match) {
+                setStatus('success');
+            } else {
+                console.warn("Auth failed: Face mismatch", data.distance);
+                setStatus('denied');
+            }
 
         } catch (err) {
             console.error("Auth failed", err);
