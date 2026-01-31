@@ -10,7 +10,8 @@ import {
     ChevronDown,
     Activity,
     ExternalLink,
-    X
+    X,
+    LogOut
 } from 'lucide-react';
 import { useProjects } from '@/context/ProjectContext';
 
@@ -157,10 +158,26 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                 </div>
             </nav>
 
+            {/* Logout Button */}
+            <div className="p-4 border-t border-[var(--card-border)]">
+                <button
+                    onClick={async () => {
+                        const { createClient } = await import('@/utils/supabase/client');
+                        const supabase = createClient();
+                        await supabase.auth.signOut();
+                        window.location.href = '/login';
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 w-full text-left rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                >
+                    <LogOut className="w-5 h-5" />
+                    <span className="font-medium">Sign Out</span>
+                </button>
+            </div>
+
             {/* Footer */}
             <div className="p-4 border-t border-[var(--card-border)]">
                 <div className="text-xs text-gray-500 text-center font-mono">
-                    Titan Universal v3.4.5
+                    Titan Universal v3.4.6
                 </div>
             </div>
         </div>
