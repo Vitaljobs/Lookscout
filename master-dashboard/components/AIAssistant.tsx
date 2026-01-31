@@ -112,6 +112,103 @@ export default function AIAssistant() {
                     }
                     responseText = updateMsg;
                 }
+                // COMMAND: BLOCK IP (Blokkeer IP)
+                else if (lowerInput.includes('blokkeer ip') || lowerInput.includes('block ip')) {
+                    const ipMatch = lowerInput.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/);
+                    const durationMatch = lowerInput.match(/(\d+)\s*(min|uur|hour|dag|day)/i);
+
+                    if (ipMatch) {
+                        const ip = ipMatch[0];
+                        let durationMinutes = undefined;
+
+                        if (durationMatch) {
+                            const value = parseInt(durationMatch[1]);
+                            const unit = durationMatch[2].toLowerCase();
+                            if (unit.includes('min')) durationMinutes = value;
+                            else if (unit.includes('uur') || unit.includes('hour')) durationMinutes = value * 60;
+                            else if (unit.includes('dag') || unit.includes('day')) durationMinutes = value * 1440;
+                        }
+
+                        try {
+                            const response = await fetch('/api/ai-command', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    command: 'block_ip',
+                                    parameters: {
+                                        ip_address: ip,
+                                        reason: 'Blocked via Titan AI command',
+                                        duration_minutes: durationMinutes
+                                    }
+                                })
+                            });
+
+                            const result = await response.json();
+                            responseText = result.success
+                                ? `✅ **IP Geblokkeerd**: ${result.message}`
+                                : `❌ **Fout**: ${result.error}`;
+                        } catch (error) {
+                            responseText = "❌ Kon IP niet blokkeren. Check de API verbinding.";
+                        }
+                    } else {
+                        responseText = "Welk IP adres moet ik blokkeren? (bijv. 'Blokkeer IP 192.168.1.100 voor 60 min')";
+                    }
+                }
+                // COMMAND: UNBLOCK IP (Deblokkeer IP)
+                else if (lowerInput.includes('deblokkeer ip') || lowerInput.includes('unblock ip')) {
+                    const ipMatch = lowerInput.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/);
+
+                    if (ipMatch) {
+                        const ip = ipMatch[0];
+
+                        try {
+                            const response = await fetch('/api/ai-command', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    command: 'unblock_ip',
+                                    parameters: { ip_address: ip }
+                                })
+                            });
+
+                            const result = await response.json();
+                            responseText = result.success
+                                ? `✅ **IP Gedeblokkeerd**: ${result.message}`
+                                : `❌ **Fout**: ${result.error}`;
+                        } catch (error) {
+                            responseText = "❌ Kon IP niet deblokkeren. Check de API verbinding.";
+                        }
+                    } else {
+                        responseText = "Welk IP adres moet ik deblokkeren? (bijv. 'Deblokkeer IP 192.168.1.100')";
+                    }
+                }
+                // COMMAND: LIST BLOCKED IPS (Toon geblokkeerde IPs)
+                else if (lowerInput.includes('geblokkeerde ip') || lowerInput.includes('blocked ip') || lowerInput.includes('toon blocks')) {
+                    try {
+                        const response = await fetch('/api/ai-command', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                command: 'list_blocked_ips',
+                                parameters: {}
+                            })
+                        });
+
+                        const result = await response.json();
+                        if (result.success && result.blocked_ips.length > 0) {
+                            let list = `🛡️ **Geblokkeerde IPs** (${result.count}):\n\n`;
+                            result.blocked_ips.slice(0, 5).forEach((block: any) => {
+                                const duration = block.is_permanent ? 'Permanent' : 'Tijdelijk';
+                                list += `- ${block.ip_address} (${duration})\n  Reden: ${block.reason}\n\n`;
+                            });
+                            responseText = list;
+                        } else {
+                            responseText = "✅ Geen geblokkeerde IPs op dit moment.";
+                        }
+                    } catch (error) {
+                        responseText = "❌ Kon geblokkeerde IPs niet ophalen.";
+                    }
+                }
                 // COMMAND: BLOCK USER (Blokkeer)
                 else if (lowerInput.includes('block') || lowerInput.includes('blok') || lowerInput.includes('ban')) {
                     const projectSearch = projects.find(p => lowerInput.includes(p.name.toLowerCase()) || lowerInput.includes(p.id));
@@ -141,17 +238,33 @@ export default function AIAssistant() {
                 }
                 // COMMAND: SECURITY INSIGHT (Security / Veiligheid / Rood)
                 else if (lowerInput.includes('security') || lowerInput.includes('rood') || lowerInput.includes('alert') || lowerInput.includes('veilig')) {
-                    // Fetch real events from PulseAPI simulation we just added
-                    let totalThreats = 0;
-                    let recentMsg = "";
-                    for (const p of projects) {
-                        const api = new PulseAPI(p.id);
-                        const events = await api.getSecurityEvents();
-                        totalThreats += events.length;
-                        if (events.length > 0) recentMsg = events[0].message;
-                    }
+                    try {
+                        const response = await fetch('/api/ai-command', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                command: 'get_security_stats',
+                                parameters: {}
+                            })
+                        });
 
-                    responseText = `🛡️ **Security Insight**\n\nIk zie verhoogde activiteit. De rode pieken geven aan dat er **${totalThreats} dreigingen** zijn geblokkeerd in het afgelopen uur.\n\nMeest recente incident: *"${recentMsg || 'Brute Force poging vanaf IP 192.168.x.x'}"*.\n\nJe verdediging houdt stand. Geen actie vereist.`;
+                        const result = await response.json();
+                        if (result.success) {
+                            const stats = result.stats;
+                            responseText = `🛡️ **Security Insight** (24u)\n\n` +
+                                `Total Events: ${stats.total}\n` +
+                                `🔴 Critical: ${stats.critical}\n` +
+                                `🟠 High: ${stats.high}\n` +
+                                `🟡 Medium: ${stats.medium}\n` +
+                                `🟢 Low: ${stats.low}\n\n` +
+                                `🚫 Blocked IPs: ${stats.blocked_ips}\n\n` +
+                                `Je verdediging houdt stand. Lockout Scout is actief.`;
+                        } else {
+                            responseText = "❌ Kon security stats niet ophalen.";
+                        }
+                    } catch (error) {
+                        responseText = "❌ Security API niet bereikbaar.";
+                    }
                 }
                 // COMMAND: PREDICTIVE GROWTH (Voorspel / Trend / Groei)
                 else if (lowerInput.includes('voorspel') || lowerInput.includes('trend') || lowerInput.includes('toekomst') || lowerInput.includes('groei') || lowerInput.includes('analyst')) {
@@ -188,7 +301,7 @@ export default function AIAssistant() {
                     responseText = "Hallo, Control Tower. Ik sta klaar. Probeer commando's als 'Status Rapport', 'Voorspel groei', 'Update' of 'Blokkeer gebruiker'.";
                 }
                 else {
-                    responseText = "Ik begreep dat niet helemaal. Ik spreek nu Nederlands! Probeer:\n- 'Update'\n- 'Blokkeer gebruiker X'\n- 'Status rapport'\n- 'Voorspel groei'";
+                    responseText = "Ik begreep dat niet helemaal. Ik spreek nu Nederlands! Probeer:\n- 'Update'\n- 'Blokkeer IP 1.2.3.4'\n- 'Geblokkeerde IPs'\n- 'Security rapport'\n- 'Status rapport'\n- 'Voorspel groei'";
                 }
 
                 setMessages(prev => [...prev, { role: 'assistant', content: responseText, timestamp: new Date() }]);
@@ -227,7 +340,7 @@ export default function AIAssistant() {
                             <Sparkles className="w-5 h-5 text-blue-400" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-white">Titan AI v1.2</h3>
+                            <h3 className="font-bold text-white">Titan AI v2.3</h3>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                 <span className="text-xs text-gray-400">NL Module Actief</span>
