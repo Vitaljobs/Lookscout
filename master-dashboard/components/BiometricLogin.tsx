@@ -103,6 +103,10 @@ export default function BiometricLogin() {
 
             if (data.match) {
                 setStatus('success');
+                // Redirect after meaningful delay for visual effect
+                setTimeout(() => {
+                    router.push('/dashboard');
+                }, 1500);
             } else {
                 console.warn("Auth failed: Face mismatch", data.distance);
                 setStatus('denied');
