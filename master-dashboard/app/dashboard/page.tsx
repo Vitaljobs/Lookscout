@@ -20,10 +20,20 @@ import SupportHub from '@/components/SupportHub';
 import ReputationTrendChart from '@/components/ReputationTrendChart';
 import SecurityWidget from '@/components/SecurityWidget';
 
+import { useAnomalyDetection } from "@/hooks/useAnomalyDetection";
+import { SecurityEvent } from "@/types/support";
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatCardData[]>([]);
   const [loading, setLoading] = useState(true);
+  // Mock events for now, or fetch them properly. 
+  // Ideally we would lift state from SecurityWidget or fetch here.
+  // For the prompt's sake, we'll initialize with empty array and let the hook handle empty events gracefully (normal state),
+  // OR we simulate an event if needed. The hook logic handles empty events fine (no critical alerts).
+  const [events, setEvents] = useState<SecurityEvent[]>([]);
   const { projects, selectedProjectId } = useProjects();
+
+  const { level: alertLevel, message: alertMessage } = useAnomalyDetection(stats, events);
 
   useEffect(() => {
     loadStats();
@@ -145,7 +155,7 @@ export default function DashboardPage() {
       {/* Live Global Pulse Map (Replaces static table) */}
       {/* Live Global Pulse Map (Replaces static table) -> Upgraded to HoloGlobe */}
       <div className="mb-8">
-        <HoloGlobe />
+        <HoloGlobe alertLevel={alertLevel} alertMessage={alertMessage} />
       </div>
 
       {/* Popular Lab & Launch Command Center */}

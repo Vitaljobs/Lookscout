@@ -35,7 +35,14 @@ interface PointData {
     type: 'visitor' | 'security';
 }
 
-export default function HoloGlobe() {
+export type AlertLevel = 'normal' | 'warning' | 'critical';
+
+interface HoloGlobeProps {
+    alertLevel?: AlertLevel;
+    alertMessage?: string | null;
+}
+
+export default function HoloGlobe({ alertLevel = 'normal', alertMessage }: HoloGlobeProps) {
     const globeEl = useRef<GlobeMethods | undefined>(undefined);
     const { selectedProjectId } = useProjects();
     const [mounted, setMounted] = useState(false);
@@ -140,6 +147,22 @@ export default function HoloGlobe() {
         }
     }, []);
 
+    const atmosphereColor = useMemo(() => {
+        switch (alertLevel) {
+            case 'critical': return '#ef4444'; // Red
+            case 'warning': return '#f59e0b'; // Orange
+            default: return '#3b82f6'; // Blue
+        }
+    }, [alertLevel]);
+
+    const glowColor = useMemo(() => {
+        switch (alertLevel) {
+            case 'critical': return 'bg-red-500';
+            case 'warning': return 'bg-orange-500';
+            default: return 'bg-blue-500';
+        }
+    }, [alertLevel]);
+
     // Helper for colors
     function getProjectColors(projectId: string): string[] {
         switch (projectId) {
@@ -164,15 +187,28 @@ export default function HoloGlobe() {
     if (!mounted) return null;
 
     return (
-        <div className="card relative overflow-hidden h-[500px] w-full bg-black/40 border-blue-500/20">
+        <div className={`card relative overflow-hidden h-[500px] w-full bg-black/40 transition-colors duration-1000 ${alertLevel === 'critical' ? 'border-red-500/40 shadow-[0_0_50px_rgba(220,38,38,0.2)]' :
+            alertLevel === 'warning' ? 'border-orange-500/40' :
+                'border-blue-500/20'
+            }`}>
             {/* Header Overlay */}
             <div className="absolute top-4 left-6 z-10 pointer-events-none">
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
-                    <h3 className="text-sm font-bold text-blue-400 tracking-widest uppercase">Titan Holo-Globe</h3>
+                    <span className={`w-2 h-2 rounded-full animate-ping ${glowColor}`} />
+                    <h3 className={`text-sm font-bold tracking-widest uppercase ${alertLevel === 'critical' ? 'text-red-400' :
+                            alertLevel === 'warning' ? 'text-orange-400' :
+                                'text-blue-400'
+                        }`}>
+                        {alertLevel === 'critical' ? 'CRITICAL ALERT DETECTED' :
+                            alertLevel === 'warning' ? 'ANOMALY DETECTED' :
+                                'Titan Holo-Globe'}
+                    </h3>
                 </div>
-                <p className="text-xs text-blue-500/60 mt-1 font-mono">
-                    {selectedProjectId ? `TRACKING: ${selectedProjectId.toUpperCase()}` : 'GLOBAL TRAFFIC MONITORING'}
+                <p className={`text-xs mt-1 font-mono ${alertLevel === 'critical' ? 'text-red-500' :
+                        alertLevel === 'warning' ? 'text-orange-500' :
+                            'text-blue-500/60'
+                    }`}>
+                    {alertMessage || (selectedProjectId ? `TRACKING: ${selectedProjectId.toUpperCase()}` : 'GLOBAL TRAFFIC MONITORING')}
                 </p>
             </div>
 
@@ -200,7 +236,7 @@ export default function HoloGlobe() {
                 ringRepeatPeriod={1000}
 
                 // Atmosphere
-                atmosphereColor="#3b82f6"
+                atmosphereColor={atmosphereColor}
                 atmosphereAltitude={0.15}
             />
 
