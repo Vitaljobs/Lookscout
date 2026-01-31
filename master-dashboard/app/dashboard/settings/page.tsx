@@ -99,7 +99,7 @@ export default function SettingsPage() {
 
     return (
         <div className="p-8 max-w-5xl mx-auto">
-            {showEnrollment && <EnrollmentWizard />}
+            {showEnrollment && <EnrollmentWizard onClose={() => setShowEnrollment(false)} />}
 
             <div className="mb-8 flex items-center justify-between">
                 <div>

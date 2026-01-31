@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 // Mock FaceAPI if models aren't loaded (Prototype fallback)
 // In production, import * as faceapi from 'face-api.js';
 
-export default function EnrollmentWizard() {
+export default function EnrollmentWizard({ onClose }: { onClose?: () => void }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [step, setStep] = useState<'start' | 'center' | 'left' | 'right' | 'processing' | 'success'>('start');
     const [stream, setStream] = useState<MediaStream | null>(null);
