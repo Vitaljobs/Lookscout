@@ -6,6 +6,8 @@ import { Rocket, TrendingUp, Users } from 'lucide-react';
 import { useProjects } from '@/context/ProjectContext';
 import { PulseAPI } from '@/lib/api/pulse';
 
+import AnimatedCounter from './AnimatedCounter';
+
 export default function LaunchStatsWidget() {
     const { projects } = useProjects();
     const [stats, setStats] = React.useState<{ velocity: number; total: number; isLive: boolean }>({
@@ -101,7 +103,7 @@ export default function LaunchStatsWidget() {
                     <span className="text-xs font-bold text-green-200 uppercase">Total Access</span>
                 </div>
                 <div className="text-2xl font-bold text-white">
-                    {stats.total.toLocaleString()}
+                    <AnimatedCounter value={stats.total} />
                 </div>
                 <div className="mt-1 text-xs text-gray-400">
                     Since launch {stats.isLive ? '(Live)' : '(Mock)'}

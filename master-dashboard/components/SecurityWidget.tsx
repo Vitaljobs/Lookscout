@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { SecurityEvent, BlockedIP } from '@/types/support';
 import { ShieldAlert, AlertTriangle, Ban, CheckCircle, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function SecurityWidget() {
     const [events, setEvents] = useState<SecurityEvent[]>([]);
@@ -81,11 +82,30 @@ export default function SecurityWidget() {
     };
 
     const criticalCount = events.filter(e => e.severity === 'critical' || e.severity === 'high').length;
+    const isAlertState = criticalCount > 0 || blockedIPs.length > 5;
 
     return (
-        <div className="card border-red-500/20 bg-gradient-to-b from-[var(--element-bg)] to-red-950/10 relative overflow-hidden">
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{
+                opacity: 1,
+                scale: 1,
+                boxShadow: isAlertState ? "0 0 30px rgba(220, 38, 38, 0.3)" : "none",
+                borderColor: isAlertState ? "rgba(220, 38, 38, 0.5)" : "rgba(220, 38, 38, 0.2)"
+            }}
+            transition={{ duration: 0.5 }}
+            className="card bg-gradient-to-b from-[var(--element-bg)] to-red-950/10 relative overflow-hidden"
+        >
             {/* Background glow */}
-            <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-red-600 rounded-full blur-[60px] opacity-20" />
+            <motion.div
+                animate={{
+                    opacity: isAlertState ? [0.2, 0.4, 0.2] : 0.2,
+                    scale: isAlertState ? [1, 1.2, 1] : 1
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute -right-10 -bottom-10 w-32 h-32 bg-red-600 rounded-full blur-[60px]"
+            />
 
             <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
@@ -172,6 +192,6 @@ export default function SecurityWidget() {
                     </>
                 )}
             </div>
-        </div>
+        </motion.div>
     );
 }

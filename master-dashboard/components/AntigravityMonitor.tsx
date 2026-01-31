@@ -1,7 +1,17 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { Activity, Database, Share2, Zap, Orbit, Layers } from 'lucide-react';
+import { Orbit, Layers } from 'lucide-react';
+
+interface Particle {
+    x: number;
+    y: number;
+    speed: number;
+    angle: number;
+    distance: number;
+    color: string;
+    size: number;
+}
 
 export default function AntigravityMonitor() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -14,69 +24,95 @@ export default function AntigravityMonitor() {
 
         let animationFrameId: number;
         let time = 0;
+        const particles: Particle[] = [];
 
         const nodes = [
-            { name: 'Common Ground', color: '#10b981', orbit: 30, speed: 0.005, size: 4 },
-            { name: 'VitalJobs', color: '#3b82f6', orbit: 45, speed: 0.003, size: 5 },
-            { name: 'Echo Chamber', color: '#8b5cf6', orbit: 60, speed: 0.002, size: 4 },
-            { name: 'Lookscout', color: '#f59e0b', orbit: 75, speed: 0.004, size: 5 },
+            { name: 'Common Ground', color: '#10b981', orbit: 60 },
+            { name: 'VitalJobs', color: '#3b82f6', orbit: 60, angleOffset: Math.PI / 2 },
+            { name: 'Echo Chamber', color: '#8b5cf6', orbit: 60, angleOffset: Math.PI },
+            { name: 'Lookscout', color: '#f59e0b', orbit: 60, angleOffset: -Math.PI / 2 },
         ];
 
+        const createParticle = (originX: number, originY: number, color: string) => {
+            particles.push({
+                x: originX,
+                y: originY,
+                speed: 0.5 + Math.random() * 0.5,
+                angle: Math.atan2(canvas.height / 2 - originY, canvas.width / 2 - originX),
+                distance: 60,
+                color: color,
+                size: 1 + Math.random()
+            });
+        };
+
         const render = () => {
-            time += 1;
+            time += 0.02;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
             // Draw Central Core (Titan)
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 20;
             ctx.shadowColor = 'rgba(99, 102, 241, 0.8)';
             ctx.fillStyle = '#6366f1';
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, 8 + Math.sin(time * 2) * 2, 0, Math.PI * 2);
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Draw Pulse core
-            const pulseSize = 8 + Math.sin(time * 0.05) * 4;
-            ctx.strokeStyle = `rgba(99, 102, 241, ${0.4 - Math.sin(time * 0.05) * 0.2})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, pulseSize, 0, Math.PI * 2);
-            ctx.stroke();
-
-
-            nodes.forEach((node) => {
-                const angle = time * node.speed;
+            // Draw Nodes & Spawn Particles
+            nodes.forEach((node, i) => {
+                const angle = time * 0.5 + (node.angleOffset || 0);
                 const x = centerX + Math.cos(angle) * node.orbit;
                 const y = centerY + Math.sin(angle) * node.orbit;
 
-                // Orbit path
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-                ctx.lineWidth = 1;
+                // Orbit Trail
+                ctx.strokeStyle = `rgba(255, 255, 255, 0.05)`;
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, node.orbit, 0, Math.PI * 2);
                 ctx.stroke();
-
-                // Gravity Beam (Sync Line)
-                if (time % 100 < 10) { // Occasional sync pulse
-                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.2 - (time % 100) / 100})`;
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(centerX, centerY);
-                    ctx.lineTo(x, y);
-                    ctx.stroke();
-                }
 
                 // Node
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = node.color;
                 ctx.fillStyle = node.color;
                 ctx.beginPath();
-                ctx.arc(x, y, node.size, 0, Math.PI * 2);
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.shadowBlur = 0;
+
+                // Spawn particle occasionally
+                if (Math.random() < 0.05) {
+                    createParticle(x, y, node.color);
+                }
             });
+
+            // Update & Draw Particles (Gravity Flow)
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.distance -= p.speed;
+
+                // Update position based on angle and new distance
+                p.x = centerX + Math.cos(p.angle + Math.PI) * p.distance * -1; // Hacky math fix, essentially move towards center
+                // Better math: Just lerp towards center? No, let's keep it simple.
+                // Re-calculate pos:
+                p.x += Math.cos(p.angle) * p.speed;
+                p.y += Math.sin(p.angle) * p.speed;
+
+                const distToCenter = Math.sqrt(Math.pow(p.x - centerX, 2) + Math.pow(p.y - centerY, 2));
+
+                if (distToCenter < 10) {
+                    particles.splice(i, 1); // Absorbed by core
+                    continue;
+                }
+
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = distToCenter / 60; // Fade out as getting closer
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
 
             animationFrameId = requestAnimationFrame(render);
         };
@@ -100,7 +136,7 @@ export default function AntigravityMonitor() {
                         </div>
                         <div>
                             <h3 className="text-sm font-bold text-white uppercase tracking-wider">Gravity Well</h3>
-                            <p className="text-[10px] text-gray-400">Node Synchronization</p>
+                            <p className="text-[10px] text-gray-400">Particle Data Flow</p>
                         </div>
                     </div>
                 </div>
@@ -113,11 +149,7 @@ export default function AntigravityMonitor() {
                     <div className="absolute bottom-2 left-2 flex flex-col gap-1">
                         <div className="flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                            <span className="text-[10px] text-indigo-300 font-mono">CORE: STABLE</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                            <span className="text-[10px] text-green-300 font-mono">NODES: 4/4</span>
+                            <span className="text-[10px] text-indigo-300 font-mono">FLOW: KINETIC</span>
                         </div>
                     </div>
                 </div>
