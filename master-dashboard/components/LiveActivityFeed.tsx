@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PulseAPI } from '@/lib/api/pulse';
 import { ActivityFeedItem } from '@/types';
 import { Zap, User, Smile, CheckCircle, Rocket } from 'lucide-react';
+import { useSound } from '@/hooks/useSound';
 
 export default function LiveActivityFeed({ projectId }: { projectId?: string }) {
     const [activities, setActivities] = useState<ActivityFeedItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const previousCountRef = useRef(0);
+    const { playBlip } = useSound();
 
     useEffect(() => {
         loadActivity();
@@ -19,6 +22,13 @@ export default function LiveActivityFeed({ projectId }: { projectId?: string }) 
         try {
             const api = new PulseAPI(projectId || 'commonground'); // Default to commonground or generic
             const data = await api.getRecentActivity();
+
+            // Play blip sound if new activities detected
+            if (!loading && data.length > previousCountRef.current) {
+                playBlip();
+            }
+
+            previousCountRef.current = data.length;
             setActivities(data);
         } catch (error) {
             console.error('Failed to load activity', error);

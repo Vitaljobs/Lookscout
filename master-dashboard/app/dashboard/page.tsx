@@ -15,6 +15,9 @@ import LaunchStatsWidget from '@/components/LaunchStatsWidget';
 import GlobalPulseMap from '@/components/GlobalPulseMap';
 import ReputationCounter from '@/components/ReputationCounter';
 import AntigravityMonitor from '@/components/AntigravityMonitor';
+import SupportHub from '@/components/SupportHub';
+import ReputationTrendChart from '@/components/ReputationTrendChart';
+import SecurityWidget from '@/components/SecurityWidget';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatCardData[]>([]);
@@ -133,25 +136,14 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Security Watch */}
-        <div className="card border-red-500/20 bg-gradient-to-b from-[var(--element-bg)] to-red-950/10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-red-500 animate-pulse" />
-              <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider">Security Watch</h3>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-          </div>
-          <div className="h-[200px] w-full">
-            <SecurityChart />
-          </div>
-          <div className="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-red-300">Status</span>
-              <span className="font-bold text-red-400">MONITORING</span>
-            </div>
-          </div>
-        </div>
+        {/* Security Watch - Now using SecurityWidget */}
+        <SecurityWidget />
+      </div>
+
+      {/* Support Hub & Reputation Trend */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <SupportHub />
+        <ReputationTrendChart />
       </div>
 
       {/* Live Global Pulse Map (Replaces static table) */}
