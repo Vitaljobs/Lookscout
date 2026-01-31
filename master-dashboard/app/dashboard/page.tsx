@@ -12,13 +12,13 @@ import SecurityChart from '@/components/charts/SecurityChart';
 import { Users, Activity, DollarSign, FolderKanban, ShieldAlert } from 'lucide-react';
 import LiveActivityFeed from '@/components/LiveActivityFeed';
 import LaunchStatsWidget from '@/components/LaunchStatsWidget';
-import GlobalPulseMap from '@/components/GlobalPulseMap';
+import DashboardHeader from "@/components/DashboardHeader";
+import HoloGlobe from "@/components/HoloGlobe";
 import ReputationCounter from '@/components/ReputationCounter';
 import AntigravityMonitor from '@/components/AntigravityMonitor';
 import SupportHub from '@/components/SupportHub';
 import ReputationTrendChart from '@/components/ReputationTrendChart';
 import SecurityWidget from '@/components/SecurityWidget';
-import DashboardHeader from '@/components/DashboardHeader';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatCardData[]>([]);
@@ -143,8 +143,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Live Global Pulse Map (Replaces static table) */}
+      {/* Live Global Pulse Map (Replaces static table) -> Upgraded to HoloGlobe */}
       <div className="mb-8">
-        <GlobalPulseMap />
+        <HoloGlobe />
       </div>
 
       {/* Popular Lab & Launch Command Center */}

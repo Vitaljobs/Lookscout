@@ -160,7 +160,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             {/* Footer */}
             <div className="p-4 border-t border-[var(--card-border)]">
                 <div className="text-xs text-gray-500 text-center font-mono">
-                    Titan Contextual v2.5.1
+                    Titan Holo v3.0.0-alpha
                 </div>
             </div>
         </div>
