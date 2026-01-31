@@ -57,8 +57,12 @@ export default function SecurityWidget() {
 
             setEvents(eventsData || []);
             setBlockedIPs(blockedData || []);
+
+
+
         } catch (error) {
             console.error('Error loading security data:', error);
+            setEvents([]);
         } finally {
             setLoading(false);
         }
