@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, RefreshCw, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Camera, RefreshCw, CheckCircle, AlertTriangle, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // Mock FaceAPI if models aren't loaded (Prototype fallback)
@@ -104,7 +104,15 @@ export default function EnrollmentWizard({ onClose }: { onClose?: () => void }) 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-            <div className="bg-[#0f1419] border border-blue-500/30 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+            <div className="bg-[#0f1419] border border-blue-500/30 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl relative">
+                {/* Close Button */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-50"
+                >
+                    <X className="w-6 h-6" />
+                </button>
+
                 {/* Header */}
                 <div className="p-6 border-b border-white/5 bg-gradient-to-r from-blue-900/20 to-transparent">
                     <h2 className="text-xl font-bold text-white flex items-center gap-2">
