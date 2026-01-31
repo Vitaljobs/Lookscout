@@ -189,7 +189,7 @@ export default function HoloGlobe({ alertLevel = 'normal', alertMessage, project
     if (!mounted) return null;
 
     return (
-        <div className={`card relative overflow-hidden h-[500px] w-full bg-black/40 transition-colors duration-1000 ${alertLevel === 'critical' ? 'border-red-500/40 shadow-[0_0_50px_rgba(220,38,38,0.2)]' :
+        <div className={`card relative overflow-hidden h-96 md:h-[500px] w-full bg-black/40 transition-colors duration-1000 ${alertLevel === 'critical' ? 'border-red-500/40 shadow-[0_0_50px_rgba(220,38,38,0.2)]' :
             alertLevel === 'warning' ? 'border-orange-500/40' :
                 'border-blue-500/20'
             }`}>

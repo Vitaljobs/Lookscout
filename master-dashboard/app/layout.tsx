@@ -13,8 +13,16 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Master Dashboard - Control Tower",
-  description: "Centralized dashboard for managing all your projects",
+  title: "Titan Control Tower",
+  description: "Neural Interface for Project Management",
+  manifest: "/manifest.json",
+  themeColor: "#000000",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({
