@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const options = await generateRegistrationOptions({
         rpName: 'Titan Control Tower',
         rpID: 'localhost', // TODO: Make dynamic for production
-        userID: user.id,
+        userID: new Uint8Array(Buffer.from(user.id)),
         userName: user.email || 'titan-user',
         attestationType: 'none',
         excludeCredentials: credentials?.map(cred => ({
