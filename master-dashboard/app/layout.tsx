@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import { ProjectProvider } from '@/context/ProjectContext';
 import { AlertProvider } from '@/context/AlertContext';
 import AIAssistant from '@/components/AIAssistant';
+import { CommandPalette } from '@/components/CommandPalette';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
           <AlertProvider>
             {children}
             <AIAssistant />
+            <CommandPalette />
           </AlertProvider>
         </ProjectProvider>
       </body>
