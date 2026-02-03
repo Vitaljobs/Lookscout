@@ -22,6 +22,7 @@ import SecurityWidget from '@/components/SecurityWidget';
 
 import { useAnomalyDetection } from "@/hooks/useAnomalyDetection";
 import { SecurityEvent } from "@/types/support";
+import NeuralInsights from '@/components/NeuralInsights';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatCardData[]>([]);
@@ -90,6 +91,11 @@ export default function DashboardPage() {
     <div className="p-8">
       {/* Header */}
       <DashboardHeader />
+
+      {/* Neural Link Insight Widget */}
+      <div className="mb-8">
+        <NeuralInsights />
+      </div>
 
       {/* Status Central */}
       <div className="flex flex-wrap items-center gap-6 mb-8 p-4 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-lg relative overflow-hidden">

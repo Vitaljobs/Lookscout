@@ -279,7 +279,7 @@ export default function BiometricLogin() {
                     transition={{ delay: 2 }}
                     className="mt-8"
                 >
-                    <button onClick={() => router.push('/dashboard')} className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-sm group">
+                    <button onClick={() => router.push('/login')} className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-sm group">
                         <Lock className="w-4 h-4 group-hover:text-blue-400" />
                         <span>Use Encryption Key (Password)</span>
                     </button>
