@@ -1,6 +1,14 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization to avoid build errors when API key is missing
+let resend: Resend | null = null;
+
+const getResendClient = () => {
+    if (!resend && process.env.RESEND_API_KEY) {
+        resend = new Resend(process.env.RESEND_API_KEY);
+    }
+    return resend;
+};
 
 interface AlertEmailProps {
     to: string;
@@ -9,13 +17,15 @@ interface AlertEmailProps {
 }
 
 export const sendAlertEmail = async ({ to, subject, markdown }: AlertEmailProps) => {
-    if (!process.env.RESEND_API_KEY) {
+    const client = getResendClient();
+
+    if (!client || !process.env.RESEND_API_KEY) {
         console.warn('⚠️ RESEND_API_KEY not set. Email not sent.');
         return { success: false, error: 'Missing API Key' };
     }
 
     try {
-        const { data, error } = await resend.emails.send({
+        const { data, error } = await client.emails.send({
             from: 'Titan Neural Link <onboarding@resend.dev>', // Default testing domain
             to: [to],
             subject: `[TITAN ALERT] ${subject}`,
