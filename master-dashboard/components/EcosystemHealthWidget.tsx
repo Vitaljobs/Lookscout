@@ -30,33 +30,67 @@ export default function EcosystemHealthWidget() {
 
     const loadEcosystemData = async () => {
         try {
-            // Generate mock data for 24 hours (in production, fetch from analytics)
-            const mockData: ProjectStats[] = [];
-            const now = new Date();
+            // Fetch last 24 hours of health logs for all projects
+            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-            for (let i = 23; i >= 0; i--) {
-                const timestamp = new Date(now.getTime() - i * 3600000);
-                mockData.push({
-                    timestamp,
-                    commonground: Math.floor(Math.random() * 50) + 20,
-                    vitaljobs: Math.floor(Math.random() * 80) + 30,
-                    'echo-chamber': Math.floor(Math.random() * 40) + 15,
-                    lookscout: Math.floor(Math.random() * 30) + 10,
+            const { data: healthLogs, error } = await supabase
+                .from('project_health_logs')
+                .select('*')
+                .gte('created_at', twentyFourHoursAgo)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+
+            if (healthLogs && healthLogs.length > 0) {
+                // Group by hour and project
+                const hourlyData: Map<string, ProjectStats> = new Map();
+
+                healthLogs.forEach((log) => {
+                    const hour = new Date(log.created_at);
+                    hour.setMinutes(0, 0, 0);
+                    const hourKey = hour.toISOString();
+
+                    if (!hourlyData.has(hourKey)) {
+                        hourlyData.set(hourKey, {
+                            timestamp: hour,
+                            commonground: 0,
+                            vitaljobs: 0,
+                            'echo-chamber': 0,
+                            lookscout: 0,
+                        });
+                    }
+
+                    const stats = hourlyData.get(hourKey)!;
+                    if (log.project_id === 'commonground') stats.commonground = log.active_users || 0;
+                    if (log.project_id === 'vitaljobs') stats.vitaljobs = log.active_users || 0;
+                    if (log.project_id === 'echo-chamber') stats['echo-chamber'] = log.active_users || 0;
+                    if (log.project_id === 'lookscout') stats.lookscout = log.active_users || 0;
                 });
+
+                const chartData = Array.from(hourlyData.values()).sort(
+                    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+                );
+
+                setData(chartData);
+
+                // Calculate current totals (last data point)
+                if (chartData.length > 0) {
+                    const latest = chartData[chartData.length - 1];
+                    setTotals({
+                        commonground: latest.commonground,
+                        vitaljobs: latest.vitaljobs,
+                        'echo-chamber': latest['echo-chamber'],
+                        lookscout: latest.lookscout,
+                    });
+                }
+            } else {
+                // No data - empty state
+                setData([]);
+                setTotals({ commonground: 0, vitaljobs: 0, 'echo-chamber': 0, lookscout: 0 });
             }
-
-            setData(mockData);
-
-            // Calculate current totals (last data point)
-            const latest = mockData[mockData.length - 1];
-            setTotals({
-                commonground: latest.commonground,
-                vitaljobs: latest.vitaljobs,
-                'echo-chamber': latest['echo-chamber'],
-                lookscout: latest.lookscout,
-            });
         } catch (error) {
             console.error('Error loading ecosystem data:', error);
+            setData([]);
         } finally {
             setLoading(false);
         }
@@ -70,180 +104,107 @@ export default function EcosystemHealthWidget() {
         'Lookscout': point.lookscout,
     }));
 
-    const totalVisitors = totals.commonground + totals.vitaljobs + totals['echo-chamber'] + totals.lookscout;
-
-    const projectColors = {
-        'Common Ground': '#10b981',
-        'VitalJobs': '#3b82f6',
-        'Echo Chamber': '#8b5cf6',
-        'Lookscout': '#f59e0b',
-    };
-
-    const { selectedProjectId } = useProjects();
-    // ... existing ...
-
-    const getOpacity = (projectName: string) => {
-        if (!selectedProjectId) return 1;
-        // Map simplified IDs to Display Names in this widget
-        const map: Record<string, string> = {
-            'commonground': 'Common Ground',
-            'vitaljobs': 'VitalJobs',
-            'vibechain': 'Echo Chamber', // Assuming vibes = echo
-            'lookscout': 'Lookscout'
-        };
-        const activeName = map[selectedProjectId];
-        return activeName === projectName ? 1 : 0.1;
-    };
+    const totalTraffic = totals.commonground + totals.vitaljobs + totals['echo-chamber'] + totals.lookscout;
 
     return (
-        <div className="card relative overflow-hidden">
+        <div className="card col-span-2 relative overflow-hidden">
             {/* Background glow */}
-            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-600 rounded-full blur-[80px] opacity-20" />
+            <div className="absolute -left-10 -top-10 w-40 h-40 bg-blue-600 rounded-full blur-[80px] opacity-20" />
 
             <div className="relative z-10">
-                <div className="flex items-center justify-between mb-6">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
                     <div>
-                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <Activity className="w-5 h-5 text-blue-400" />
-                            Ecosystem Health
-                        </h3>
-                        <p className="text-sm text-gray-400 mt-1">Live bezoekers over alle projecten</p>
+                            <h3 className="text-lg font-semibold text-white">Combined Traffic Volume (24h)</h3>
+                        </div>
+                        <div className="flex gap-4 mt-2">
+                            <div>
+                                <span className="text-xs text-gray-400">COMMON GROUND</span>
+                                <p className="text-sm font-bold text-green-400">{totals.commonground}</p>
+                            </div>
+                            <div>
+                                <span className="text-xs text-gray-400">VIBECHAIN</span>
+                                <p className="text-sm font-bold text-yellow-400">{totals['echo-chamber']}</p>
+                            </div>
+                            <div>
+                                <span className="text-xs text-gray-400">VITAL JOBS</span>
+                                <p className="text-sm font-bold text-blue-400">{totals.vitaljobs}</p>
+                            </div>
+                        </div>
                     </div>
                     <div className="text-right">
-                        <div className="text-3xl font-bold text-white">{totalVisitors}</div>
-                        <div className="text-xs text-gray-400">Totaal online</div>
-                    </div>
-                </div>
-
-                {/* Project Stats Grid */}
-                <div className="grid grid-cols-4 gap-3 mb-6">
-                    <div className={`bg-green-500/10 border border-green-500/30 rounded-lg p-3 transition-opacity duration-300`} style={{ opacity: getOpacity('Common Ground') }}>
-                        <div className="text-xs text-green-400 mb-1">Common Ground</div>
-                        <div className="text-xl font-bold text-white">{totals.commonground}</div>
-                        <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
-                            <TrendingUp className="w-3 h-3" />
-                            <span>+12%</span>
-                        </div>
-                    </div>
-
-                    <div className={`bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 transition-opacity duration-300`} style={{ opacity: getOpacity('VitalJobs') }}>
-                        <div className="text-xs text-blue-400 mb-1">VitalJobs</div>
-                        <div className="text-xl font-bold text-white">{totals.vitaljobs}</div>
-                        <div className="flex items-center gap-1 text-xs text-blue-400 mt-1">
-                            <TrendingUp className="w-3 h-3" />
-                            <span>+8%</span>
-                        </div>
-                    </div>
-
-                    <div className={`bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 transition-opacity duration-300`} style={{ opacity: getOpacity('Echo Chamber') }}>
-                        <div className="text-xs text-purple-400 mb-1">Echo Chamber</div>
-                        <div className="text-xl font-bold text-white">{totals['echo-chamber']}</div>
-                        <div className="flex items-center gap-1 text-xs text-purple-400 mt-1">
-                            <TrendingUp className="w-3 h-3" />
-                            <span>+15%</span>
-                        </div>
-                    </div>
-
-                    <div className={`bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 transition-opacity duration-300`} style={{ opacity: getOpacity('Lookscout') }}>
-                        <div className="text-xs text-orange-400 mb-1">Lookscout</div>
-                        <div className="text-xl font-bold text-white">{totals.lookscout}</div>
-                        <div className="flex items-center gap-1 text-xs text-orange-400 mt-1">
-                            <TrendingUp className="w-3 h-3" />
-                            <span>+5%</span>
+                        <div className="text-xs text-gray-400">Live Update</div>
+                        <div className="text-sm text-green-400 flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            Active
                         </div>
                     </div>
                 </div>
 
-                {/* Combined Chart */}
-                <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData}>
-                            <defs>
-                                {Object.entries(projectColors).map(([name, color]) => (
-                                    <linearGradient key={name} id={`gradient-${name}`} x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor={color} stopOpacity={0} />
+                {/* Chart */}
+                <div className="h-[200px]">
+                    {data.length === 0 ? (
+                        <div className="flex items-center justify-center h-full text-gray-500">
+                            <div className="text-center">
+                                <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                                <p className="text-sm">Geen data beschikbaar</p>
+                                <p className="text-xs mt-1">Wacht op eerste logs...</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="colorCommon" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                     </linearGradient>
-                                ))}
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                            <XAxis
-                                dataKey="time"
-                                stroke="#9ca3af"
-                                style={{ fontSize: '11px' }}
-                                tick={{ fill: '#9ca3af' }}
-                            />
-                            <YAxis
-                                stroke="#9ca3af"
-                                style={{ fontSize: '11px' }}
-                                tick={{ fill: '#9ca3af' }}
-                            />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                                    borderRadius: '8px',
-                                    backdropFilter: 'blur(10px)',
-                                }}
-                                labelStyle={{ color: '#f3f4f6' }}
-                            />
-                            <Legend
-                                wrapperStyle={{ fontSize: '12px' }}
-                                iconType="circle"
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="Common Ground"
-                                stroke="#10b981"
-                                strokeWidth={2}
-                                strokeOpacity={getOpacity('Common Ground')}
-                                fillOpacity={getOpacity('Common Ground')}
-                                fill="url(#gradient-Common Ground)"
-                                animationDuration={1000}
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="VitalJobs"
-                                stroke="#3b82f6"
-                                strokeWidth={2}
-                                strokeOpacity={getOpacity('VitalJobs')}
-                                fillOpacity={getOpacity('VitalJobs')}
-                                fill="url(#gradient-VitalJobs)"
-                                animationDuration={1000}
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="Echo Chamber"
-                                stroke="#8b5cf6"
-                                strokeWidth={2}
-                                strokeOpacity={getOpacity('Echo Chamber')}
-                                fillOpacity={getOpacity('Echo Chamber')}
-                                fill="url(#gradient-Echo Chamber)"
-                                animationDuration={1000}
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="Lookscout"
-                                stroke="#f59e0b"
-                                strokeWidth={2}
-                                strokeOpacity={getOpacity('Lookscout')}
-                                fillOpacity={getOpacity('Lookscout')}
-                                fill="url(#gradient-Lookscout)"
-                                animationDuration={1000}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
-
-                {/* Status footer */}
-                <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                    <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2 text-blue-400">
-                            <Users className="w-4 h-4" />
-                            <span>All Systems Operational</span>
-                        </div>
-                        <span className="text-gray-500">Last updated: {new Date().toLocaleTimeString('nl-NL')}</span>
-                    </div>
+                                    <linearGradient id="colorVital" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                    </linearGradient>
+                                    <linearGradient id="colorEcho" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#eab308" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                <XAxis dataKey="time" stroke="#9ca3af" style={{ fontSize: '11px' }} />
+                                <YAxis stroke="#9ca3af" style={{ fontSize: '11px' }} />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: '#1f2937',
+                                        border: '1px solid #374151',
+                                        borderRadius: '8px',
+                                        fontSize: '12px',
+                                    }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="Common Ground"
+                                    stackId="1"
+                                    stroke="#10b981"
+                                    fill="url(#colorCommon)"
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="VitalJobs"
+                                    stackId="1"
+                                    stroke="#3b82f6"
+                                    fill="url(#colorVital)"
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="Echo Chamber"
+                                    stackId="1"
+                                    stroke="#eab308"
+                                    fill="url(#colorEcho)"
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    )}
                 </div>
             </div>
         </div>

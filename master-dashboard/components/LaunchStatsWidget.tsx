@@ -112,7 +112,7 @@ export default function LaunchStatsWidget() {
                     <AnimatedCounter value={stats.total} />
                 </div>
                 <div className="mt-1 text-xs text-gray-400">
-                    Since launch {stats.isLive ? '(Live)' : '(Mock)'}
+                    Since launch
                 </div>
             </div>
         </div>

@@ -75,7 +75,7 @@ export default function DashboardPage() {
         {
           title: selectedProjectId ? 'Status' : 'Active Projects',
           value: selectedProjectId ? 'Active' : activeProjectsCount || 3,
-          badge: { text: 'Running', color: 'orange' }
+          badge: { text: selectedProjectId ? 'Operational' : 'Running', color: 'green' }
         }
       ];
 

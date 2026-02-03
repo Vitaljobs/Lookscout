@@ -131,6 +131,27 @@ export class PulseAPI {
 
     private async fetchWithAuth(endpoint: string, options: RequestInit = {}) {
         let url = `${this.targetBaseUrl}${endpoint}`;
+
+        // [MODIFICATION] Force internal API route for Common Ground Pulse
+        // optimizing local performance and avoiding circular proxy issues
+        if (this.projectId === 'commonground' && (endpoint === '/stats' || endpoint === '/live-users' || endpoint === '/activity')) {
+            const type = endpoint.replace('/', '');
+            url = `/api/pulse?type=${type}`;
+            // Return fetch directly, bypassing proxy headers
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const txt = await response.text();
+                    console.error(`[PulseAPI] Failed: ${response.status} - ${txt}`);
+                    throw new Error(`Internal Pulse API Error: ${response.status} for ${type}`);
+                }
+                return await response.json();
+            } catch (e) {
+                console.warn("Internal Pulse API Failed:", e);
+                throw e; // Fallback will catch this
+            }
+        }
+
         const isSupabase = this.targetBaseUrl.includes('supabase.co');
 
         const headers: Record<string, string> = {

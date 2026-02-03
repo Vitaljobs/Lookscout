@@ -79,7 +79,7 @@ export default function AIAssistant() {
             // 1. Gather Context
             const systemContext = await generateSystemContext();
 
-            // 2. Process Command (Mock AI Logic)
+            // 2. Process Command (Rule-based Assistant Logic)
             setTimeout(async () => {
                 let responseText = "Ik begrijp dat commando nog niet helemaal.";
                 const lowerInput = userMsg.content.toLowerCase();

@@ -23,6 +23,24 @@ export default function LoginPage() {
             password,
         })
 
+        // Log security event
+        try {
+            await fetch('/api/security/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event_type: error ? 'failed_login' : 'successful_login',
+                    ip_address: 'client', // Will be replaced server-side
+                    severity: error ? 'medium' : 'low',
+                    project_source: 'master-dashboard',
+                    endpoint: '/login',
+                    metadata: { email, error: error?.message }
+                })
+            })
+        } catch (logError) {
+            console.error('Failed to log security event:', logError)
+        }
+
         if (error) {
             setMessage({ type: 'error', text: error.message })
             setLoading(false)

@@ -49,7 +49,7 @@ export default function HoloGlobe({ alertLevel = 'normal', alertMessage, project
     const selectedProjectId = projectId || contextProjectId;
     const [mounted, setMounted] = useState(false);
 
-    // Mock Data Generation
+    // Decorative Visualization (Real geo-tracking requires IP logging - privacy sensitive)
     const { arcsData, pointsData } = useMemo(() => {
         const arcs: ArcData[] = [];
         const points: PointData[] = [];
