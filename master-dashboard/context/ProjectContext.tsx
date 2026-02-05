@@ -19,6 +19,13 @@ export interface Project {
     key: string;
     theme: ProjectTheme;
     stats?: CommonGroundStats;
+    technicalDetails?: {
+        hostingProvider?: string; // e.g. 'Vercel'
+        hostingUrl?: string;      // e.g. 'https://vercel.com/...'
+        repositoryProvider?: string; // e.g. 'GitHub'
+        repositoryUrl?: string;      // e.g. 'https://github.com/...'
+        builderTool?: string;        // e.g. 'Loveable', 'Antigravity'
+    };
 }
 
 interface ProjectContextType {
@@ -43,7 +50,14 @@ const DEFAULT_PROJECTS: Project[] = [
         url: process.env.NEXT_PUBLIC_PULSE_API_URL || '',
         publicUrl: '',
         key: process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
-        theme: 'green'
+        theme: 'green',
+        technicalDetails: {
+            hostingProvider: 'Vercel',
+            hostingUrl: 'https://vercel.com/vitaljobs/commonground',
+            repositoryProvider: 'GitHub',
+            repositoryUrl: 'https://github.com/Vitaljobs/Lookscout',
+            builderTool: 'Loveable'
+        }
     },
     {
         id: 'vibechain',
@@ -54,7 +68,14 @@ const DEFAULT_PROJECTS: Project[] = [
         url: process.env.NEXT_PUBLIC_VIBECHAIN_URL || process.env.NEXT_PUBLIC_VIBECHAIN_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL || '',
         publicUrl: '',
         key: process.env.NEXT_PUBLIC_VIBECHAIN_KEY || process.env.NEXT_PUBLIC_VIBECHAIN_API_KEY || process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
-        theme: 'blue'
+        theme: 'blue',
+        technicalDetails: {
+            hostingProvider: 'Vercel',
+            hostingUrl: 'https://vercel.com/vitaljobs/vibechain',
+            repositoryProvider: 'GitHub',
+            repositoryUrl: 'https://github.com/Vitaljobs/Lookscout',
+            builderTool: 'Antigravity'
+        }
     },
     {
         id: 'vitaljobs',
@@ -65,7 +86,14 @@ const DEFAULT_PROJECTS: Project[] = [
         url: process.env.NEXT_PUBLIC_VITALJOBS_URL || process.env.NEXT_PUBLIC_VITALJOBS_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL || '',
         publicUrl: '',
         key: process.env.NEXT_PUBLIC_VITALJOBS_KEY || process.env.NEXT_PUBLIC_VITALJOBS_API_KEY || process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
-        theme: 'orange'
+        theme: 'orange',
+        technicalDetails: {
+            hostingProvider: 'Vercel',
+            hostingUrl: 'https://vercel.com/vitaljobs/vitaljobs',
+            repositoryProvider: 'GitHub',
+            repositoryUrl: 'https://github.com/Vitaljobs/Lookscout',
+            builderTool: 'Cursor'
+        }
     },
     {
         id: 'baztion',
@@ -76,7 +104,14 @@ const DEFAULT_PROJECTS: Project[] = [
         url: 'https://baztion.vercel.app',
         publicUrl: '',
         key: '',
-        theme: 'purple'
+        theme: 'purple',
+        technicalDetails: {
+            hostingProvider: 'Vercel',
+            hostingUrl: 'https://vercel.com/vitaljobs/baztion',
+            repositoryProvider: 'GitHub',
+            repositoryUrl: 'https://github.com/Vitaljobs/Lookscout',
+            builderTool: 'Antigravity'
+        }
     }
 ];
 

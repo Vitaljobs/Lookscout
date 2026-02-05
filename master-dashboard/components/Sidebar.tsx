@@ -11,12 +11,12 @@ import {
     Activity,
     ExternalLink,
     X,
-    LogOut
+    LogOut,
+    Github,
+    Server,
+    Cpu
 } from 'lucide-react';
 import { useProjects } from '@/context/ProjectContext';
-
-// const projects = ... REMOVE THIS hardcoded array if present, or just let it interpret via context
-// We should remove the hardcoded 'projects' array since we use context now
 
 
 const navigation = [
@@ -121,36 +121,63 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                                 }
 
                                 return (
-                                    <div key={project.id} className={`flex items-center justify-between w-full group`}>
-                                        <button
-                                            onClick={() => {
-                                                selectProject(project.id);
-                                                handleNavClick();
-                                                // If we are not on dashboard, go there
-                                                if (pathname !== '/dashboard') {
-                                                    // router.push('/dashboard') - need to import useRouter
-                                                }
-                                            }}
-                                            className={`flex-1 flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all text-left ${selectedProjectId === project.id
-                                                ? activeClass
-                                                : 'text-gray-400 hover:text-white'
-                                                }`}
-                                        >
-                                            <div className={`w-3 h-3 rounded-full animate-pulse ${getStatusColor(project.status)} shadow-[0_0_12px_currentColor]`} />
-                                            <span className={selectedProjectId === project.id ? 'text-electric-blue font-semibold shadow-neon-text' : ''}>{project.name}</span>
-                                        </button>
-                                        {project.publicUrl && (
-                                            <a
-                                                href={project.publicUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="hidden group-hover:flex items-center justify-center w-8 h-8 text-gray-400 hover:text-white transition-colors"
-                                                title={`Visit ${project.name}`}
+                                    <div key={project.id} className="flex flex-col w-full group mb-1">
+                                        <div className="flex items-center justify-between w-full">
+                                            <button
+                                                onClick={() => {
+                                                    selectProject(project.id);
+                                                    handleNavClick();
+                                                    if (pathname !== '/dashboard') {
+                                                        // router.push('/dashboard')
+                                                    }
+                                                }}
+                                                className={`flex-1 flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all text-left ${selectedProjectId === project.id
+                                                    ? activeClass
+                                                    : 'text-gray-400 hover:text-white'
+                                                    }`}
                                             >
-                                                <ExternalLink className="w-3 h-3 hover:text-electric-blue hover:shadow-neon" />
-                                            </a>
+                                                <div className={`w-3 h-3 rounded-full animate-pulse ${getStatusColor(project.status)} shadow-[0_0_12px_currentColor]`} />
+                                                <span className={selectedProjectId === project.id ? 'text-electric-blue font-semibold shadow-neon-text' : ''}>{project.name}</span>
+                                            </button>
+                                        </div>
+
+                                        {/* Technical Details - Only visible when active */}
+                                        {selectedProjectId === project.id && project.technicalDetails && (
+                                            <div className="pl-11 pr-4 py-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
+                                                {project.technicalDetails?.hostingUrl && (
+                                                    <a
+                                                        href={project.technicalDetails.hostingUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2 text-xs text-gray-500 hover:text-white transition-colors group/link"
+                                                    >
+                                                        <Server className="w-3 h-3" />
+                                                        <span className="truncate">{project.technicalDetails?.hostingProvider || 'Hosting'}</span>
+                                                        <ExternalLink className="w-2 h-2 opacity-0 group-hover/link:opacity-100 transition-opacity" />
+                                                    </a>
+                                                )}
+                                                {project.technicalDetails?.repositoryUrl && (
+                                                    <a
+                                                        href={project.technicalDetails.repositoryUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2 text-xs text-gray-500 hover:text-white transition-colors group/link"
+                                                    >
+                                                        <Github className="w-3 h-3" />
+                                                        <span className="truncate">{project.technicalDetails?.repositoryProvider || 'Repository'}</span>
+                                                        <ExternalLink className="w-2 h-2 opacity-0 group-hover/link:opacity-100 transition-opacity" />
+                                                    </a>
+                                                )}
+                                                {project.technicalDetails?.builderTool && (
+                                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                        <Cpu className="w-3 h-3" />
+                                                        <span className="truncate">Built with {project.technicalDetails.builderTool}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
+
                                 );
                             })}
                         </div>
