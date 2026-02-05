@@ -45,6 +45,7 @@ const PROJECT_KEYWORDS = {
     'commonground': ['common', 'ground', 'wellness', 'mental health', 'check-in', 'mood'],
     'vitaljobs': ['vital', 'jobs', 'vacature', 'sollicitatie', 'cv', 'recruitment'],
     'lookscout': ['lookscout', 'dashboard', 'titan', 'control tower', 'monitoring'],
+    'baztion': ['baztion', 'baloria', 'signal', 'psychological', 'safety', 'anonymity', 'anonimiteit', 'culture', 'balls', 'pit'],
 };
 
 /**
@@ -62,7 +63,7 @@ export async function analyzeEmail(
         const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
         const prompt = `Analyseer deze email en bepaal:
-1. Over welk project gaat dit? Opties: echo-chamber, commonground, vitaljobs, lookscout, unknown
+1. Over welk project gaat dit? Opties: echo-chamber, commonground, vitaljobs, lookscout, baztion, unknown
 2. Wat is het sentiment? Opties: positive, neutral, negative
 3. Geef een korte samenvatting (max 50 woorden)
 
@@ -76,6 +77,7 @@ Project keywords voor referentie:
 - commonground: ${PROJECT_KEYWORDS['commonground'].join(', ')}
 - vitaljobs: ${PROJECT_KEYWORDS['vitaljobs'].join(', ')}
 - lookscout: ${PROJECT_KEYWORDS['lookscout'].join(', ')}
+- baztion: ${PROJECT_KEYWORDS['baztion'].join(', ')}
 
 Antwoord in JSON format:
 {
@@ -98,7 +100,7 @@ Antwoord in JSON format:
         const analysis = JSON.parse(jsonMatch[0]) as EmailAnalysis;
 
         // Validate project
-        const validProjects = ['echo-chamber', 'commonground', 'vitaljobs', 'lookscout', 'unknown'];
+        const validProjects = ['echo-chamber', 'commonground', 'vitaljobs', 'lookscout', 'baztion', 'unknown'];
         if (!validProjects.includes(analysis.project)) {
             analysis.project = 'unknown';
         }

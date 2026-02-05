@@ -66,6 +66,17 @@ const DEFAULT_PROJECTS: Project[] = [
         publicUrl: '',
         key: process.env.NEXT_PUBLIC_VITALJOBS_KEY || process.env.NEXT_PUBLIC_VITALJOBS_API_KEY || process.env.NEXT_PUBLIC_PULSE_API_KEY || '',
         theme: 'orange'
+    },
+    {
+        id: 'baztion',
+        name: 'Baztion',
+        description: 'Psychological Safety & Culture',
+        slug: 'baztion',
+        status: 'operational',
+        url: 'https://baztion.vercel.app',
+        publicUrl: '',
+        key: '',
+        theme: 'purple'
     }
 ];
 
@@ -81,7 +92,8 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
             try {
                 const parsed: Project[] = JSON.parse(saved);
                 // Hydrate with secure keys, falling back to Env Vars if storage is empty
-                const hydrated = parsed.map(p => {
+                // 1. Hydrate existing projects from storage
+                const hydratedExisting = parsed.map(p => {
                     const defaultP = DEFAULT_PROJECTS.find(d => d.id === p.id);
                     // 1. Secure Storage (Session) 2. Local Storage (Persisted) 3. Env Var (Default)
                     const effectiveKey = getApiKey(p.id) || p.key || defaultP?.key || '';
@@ -93,7 +105,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
                         url: effectiveUrl
                     };
                 });
-                setProjects(hydrated);
+
+                // 2. Add any new default projects that are missing from storage (e.g. Baztion)
+                const newDefaults = DEFAULT_PROJECTS.filter(d => !parsed.some(p => p.id === d.id));
+
+                setProjects([...hydratedExisting, ...newDefaults]);
             } catch (e) {
                 console.error('Failed to parse projects', e);
             }

@@ -19,6 +19,7 @@ import AntigravityMonitor from '@/components/AntigravityMonitor';
 import SupportHub from '@/components/SupportHub';
 import ReputationTrendChart from '@/components/ReputationTrendChart';
 import SecurityWidget from '@/components/SecurityWidget';
+import BaztionHealthWidget from '@/components/widgets/BaztionHealthWidget';
 
 import { useAnomalyDetection } from "@/hooks/useAnomalyDetection";
 import { SecurityEvent } from "@/types/support";
@@ -156,6 +157,11 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <SupportHub />
         <ReputationTrendChart />
+      </div>
+
+      {/* Baztion Health Monitor */}
+      <div className="mb-8">
+        <BaztionHealthWidget />
       </div>
 
       {/* Live Global Pulse Map (Replaces static table) */}
