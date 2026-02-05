@@ -122,6 +122,8 @@ export default function SupportHub() {
             'echo-chamber': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
             'commonground': 'bg-green-500/20 text-green-400 border-green-500/30',
             'vitaljobs': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+            'lookscout': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+            'unknown': 'bg-gray-500/20 text-gray-400 border-gray-500/30',
         };
         return colors[project] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     };
@@ -159,8 +161,8 @@ export default function SupportHub() {
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${filter === f
-                                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                                    : 'bg-[var(--sidebar-bg)] text-gray-400 hover:text-white border border-[var(--card-border)]'
+                                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                : 'bg-[var(--sidebar-bg)] text-gray-400 hover:text-white border border-[var(--card-border)]'
                                 }`}
                         >
                             {f === 'all' ? 'Alle' : f === 'new' ? 'Nieuw' : 'Beantwoord'}
@@ -185,8 +187,8 @@ export default function SupportHub() {
                                 key={msg.id}
                                 onClick={() => setSelectedMessage(msg)}
                                 className={`p-3 rounded-lg cursor-pointer transition-all ${selectedMessage?.id === msg.id
-                                        ? 'bg-blue-500/10 border border-blue-500/30'
-                                        : 'bg-[var(--sidebar-bg)] border border-[var(--card-border)] hover:bg-[var(--hover-bg)]'
+                                    ? 'bg-blue-500/10 border border-blue-500/30'
+                                    : 'bg-[var(--sidebar-bg)] border border-[var(--card-border)] hover:bg-[var(--hover-bg)]'
                                     }`}
                             >
                                 <div className="flex items-start justify-between mb-2">
@@ -194,9 +196,21 @@ export default function SupportHub() {
                                         {getStatusIcon(msg.status)}
                                         <span className="text-sm font-medium text-white">{msg.name}</span>
                                     </div>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getProjectBadgeColor(msg.project_source)}`}>
-                                        {msg.project_source}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        {msg.sentiment && (
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${msg.sentiment === 'positive'
+                                                    ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                                                    : msg.sentiment === 'negative'
+                                                        ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                                                        : 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+                                                }`}>
+                                                {msg.sentiment === 'positive' ? '😊' : msg.sentiment === 'negative' ? '😟' : '😐'}
+                                            </span>
+                                        )}
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getProjectBadgeColor(msg.project_source)}`}>
+                                            {msg.project_source}
+                                        </span>
+                                    </div>
                                 </div>
                                 <p className="text-xs text-gray-400 mb-1">{msg.subject}</p>
                                 <p className="text-xs text-gray-500 line-clamp-2">{msg.message}</p>

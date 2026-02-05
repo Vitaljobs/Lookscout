@@ -1,11 +1,14 @@
 export interface ContactMessage {
     id: string;
-    project_source: string;
+    project_id: string;  // UUID foreign key to projects table
+    project_source: string;  // Legacy slug field
     name: string;
     email: string;
     subject: string;
     message: string;
     status: 'new' | 'replied' | 'archived';
+    sentiment?: 'positive' | 'neutral' | 'negative';
+    metadata?: Record<string, any>;
     created_at: string;
     replied_at?: string;
     reply_message?: string;
