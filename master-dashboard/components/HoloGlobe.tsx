@@ -142,10 +142,12 @@ export default function HoloGlobe({ alertLevel = 'normal', alertMessage, project
 
     useEffect(() => {
         setMounted(true);
-        // Auto-rotation
+        // Auto-rotation & Control Settings
         if (globeEl.current) {
-            globeEl.current.controls().autoRotate = true;
-            globeEl.current.controls().autoRotateSpeed = 0.5;
+            const controls = globeEl.current.controls();
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.5;
+            controls.enableZoom = false; // Disable zoom on scroll to prevent hijacking page scroll
         }
     }, []);
 

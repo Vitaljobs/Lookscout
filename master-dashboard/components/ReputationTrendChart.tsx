@@ -6,6 +6,7 @@ import { TrendingUp, Loader2 } from 'lucide-react';
 import { ReputationDataPoint } from '@/types/support';
 import { createClient } from '@/utils/supabase/client';
 import { useProjects } from '@/context/ProjectContext';
+import { Card } from '@/components/ui/Card';
 
 export default function ReputationTrendChart() {
     const [data, setData] = useState<ReputationDataPoint[]>([]);
@@ -89,14 +90,14 @@ export default function ReputationTrendChart() {
 
     if (loading) {
         return (
-            <div className="card h-full flex items-center justify-center">
+            <Card className="h-full flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
-            </div>
+            </Card>
         );
     }
 
     return (
-        <div className="card h-full flex flex-col relative overflow-hidden">
+        <Card className="h-full flex flex-col relative overflow-hidden">
             {/* Background glow */}
             <div className="absolute -right-10 -top-10 w-32 h-32 bg-purple-600 rounded-full blur-[60px] opacity-20" />
 
@@ -188,6 +189,6 @@ export default function ReputationTrendChart() {
                     )}
                 </div>
             </div>
-        </div>
+        </Card>
     );
 }

@@ -1,48 +1,45 @@
 @import "tailwindcss";
+@source "../node_modules/flowbite-react";
 
 :root {
-  /* Dark theme colors matching Lookscout */
-  --background: #0f1419;
-  --foreground: #e4e6eb;
-  --card-bg: #1a1f28;
-  --card-border: #2a2f38;
-  --sidebar-bg: #151a21;
-  --hover-bg: #252a33;
-  --accent-blue: #3b82f6;
-  --accent-green: #10b981;
-  --accent-red: #ef4444;
-  --accent-orange: #f59e0b;
-  --text-muted: #9ca3af;
-  --electric-blue: #00f3ff;
-  --neon-shadow: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3);
+  /* MaterialM Inspired Dark Theme */
+  --background: #111827;
+  /* Darker, richer background (Gray 900) */
+  --foreground: #F3F4F6;
+  /* Gray 100 */
 
-  /* Glassmorphism System */
-  --glass-bg: rgba(21, 26, 33, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: 12px;
+  --card-bg: #1F2937;
+  /* Gray 800 */
+  --card-border: #374151;
+  /* Gray 700 */
 
-  /* Dynamic Accents */
-  --accent-primary: 59, 130, 246;
-  /* Default Blue */
-}
+  --sidebar-bg: #1F2937;
+  /* Gray 800 for sidebar */
+  --sidebar-hover: #374151;
 
-.text-electric-blue {
-  color: var(--electric-blue);
-}
+  --primary: #3B82F6;
+  /* Blue 500 */
+  --secondary: #10B981;
+  /* Emerald 500 */
 
-.bg-electric-blue {
-  background-color: var(--electric-blue);
-}
+  --text-muted: #9CA3AF;
+  /* Gray 400 */
 
-.shadow-neon {
-  box-shadow: var(--neon-shadow);
+  /* Glassmorphism adjustments for MaterialM feel */
+  --glass-bg: rgba(31, 41, 55, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.05);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-card: var(--card-bg);
+  --color-card-border: var(--card-border);
+
+  --color-sidebar: var(--sidebar-bg);
+
+  --font-sans: var(--font-inter);
 }
 
 * {

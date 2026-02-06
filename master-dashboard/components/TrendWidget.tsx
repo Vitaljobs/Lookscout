@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { TrendingUp, ArrowUpRight } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
 
 export default function TrendWidget() {
     const trends = [
@@ -13,18 +14,24 @@ export default function TrendWidget() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {trends.map((trend) => (
-                <div key={trend.label} className="bg-[var(--card-bg)] border border-[var(--card-border)] p-4 rounded-xl flex items-center justify-between hover:border-[var(--electric-blue)] transition-colors group">
+                <Card
+                    key={trend.label}
+                    className="flex items-center justify-between hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 group cursor-pointer"
+                >
                     <div>
-                        <p className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{trend.label}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className={`text-xl font-bold ${trend.color}`}>{trend.growth}%</span>
-                            <span className="text-xs text-gray-500">vs yesterday</span>
+                        <p className="text-gray-400 text-xs uppercase tracking-wider font-semibold mb-1">{trend.label}</p>
+                        <div className="flex items-center gap-2">
+                            <span className={`text-2xl font-bold text-white`}>{trend.growth}%</span>
+                            <span className={`text-xs ${trend.color} flex items-center`}>
+                                <ArrowUpRight className="w-3 h-3 mr-0.5" />
+                                24h
+                            </span>
                         </div>
                     </div>
-                    <div className={`p-2 rounded-full bg-[var(--sidebar-bg)] group-hover:shadow-[0_0_15px_rgba(0,243,255,0.3)] transition-all`}>
-                        <ArrowUpRight className={`w-5 h-5 ${trend.color}`} />
+                    <div className={`p-2.5 rounded-lg bg-[var(--sidebar-bg)] border border-[var(--card-border)] group-hover:bg-blue-500/10 group-hover:text-blue-400 transition-colors`}>
+                        <TrendingUp className={`w-5 h-5 text-gray-400 group-hover:text-blue-400`} />
                     </div>
-                </div>
+                </Card>
             ))}
         </div>
     );

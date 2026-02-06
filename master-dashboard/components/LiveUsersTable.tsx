@@ -5,6 +5,7 @@ import { LiveUser } from '@/types';
 import { PulseAPI } from '@/lib/api/pulse';
 import { useProjects } from '@/context/ProjectContext';
 import { ArrowUpDown, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
 
 interface GlobalUser extends LiveUser {
     source: string;
@@ -120,16 +121,14 @@ export default function GlobalUserTable() {
 
     if (loading && users.length === 0) {
         return (
-            <div className="card">
-                <div className="flex items-center justify-center h-64">
-                    <div className="animate-pulse text-gray-400">Loading global users...</div>
-                </div>
-            </div>
+            <Card className="h-64 flex items-center justify-center">
+                <div className="animate-pulse text-gray-400">Loading global users...</div>
+            </Card>
         );
     }
 
     return (
-        <div className="table-container animate-fade-in shadow-2xl shadow-blue-900/10">
+        <Card noPadding className="animate-fade-in shadow-2xl shadow-blue-900/10 overflow-hidden">
             <div className="p-6 border-b border-[var(--card-border)] bg-[var(--sidebar-bg)]">
                 <div className="flex items-center justify-between">
                     <div>
@@ -146,62 +145,64 @@ export default function GlobalUserTable() {
                 </div>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th className="w-[200px]">User</th>
-                        <th>Source (Project)</th>
-                        <th>Activity</th>
-                        <th>Location</th>
-                        <th>Status</th>
-                        <th>Last Seen</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {currentUsers.map((user, idx) => (
-                        <tr key={`${user.id}-${idx}`} className="group hover:bg-[var(--hover-bg)] transition-colors">
-                            <td>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center text-white font-semibold shadow-lg group-hover:from-blue-600 group-hover:to-purple-600 transition-all">
-                                        {user.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <div className="font-medium text-white group-hover:text-blue-400 transition-colors">{user.name}</div>
-                                        <div className="text-sm text-gray-500">{user.email}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span className={`px-2 py-1 rounded-md text-xs font-medium border ${getSourceBadgeColor(user.sourceTheme)}`}>
-                                    {user.source}
-                                </span>
-                            </td>
-                            <td className="text-gray-300 font-mono text-xs">{user.activity}</td>
-                            <td className="text-gray-300">
-                                <span className="flex items-center gap-1">
-                                    📍 {user.location}
-                                </span>
-                            </td>
-                            <td>
-                                <span className={`badge ${getStatusBadge(user.status)}`}>
-                                    {user.status}
-                                </span>
-                            </td>
-                            <td className="text-gray-400 text-xs">{formatLastSeen(user.lastSeen)}</td>
-                            <td>
-                                <button
-                                    onClick={() => handleManage(user)}
-                                    className="px-3 py-1.5 rounded-md bg-[var(--card-border)] hover:bg-blue-600 text-white text-xs font-medium transition-colors flex items-center gap-1 active:scale-95"
-                                >
-                                    <Settings className="w-3 h-3" />
-                                    Manage
-                                </button>
-                            </td>
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="border-b border-[var(--card-border)] text-xs uppercase text-gray-400 bg-[var(--card-bg)]">
+                            <th className="p-4 font-semibold">User</th>
+                            <th className="p-4 font-semibold">Source</th>
+                            <th className="p-4 font-semibold">Activity</th>
+                            <th className="p-4 font-semibold">Location</th>
+                            <th className="p-4 font-semibold">Status</th>
+                            <th className="p-4 font-semibold">Last Seen</th>
+                            <th className="p-4 font-semibold">Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody className="text-sm divide-y divide-[var(--card-border)]">
+                        {currentUsers.map((user, idx) => (
+                            <tr key={`${user.id}-${idx}`} className="group hover:bg-[var(--hover-bg)] transition-colors">
+                                <td className="p-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center text-white font-semibold shadow-lg group-hover:from-blue-600 group-hover:to-purple-600 transition-all">
+                                            {user.name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <div className="font-medium text-white group-hover:text-blue-400 transition-colors">{user.name}</div>
+                                            <div className="text-sm text-gray-500">{user.email}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="p-4">
+                                    <span className={`px-2 py-1 rounded-md text-xs font-medium border ${getSourceBadgeColor(user.sourceTheme)}`}>
+                                        {user.source}
+                                    </span>
+                                </td>
+                                <td className="p-4 text-gray-300 font-mono text-xs">{user.activity}</td>
+                                <td className="p-4 text-gray-300">
+                                    <span className="flex items-center gap-1">
+                                        📍 {user.location}
+                                    </span>
+                                </td>
+                                <td className="p-4">
+                                    <span className={`badge ${getStatusBadge(user.status)}`}>
+                                        {user.status}
+                                    </span>
+                                </td>
+                                <td className="p-4 text-gray-400 text-xs">{formatLastSeen(user.lastSeen)}</td>
+                                <td className="p-4">
+                                    <button
+                                        onClick={() => handleManage(user)}
+                                        className="px-3 py-1.5 rounded-md bg-[var(--card-border)] hover:bg-blue-600 text-white text-xs font-medium transition-colors flex items-center gap-1 active:scale-95"
+                                    >
+                                        <Settings className="w-3 h-3" />
+                                        Manage
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
 
             {/* Pagination */}
             <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--card-border)] bg-[var(--card-bg)]">
@@ -212,19 +213,19 @@ export default function GlobalUserTable() {
                     <button
                         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
-                        className="px-3 py-1 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         <ChevronLeft className="w-4 h-4" />
                     </button>
                     <button
                         onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
-                        className="px-3 py-1 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         <ChevronRight className="w-4 h-4" />
                     </button>
                 </div>
             </div>
-        </div>
+        </Card>
     );
 }

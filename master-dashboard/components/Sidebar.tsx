@@ -1,8 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+    Sidebar as FlowbiteSidebar,
+    SidebarItems,
+    SidebarItemGroup,
+    SidebarItem,
+    SidebarCollapse
+} from 'flowbite-react';
 import {
     LayoutDashboard,
     FolderKanban,
@@ -14,10 +20,10 @@ import {
     LogOut,
     Github,
     Server,
-    Cpu
+    Cpu,
+    Grid
 } from 'lucide-react';
 import { useProjects } from '@/context/ProjectContext';
-
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -27,8 +33,8 @@ const navigation = [
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
-    const [projectsOpen, setProjectsOpen] = useState(true);
     const { projects, selectedProjectId, selectProject } = useProjects();
+    const [isProjectsOpen, setIsProjectsOpen] = useState(true);
 
     const handleNavClick = () => {
         if (onClose) onClose();
@@ -36,14 +42,39 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
 
     // Helper for status dots
     const getStatusColor = (status: string) => {
-        if (status === 'operational') return 'bg-green-500';
-        if (status === 'maintenance') return 'bg-red-500';
-        return 'bg-orange-500'; // degraded
+        if (status === 'operational') return 'bg-green-400';
+        if (status === 'maintenance') return 'bg-red-400';
+        return 'bg-amber-400'; // degraded
+    };
+
+    const customTheme = {
+        root: {
+            base: "h-full bg-gray-800 border-r border-gray-700 transition-all duration-300",
+            inner: "h-full overflow-y-auto overflow-x-hidden rounded bg-gray-800 px-3 py-4 dark:bg-gray-800"
+        },
+        item: {
+            base: "flex items-center justify-center rounded-lg p-2 text-base font-normal text-gray-400 hover:bg-gray-700 hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white",
+            active: "bg-blue-600 text-white dark:bg-blue-600 dark:text-white",
+            icon: {
+                base: "h-6 w-6 flex-shrink-0 text-gray-400 transition duration-75 group-hover:text-white dark:text-gray-400 dark:group-hover:text-white",
+                active: "text-white dark:text-white"
+            }
+        },
+        collapse: {
+            button: "group flex w-full items-center rounded-lg p-2 text-base font-normal text-gray-400 transition duration-75 hover:bg-gray-700 hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white",
+            icon: {
+                base: "h-6 w-6 text-gray-400 transition duration-75 group-hover:text-white dark:text-gray-400 dark:group-hover:text-white",
+                open: {
+                    off: "",
+                    on: "text-white"
+                }
+            }
+        }
     };
 
     return (
-        <div className="w-64 h-full bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border-r border-[var(--glass-border)] flex flex-col relative transition-all duration-300">
-            {/* Close Button (Mobile Only) */}
+        <FlowbiteSidebar theme={customTheme} aria-label="Sidebar with multi-level dropdown">
+            {/* Mobile Close */}
             <button
                 onClick={onClose}
                 className="absolute top-4 right-4 md:hidden text-gray-400 hover:text-white"
@@ -51,162 +82,89 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                 <X className="w-6 h-6" />
             </button>
 
-            {/* Logo */}
-            <div className="p-6 border-b border-[var(--card-border)]">
-                <div className="flex items-center gap-2">
-                    <Activity className="w-8 h-8 text-blue-500" />
-                    <h1 className="text-xl font-bold text-white">Control Tower</h1>
+            {/* Logo Section */}
+            <div className="flex items-center gap-3 pl-2.5 mb-6">
+                <div className="bg-blue-600 p-1.5 rounded-lg shadow-lg shadow-blue-500/30">
+                    <Activity className="w-6 h-6 text-white" />
                 </div>
+                <span className="self-center whitespace-nowrap text-xl font-bold text-white tracking-tight">
+                    Control Tower
+                </span>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                {navigation.map((item) => {
-                    const isActive = pathname === item.href;
-                    const Icon = item.icon;
-
-                    return (
-                        <Link
+            <SidebarItems>
+                <SidebarItemGroup>
+                    {navigation.map((item) => (
+                        <SidebarItem
                             key={item.name}
                             href={item.href}
+                            icon={item.icon}
+                            active={pathname === item.href}
                             onClick={() => {
                                 handleNavClick();
                                 if (item.href === '/dashboard') selectProject(null);
                             }}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive && !selectedProjectId
-                                ? 'bg-[var(--hover-bg)] text-white'
-                                : 'text-gray-400 hover:bg-[var(--hover-bg)] hover:text-white'
-                                }`}
                         >
-                            <Icon className="w-5 h-5" />
-                            <span className="font-medium">{item.name}</span>
-                        </Link>
-                    );
-                })}
+                            {item.name}
+                        </SidebarItem>
+                    ))}
+                </SidebarItemGroup>
 
-                {/* Projects Section */}
-                <div className="pt-6">
-                    <button
-                        onClick={() => setProjectsOpen(!projectsOpen)}
-                        className="flex items-center justify-between w-full px-4 py-2 text-sm font-semibold text-gray-400 hover:text-white transition-colors"
+                <SidebarItemGroup>
+                    <SidebarCollapse
+                        icon={Grid}
+                        label="Projects"
+                        open={isProjectsOpen}
+                        onClick={() => setIsProjectsOpen(!isProjectsOpen)}
                     >
-                        <span>PROJECTS</span>
-                        <ChevronDown
-                            className={`w-4 h-4 transition-transform ${projectsOpen ? 'rotate-180' : ''
-                                }`}
-                        />
-                    </button>
+                        {projects.map((project) => (
+                            <SidebarItem
+                                key={project.id}
+                                as="button"
+                                onClick={() => {
+                                    selectProject(project.id);
+                                    handleNavClick();
+                                }}
+                                className={`pl-8 transition-colors ${selectedProjectId === project.id
+                                    ? 'text-blue-400 hover:text-blue-300'
+                                    : 'text-gray-500 hover:text-gray-300'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-2 h-2 rounded-full ${getStatusColor(project.status)} ${selectedProjectId === project.id ? 'animate-pulse shadow-[0_0_8px_currentColor]' : ''}`} />
+                                    <span className="truncate">{project.name}</span>
+                                </div>
+                            </SidebarItem>
+                        ))}
+                    </SidebarCollapse>
+                </SidebarItemGroup>
 
-                    {projectsOpen && (
-                        <div className="mt-2 space-y-1">
-                            {projects.map((project) => {
-                                const isActive = pathname.includes(project.slug);
-                                const isGreen = project.theme === 'green';
-                                const isBlue = project.theme === 'blue';
-                                const isOrange = project.theme === 'orange';
-                                const isPurple = project.theme === 'purple';
-                                const isPink = project.theme === 'pink';
-                                const isRed = project.theme === 'red';
+                <SidebarItemGroup className="mt-auto">
+                    <SidebarItem
+                        href="#"
+                        icon={LogOut}
+                        onClick={async () => {
+                            const { createClient } = await import('@/utils/supabase/client');
+                            const supabase = createClient();
+                            await supabase.auth.signOut();
+                            window.location.href = '/login';
+                        }}
+                        className="hover:bg-red-500/10 hover:text-red-400 group-hover:text-red-400"
+                    >
+                        Sign Out
+                    </SidebarItem>
 
-                                let activeClass = '';
-                                if (isActive) {
-                                    // Fallback defaults if theme logic gets complex, using hex for precision matching globals
-                                    if (isGreen) activeClass = 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20';
-                                    else if (isBlue) activeClass = 'bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20';
-                                    else if (isOrange) activeClass = 'bg-[#f59e0b]/10 text-[#f59e0b] border border-[#f59e0b]/20';
-                                    else if (isPurple) activeClass = 'bg-purple-500/10 text-purple-500 border border-purple-500/20';
-                                    else if (isPink) activeClass = 'bg-pink-500/10 text-pink-500 border border-pink-500/20';
-                                    else if (isRed) activeClass = 'bg-red-500/10 text-red-500 border border-red-500/20';
-                                    else activeClass = 'bg-gray-500/10 text-white border border-gray-500/20';
-                                }
-
-                                return (
-                                    <div key={project.id} className="flex flex-col w-full group mb-1">
-                                        <div className="flex items-center justify-between w-full">
-                                            <button
-                                                onClick={() => {
-                                                    selectProject(project.id);
-                                                    handleNavClick();
-                                                    if (pathname !== '/dashboard') {
-                                                        // router.push('/dashboard')
-                                                    }
-                                                }}
-                                                className={`flex-1 flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all text-left ${selectedProjectId === project.id
-                                                    ? activeClass
-                                                    : 'text-gray-400 hover:text-white'
-                                                    }`}
-                                            >
-                                                <div className={`w-3 h-3 rounded-full animate-pulse ${getStatusColor(project.status)} shadow-[0_0_12px_currentColor]`} />
-                                                <span className={selectedProjectId === project.id ? 'text-electric-blue font-semibold shadow-neon-text' : ''}>{project.name}</span>
-                                            </button>
-                                        </div>
-
-                                        {/* Technical Details - Only visible when active */}
-                                        {selectedProjectId === project.id && project.technicalDetails && (
-                                            <div className="pl-11 pr-4 py-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
-                                                {project.technicalDetails?.hostingUrl && (
-                                                    <a
-                                                        href={project.technicalDetails.hostingUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="flex items-center gap-2 text-xs text-gray-500 hover:text-white transition-colors group/link"
-                                                    >
-                                                        <Server className="w-3 h-3" />
-                                                        <span className="truncate">{project.technicalDetails?.hostingProvider || 'Hosting'}</span>
-                                                        <ExternalLink className="w-2 h-2 opacity-0 group-hover/link:opacity-100 transition-opacity" />
-                                                    </a>
-                                                )}
-                                                {project.technicalDetails?.repositoryUrl && (
-                                                    <a
-                                                        href={project.technicalDetails.repositoryUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="flex items-center gap-2 text-xs text-gray-500 hover:text-white transition-colors group/link"
-                                                    >
-                                                        <Github className="w-3 h-3" />
-                                                        <span className="truncate">{project.technicalDetails?.repositoryProvider || 'Repository'}</span>
-                                                        <ExternalLink className="w-2 h-2 opacity-0 group-hover/link:opacity-100 transition-opacity" />
-                                                    </a>
-                                                )}
-                                                {project.technicalDetails?.builderTool && (
-                                                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                        <Cpu className="w-3 h-3" />
-                                                        <span className="truncate">Built with {project.technicalDetails.builderTool}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                );
-                            })}
+                    <div className="px-2 py-4 mt-4">
+                        <div className="bg-gray-700/50 rounded-lg p-3">
+                            <h5 className="text-xs font-semibold text-gray-400 uppercase mb-2">System Status</h5>
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                                <span>Version</span>
+                                <span className="text-blue-400">v3.4.7</span>
+                            </div>
                         </div>
-                    )}
-                </div>
-            </nav>
-
-            {/* Logout Button */}
-            <div className="p-4 border-t border-[var(--card-border)]">
-                <button
-                    onClick={async () => {
-                        const { createClient } = await import('@/utils/supabase/client');
-                        const supabase = createClient();
-                        await supabase.auth.signOut();
-                        window.location.href = '/login';
-                    }}
-                    className="flex items-center gap-3 px-4 py-3 w-full text-left rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
-                >
-                    <LogOut className="w-5 h-5" />
-                    <span className="font-medium">Sign Out</span>
-                </button>
-            </div>
-
-            {/* Footer */}
-            <div className="p-4 border-t border-[var(--card-border)]">
-                <div className="text-xs text-gray-500 text-center font-mono">
-                    Titan Universal v3.4.7
-                </div>
-            </div>
-        </div>
+                    </div>
+                </SidebarItemGroup>
+            </SidebarItems>
+        </FlowbiteSidebar>
     );
 }

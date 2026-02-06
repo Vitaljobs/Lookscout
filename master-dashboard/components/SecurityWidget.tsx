@@ -7,6 +7,7 @@ import { ShieldAlert, AlertTriangle, Ban, CheckCircle, Loader2 } from 'lucide-re
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useProjects } from '@/context/ProjectContext';
+import { Card } from '@/components/ui/Card';
 
 export default function SecurityWidget() {
     const { selectedProjectId } = useProjects();
@@ -118,103 +119,105 @@ export default function SecurityWidget() {
             }}
             transition={{ duration: 0.5 }}
             id="security-widget"
-            className="card bg-gradient-to-b from-[var(--element-bg)] to-red-950/10 relative overflow-hidden"
+            className="h-full relative overflow-hidden"
         >
-            {/* Background glow */}
-            <motion.div
-                animate={{
-                    opacity: isAlertState ? [0.2, 0.4, 0.2] : 0.2,
-                    scale: isAlertState ? [1, 1.2, 1] : 1
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute -right-10 -bottom-10 w-32 h-32 bg-red-600 rounded-full blur-[60px]"
-            />
+            <Card className="h-full bg-gradient-to-b from-[var(--element-bg)] to-red-950/10 border-red-500/20">
+                {/* Background glow */}
+                <motion.div
+                    animate={{
+                        opacity: isAlertState ? [0.2, 0.4, 0.2] : 0.2,
+                        scale: isAlertState ? [1, 1.2, 1] : 1
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute -right-10 -bottom-10 w-32 h-32 bg-red-600 rounded-full blur-[60px]"
+                />
 
-            <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                        <ShieldAlert className="w-5 h-5 text-red-500 animate-pulse" />
-                        <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider">Security Watch</h3>
+                <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <ShieldAlert className="w-5 h-5 text-red-500 animate-pulse" />
+                            <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider">Security Watch</h3>
+                        </div>
+                        {criticalCount > 0 && (
+                            <span className="px-2 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-bold border border-red-500/30 animate-pulse">
+                                {criticalCount} critical
+                            </span>
+                        )}
                     </div>
-                    {criticalCount > 0 && (
-                        <span className="px-2 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-bold border border-red-500/30 animate-pulse">
-                            {criticalCount} critical
-                        </span>
+
+                    {loading ? (
+                        <div className="flex items-center justify-center py-8">
+                            <Loader2 className="w-6 h-6 animate-spin text-red-400" />
+                        </div>
+                    ) : (
+                        <>
+                            {/* Blocked IPs */}
+                            <div className="mb-4">
+                                <div className="text-xs text-gray-400 mb-2 flex items-center gap-2">
+                                    <Ban className="w-3 h-3" />
+                                    Blocked IPs ({blockedIPs.length})
+                                </div>
+                                {blockedIPs.length === 0 ? (
+                                    <div className="text-xs text-gray-500 p-2 bg-black/20 rounded border border-white/5">
+                                        <CheckCircle className="w-4 h-4 inline mr-1 text-green-500" />
+                                        No blocked IPs
+                                    </div>
+                                ) : (
+                                    <div className="space-y-1 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700">
+                                        {blockedIPs.slice(0, 5).map((ip) => (
+                                            <div
+                                                key={ip.id}
+                                                className="text-xs p-2 bg-red-500/5 rounded border border-red-500/20 flex items-center justify-between"
+                                            >
+                                                <span className="font-mono text-red-400">{ip.ip_address}</span>
+                                                <span className="text-gray-500 text-[10px]">{ip.reason}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Recent Events */}
+                            <div>
+                                <div className="text-xs text-gray-400 mb-2">Recent Events</div>
+                                {events.length === 0 ? (
+                                    <div className="text-xs text-gray-500 p-2 bg-black/20 rounded border border-white/5 text-center">
+                                        No security events
+                                    </div>
+                                ) : (
+                                    <div className="space-y-1 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700">
+                                        {events.map((event) => (
+                                            <div
+                                                key={event.id}
+                                                className={`text-xs p-2 rounded border flex items-start gap-2 ${getSeverityColor(event.severity)}`}
+                                            >
+                                                {getSeverityIcon(event.severity)}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="font-medium">{event.event_type}</div>
+                                                    {event.reason && (
+                                                        <div className="text-[10px] opacity-80 truncate">{event.reason}</div>
+                                                    )}
+                                                    {event.ip_address && (
+                                                        <div className="text-[10px] font-mono opacity-60">{event.ip_address}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Status footer */}
+                            <div className="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-red-300">Status</span>
+                                    <span className="font-bold text-red-400">MONITORING</span>
+                                </div>
+                            </div>
+                        </>
                     )}
                 </div>
-
-                {loading ? (
-                    <div className="flex items-center justify-center py-8">
-                        <Loader2 className="w-6 h-6 animate-spin text-red-400" />
-                    </div>
-                ) : (
-                    <>
-                        {/* Blocked IPs */}
-                        <div className="mb-4">
-                            <div className="text-xs text-gray-400 mb-2 flex items-center gap-2">
-                                <Ban className="w-3 h-3" />
-                                Blocked IPs ({blockedIPs.length})
-                            </div>
-                            {blockedIPs.length === 0 ? (
-                                <div className="text-xs text-gray-500 p-2 bg-black/20 rounded border border-white/5">
-                                    <CheckCircle className="w-4 h-4 inline mr-1 text-green-500" />
-                                    No blocked IPs
-                                </div>
-                            ) : (
-                                <div className="space-y-1 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700">
-                                    {blockedIPs.slice(0, 5).map((ip) => (
-                                        <div
-                                            key={ip.id}
-                                            className="text-xs p-2 bg-red-500/5 rounded border border-red-500/20 flex items-center justify-between"
-                                        >
-                                            <span className="font-mono text-red-400">{ip.ip_address}</span>
-                                            <span className="text-gray-500 text-[10px]">{ip.reason}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Recent Events */}
-                        <div>
-                            <div className="text-xs text-gray-400 mb-2">Recent Events</div>
-                            {events.length === 0 ? (
-                                <div className="text-xs text-gray-500 p-2 bg-black/20 rounded border border-white/5 text-center">
-                                    No security events
-                                </div>
-                            ) : (
-                                <div className="space-y-1 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700">
-                                    {events.map((event) => (
-                                        <div
-                                            key={event.id}
-                                            className={`text-xs p-2 rounded border flex items-start gap-2 ${getSeverityColor(event.severity)}`}
-                                        >
-                                            {getSeverityIcon(event.severity)}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="font-medium">{event.event_type}</div>
-                                                {event.reason && (
-                                                    <div className="text-[10px] opacity-80 truncate">{event.reason}</div>
-                                                )}
-                                                {event.ip_address && (
-                                                    <div className="text-[10px] font-mono opacity-60">{event.ip_address}</div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Status footer */}
-                        <div className="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-red-300">Status</span>
-                                <span className="font-bold text-red-400">MONITORING</span>
-                            </div>
-                        </div>
-                    </>
-                )}
-            </div>
+            </Card>
         </motion.div>
     );
 }

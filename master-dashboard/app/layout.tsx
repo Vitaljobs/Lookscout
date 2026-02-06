@@ -32,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased bg-[#0f1419] text-white`}>
+      <body className={`${inter.variable} antialiased bg-[var(--background)] text-white`}>
         <ProjectProvider>
           <AlertProvider>
             {children}

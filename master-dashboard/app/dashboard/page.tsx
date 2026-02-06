@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import StatCard from '@/components/StatCard';
+import { Card } from '@/components/ui/Card';
 import LiveUsersTable from '@/components/LiveUsersTable';
 import { useProjects } from '@/context/ProjectContext';
 import { StatCardData } from '@/types';
@@ -13,7 +14,8 @@ import { Users, Activity, DollarSign, FolderKanban, ShieldAlert } from 'lucide-r
 import LiveActivityFeed from '@/components/LiveActivityFeed';
 import LaunchStatsWidget from '@/components/LaunchStatsWidget';
 import DashboardHeader from "@/components/DashboardHeader";
-import HoloGlobe from "@/components/HoloGlobe";
+// import HoloGlobe from "@/components/HoloGlobe"; // Removed per user request
+import ProjectPulseGrid from '@/components/ProjectPulseGrid';
 import ReputationCounter from '@/components/ReputationCounter';
 import AntigravityMonitor from '@/components/AntigravityMonitor';
 import SupportHub from '@/components/SupportHub';
@@ -89,9 +91,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <DashboardHeader />
+    <div className="space-y-8">
+      {/* Header removed (in Shell) */}
 
       {/* Neural Link Insight Widget */}
       <div className="mb-8">
@@ -134,7 +135,7 @@ export default function DashboardPage() {
       }
       {/* Split Row: Master Chart & Security Watch */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-        <div className="lg:col-span-3 card">
+        <Card className="lg:col-span-3">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-white">Combined Traffic Volume (24h)</h3>
             <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-mono border border-blue-500/20">Live Update</span>
@@ -147,7 +148,7 @@ export default function DashboardPage() {
           <div className="h-[320px] w-full flex items-center justify-center">
             <MasterAreaChart />
           </div>
-        </div>
+        </Card>
 
         {/* Security Watch - Now using SecurityWidget */}
         <SecurityWidget />
@@ -166,9 +167,8 @@ export default function DashboardPage() {
 
       {/* Live Global Pulse Map (Replaces static table) */}
       {/* Live Global Pulse Map (Replaces static table) -> Upgraded to HoloGlobe */}
-      <div className="mb-8">
-        <HoloGlobe alertLevel={alertLevel} alertMessage={alertMessage} />
-      </div>
+      {/* Live Global Pulse Map (Replaced with Real-Time Project Pulse) */}
+      <ProjectPulseGrid />
 
       {/* Popular Lab & Launch Command Center */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
