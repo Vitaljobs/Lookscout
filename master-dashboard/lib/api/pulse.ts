@@ -84,6 +84,7 @@ export class PulseAPI {
             case 'commonground': return process.env.NEXT_PUBLIC_PULSE_API_KEY;
             case 'vibechain': return process.env.NEXT_PUBLIC_VIBECHAIN_KEY || process.env.NEXT_PUBLIC_VIBECHAIN_API_KEY;
             case 'vitaljobs': return process.env.NEXT_PUBLIC_VITALJOBS_KEY || process.env.NEXT_PUBLIC_VITALJOBS_API_KEY;
+            case 'baloria': return process.env.NEXT_PUBLIC_BALORIA_KEY || process.env.NEXT_PUBLIC_BALORIA_API_KEY;
             default: return process.env.NEXT_PUBLIC_PULSE_API_KEY;
         }
     }
@@ -125,6 +126,7 @@ export class PulseAPI {
             case 'commonground': return process.env.NEXT_PUBLIC_PULSE_API_URL;
             case 'vibechain': return process.env.NEXT_PUBLIC_VIBECHAIN_URL || process.env.NEXT_PUBLIC_VIBECHAIN_API_URL;
             case 'vitaljobs': return process.env.NEXT_PUBLIC_VITALJOBS_URL || process.env.NEXT_PUBLIC_VITALJOBS_API_URL;
+            case 'baloria': return process.env.NEXT_PUBLIC_BALORIA_URL || process.env.NEXT_PUBLIC_BALORIA_API_URL;
             default: return process.env.NEXT_PUBLIC_PULSE_API_URL;
         }
     }

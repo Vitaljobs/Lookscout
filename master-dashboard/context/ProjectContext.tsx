@@ -112,6 +112,24 @@ const DEFAULT_PROJECTS: Project[] = [
             repositoryUrl: 'https://github.com/Vitaljobs/Lookscout',
             builderTool: 'Antigravity'
         }
+    },
+    {
+        id: 'baloria',
+        name: 'Baloria',
+        description: 'Sociaal Q&A platform (Ballebak)',
+        slug: 'baloria',
+        status: 'operational',
+        url: 'https://baloria.nl',
+        publicUrl: 'https://baloria.nl',
+        key: '',
+        theme: 'pink',
+        technicalDetails: {
+            hostingProvider: 'Vercel',
+            hostingUrl: 'https://vercel.com/vitaljobs/baloria',
+            repositoryProvider: 'GitHub',
+            repositoryUrl: 'https://github.com/Vitaljobs/Lookscout',
+            builderTool: 'Antigravity'
+        }
     }
 ];
 

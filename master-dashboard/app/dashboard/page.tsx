@@ -22,6 +22,8 @@ import SupportHub from '@/components/SupportHub';
 import ReputationTrendChart from '@/components/ReputationTrendChart';
 import SecurityWidget from '@/components/SecurityWidget';
 import BaztionHealthWidget from '@/components/widgets/BaztionHealthWidget';
+import BaloriaBallebakWidget from '@/components/widgets/BaloriaBallebakWidget';
+import BaloriaAnalyticsWidget from '@/components/widgets/BaloriaAnalyticsWidget';
 
 import { useAnomalyDetection } from "@/hooks/useAnomalyDetection";
 import { SecurityEvent } from "@/types/support";
@@ -160,14 +162,18 @@ export default function DashboardPage() {
         <ReputationTrendChart />
       </div>
 
-      {/* Baztion Health Monitor */}
-      <div className="mb-8">
+      {/* Project Health Monitors */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <BaztionHealthWidget />
+        <BaloriaBallebakWidget />
+      </div>
+
+      {/* Baloria Admin Analytics */}
+      <div className="mb-8">
+        <BaloriaAnalyticsWidget />
       </div>
 
       {/* Live Global Pulse Map (Replaces static table) */}
-      {/* Live Global Pulse Map (Replaces static table) -> Upgraded to HoloGlobe */}
-      {/* Live Global Pulse Map (Replaced with Real-Time Project Pulse) */}
       <ProjectPulseGrid />
 
       {/* Popular Lab & Launch Command Center */}

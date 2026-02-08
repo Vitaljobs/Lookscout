@@ -4,14 +4,18 @@
 -- Voegt Baloria toe aan het Master Dashboard ecosysteem
 
 -- Baloria Project Registratie
-INSERT INTO projects (slug, name, description, domain, status, created_at)
+-- Zorg dat kolommen bestaan (voor het geval ze missen)
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS domain text;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS status text DEFAULT 'active';
+
+INSERT INTO projects (slug, name, description, domain, status)
 VALUES (
   'baloria',
   'Baloria',
   'Sociaal platform met visuele ballebak voor vragen, kansen en connecties',
   'baloria.nl',
-  'active',
-  now()
+  'active'
 )
 ON CONFLICT (slug) DO UPDATE SET
   name = EXCLUDED.name,
@@ -22,7 +26,7 @@ ON CONFLICT (slug) DO UPDATE SET
 -- Grant Overlord Access voor James
 INSERT INTO user_project_access (user_id, project_id, role)
 SELECT 
-  'e8198878-31fb-4c2b-89f7-425849abd945'::uuid,
+  (SELECT id FROM auth.users WHERE email = 'james@live.nl' LIMIT 1),
   id,
   'owner'
 FROM projects
@@ -72,12 +76,12 @@ ALTER TABLE baloria_catches ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Overlord sees all balls"
   ON baloria_balls FOR ALL
   TO authenticated
-  USING (auth.uid() = 'e8198878-31fb-4c2b-89f7-425849abd945'::uuid);
+  USING (auth.uid() IN (SELECT id FROM auth.users WHERE email = 'james@live.nl'));
 
 CREATE POLICY "Overlord sees all catches"
   ON baloria_catches FOR ALL
   TO authenticated
-  USING (auth.uid() = 'e8198878-31fb-4c2b-89f7-425849abd945'::uuid);
+  USING (auth.uid() IN (SELECT id FROM auth.users WHERE email = 'james@live.nl'));
 
 -- Public kan actieve ballen zien
 CREATE POLICY "Public can view active balls"
