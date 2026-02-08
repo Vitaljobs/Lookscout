@@ -140,9 +140,11 @@ export class PulseAPI {
     private async fetchWithAuth(endpoint: string, options: RequestInit = {}) {
         let url = `${this.targetBaseUrl}${endpoint}`;
 
-        // [MODIFICATION] Force internal API route for Common Ground Pulse
-        // optimizing local performance and avoiding circular proxy issues
-        if (this.projectId === 'commonground' && (endpoint === '/stats' || endpoint === '/live-users' || endpoint === '/activity')) {
+        // [MODIFICATION] Force internal API route for internal Supabase projects
+        // optimizing local performance and avoiding circular proxy issues or 401/500 errors
+        const isInternalSupabase = this.targetBaseUrl.includes('cwhcxazrmayjhaadtjqs.supabase.co');
+
+        if (isInternalSupabase && (endpoint === '/stats' || endpoint === '/live-users' || endpoint === '/activity')) {
             const type = endpoint.replace('/', '');
             url = `/api/pulse?type=${type}`;
             // Return fetch directly, bypassing proxy headers
@@ -150,13 +152,13 @@ export class PulseAPI {
                 const response = await fetch(url);
                 if (!response.ok) {
                     const txt = await response.text();
-                    console.error(`[PulseAPI] Failed: ${response.status} - ${txt}`);
-                    throw new Error(`Internal Pulse API Error: ${response.status} for ${type}`);
+                    console.error(`[PulseAPI] Internal Failed: ${response.status} - ${txt}`);
+                    throw new Error(`Internal Pulse API Error: ${response.status}`);
                 }
                 return await response.json();
             } catch (e) {
-                console.warn("Internal Pulse API Failed:", e);
-                throw e; // Fallback will catch this
+                console.warn("Internal Pulse API Failed, falling back:", e);
+                // Continue to regular fetch if internal fails
             }
         }
 
