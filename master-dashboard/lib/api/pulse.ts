@@ -204,8 +204,8 @@ export class PulseAPI {
             }
         }
 
-        // Use Proxy on Client Side to avoid CORS
-        if (typeof window !== 'undefined') {
+        // Use Proxy on Client Side to avoid CORS (only for external absolute URLs)
+        if (typeof window !== 'undefined' && !url.startsWith('/')) {
             headers['X-Proxy-Target'] = url;
             url = '/api/proxy';
         }

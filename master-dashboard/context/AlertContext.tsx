@@ -40,6 +40,10 @@ export function AlertProvider({ children }: { children: ReactNode }) {
         setAlerts(prev => prev.filter(a => a.id !== id));
     };
 
+    const removeAlertByProject = (projectId: string) => {
+        setAlerts(prev => prev.filter(a => a.projectId !== projectId));
+    };
+
     // Polling Logic for Health Checks
     useEffect(() => {
         const checkHealth = async () => {
@@ -51,11 +55,13 @@ export function AlertProvider({ children }: { children: ReactNode }) {
                         const api = new PulseAPI(p.id);
                         const { isLive, error } = await api.getStats();
 
-                        // Only alert if there's an actual error, not just a graceful fallback to mock data
-                        if (!isLive && p.status === 'operational' && error) {
+                        if (isLive) {
+                            // Connection restored or working fine, clear alert
+                            removeAlertByProject(p.id);
+                        } else if (p.status === 'operational' && error) {
                             addAlert(`Connection to ${p.name} lost! (${error})`, 'error', p.id);
                         } else if (error) {
-                            addAlert(`Error in ${p.name}: ${error}`, 'warning', p.id);
+                            addAlert(`Warning in ${p.name}: ${error}`, 'warning', p.id);
                         }
                     } catch (e) {
                         // Should be caught by pulse api, but just in case
