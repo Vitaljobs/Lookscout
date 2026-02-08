@@ -52,49 +52,41 @@ export default function BaloriaBallebakWidget() {
 
     async function fetchBaloriaData() {
         try {
-            // 1. Get Project ID
-            const { data: project } = await supabase
-                .from('projects')
-                .select('id')
-                .eq('slug', 'baloria')
-                .single();
-
-            if (!project) return;
-
-            // 2. Fetch Active Balls
-            const { count: activeCount } = await supabase
-                .from('baloria_balls')
+            // 1. Fetch Open Questions (Actieve Ballen)
+            const { count: openCount } = await supabase
+                .from('baloria_questions')
                 .select('*', { count: 'exact', head: true })
-                .eq('project_id', project.id)
-                .eq('status', 'active');
+                .eq('status', 'open');
 
-            // 3. Fetch Total Catches
-            const { count: catchCount } = await supabase
-                .from('baloria_catches')
+            // 2. Fetch Total Answers (Ballen Gevangen)
+            const { count: answerCount } = await supabase
+                .from('baloria_answers')
                 .select('id', { count: 'exact', head: true });
 
-            // 4. Fetch Questions
-            const { count: questionsCount } = await supabase
-                .from('baloria_balls')
-                .select('*', { count: 'exact', head: true })
-                .eq('project_id', project.id)
-                .eq('ball_type', 'question');
+            // 3. Fetch Total Questions
+            const { count: totalQuestions } = await supabase
+                .from('baloria_questions')
+                .select('*', { count: 'exact', head: true });
 
-            // 5. Get Top Theme (simplified logic, usually a group-by query)
+            // 4. Get Top Theme from questions
             const { data: themes } = await supabase
-                .from('baloria_balls')
+                .from('baloria_questions')
                 .select('theme')
-                .eq('project_id', project.id)
-                .limit(10);
+                .limit(20);
 
-            const topTheme = themes && themes.length > 0 ? themes[0].theme : 'Relaties';
+            // Basic frequency calculation
+            const themeCounts: Record<string, number> = {};
+            themes?.forEach(t => {
+                if (t.theme) themeCounts[t.theme] = (themeCounts[t.theme] || 0) + 1;
+            });
+            const topTheme = Object.entries(themeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Gezondheid';
 
             setStats({
-                total_balls: (activeCount || 0) + (catchCount || 0),
-                active_balls: activeCount || 0,
-                total_catches: catchCount || 0,
+                total_balls: totalQuestions || 0,
+                active_balls: openCount || 0,
+                total_catches: answerCount || 0,
                 top_theme: topTheme,
-                questions_count: questionsCount || 0
+                questions_count: totalQuestions || 0
             });
         } catch (error) {
             console.error('Error fetching Baloria data:', error);
