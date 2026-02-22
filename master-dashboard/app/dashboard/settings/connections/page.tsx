@@ -20,7 +20,6 @@ import {
     AlertCircle,
     Loader2
 } from 'lucide-react';
-import { toast } from 'flowbite-react'; // If available, else I'll use simple alerts for now
 
 export default function ConnectionsPage() {
     const [sites, setSites] = useState<ExternalSite[]>([]);
