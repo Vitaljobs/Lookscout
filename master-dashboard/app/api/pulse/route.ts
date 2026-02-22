@@ -27,7 +27,15 @@ export async function GET(request: Request) {
                 .limit(1)
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.warn("Pulse API: stats table missing or query failed, returning defaults.");
+                return NextResponse.json({
+                    total_users: 0,
+                    active_now: 0,
+                    page_views_24h: 0,
+                    popular_lab: 'N/A'
+                });
+            }
 
             // If table is empty, return defaults
             if (!data) {
