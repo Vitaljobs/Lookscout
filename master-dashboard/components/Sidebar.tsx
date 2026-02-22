@@ -27,8 +27,10 @@ import { useProjects } from '@/context/ProjectContext';
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Helpdesk', href: '/dashboard/helpdesk', icon: Activity },
     { name: 'Projects', href: '/dashboard/projects', icon: FolderKanban },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+    { name: 'Connections', href: '/dashboard/settings/connections', icon: ExternalLink },
 ];
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
