@@ -1,11 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, User, Mail, Globe, Clock, CheckCircle, Reply, MessageSquare, Loader2 } from 'lucide-react';
+import { X, Send, User, Mail, Globe, Clock, CheckCircle, Reply, MessageSquare, Loader2, RefreshCw } from 'lucide-react';
 import { SupportMessage, sendHelpdeskReply } from '@/app/actions/helpdesk';
 import { formatDistanceToNow } from 'date-fns';
 import { nl } from 'date-fns/locale';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+interface FollowUpMessage {
+    id: string;
+    content: string;
+    role: string;
+    created_at: string;
+}
 
 interface HelpdeskDetailProps {
     message: SupportMessage | null;
@@ -17,6 +30,21 @@ export default function HelpdeskDetail({ message, onClose, onReplySuccess }: Hel
     const [replyText, setReplyText] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [followUpMessages, setFollowUpMessages] = useState<FollowUpMessage[]>([]);
+
+    // Fetch follow-up messages from SERVLY database when a message is selected
+    useEffect(() => {
+        if (!message) { setFollowUpMessages([]); return; }
+        const threadIdMatch = message.sender_email?.match(/\+id_([^@]+)@/);
+        if (!threadIdMatch) return;
+        const threadId = threadIdMatch[1];
+        supabase
+            .from('messages')
+            .select('id, content, role, created_at')
+            .eq('thread_id', threadId)
+            .order('created_at', { ascending: true })
+            .then(({ data }) => setFollowUpMessages(data || []));
+    }, [message?.id]);
 
     const handleReply = async () => {
         if (!message || !replyText.trim()) return;
@@ -144,45 +172,72 @@ export default function HelpdeskDetail({ message, onClose, onReplySuccess }: Hel
                                 </div>
                             )}
 
-                            {/* Reply Input (visible if not closed or if we want to allow multiple replies - but here we close on reply) */}
-                            {message.status !== 'closed' && (
+                            {/* Follow-up messages from SERVLY */}
+                            {followUpMessages.length > 0 && (
                                 <div className="space-y-3">
-                                    <h4 className="text-sm font-bold text-purple-400 uppercase tracking-widest flex items-center gap-2">
-                                        <Reply className="w-4 h-4" />
-                                        Stuur Antwoord
+                                    <h4 className="text-sm font-bold text-yellow-400 uppercase tracking-widest flex items-center gap-2">
+                                        <MessageSquare className="w-4 h-4" />
+                                        Volledig Gesprek ({followUpMessages.length})
                                     </h4>
-                                    <div className="relative group">
-                                        <textarea
-                                            value={replyText}
-                                            onChange={(e) => setReplyText(e.target.value)}
-                                            placeholder="Typ hier je antwoord naar de klant..."
-                                            className="w-full h-40 p-4 bg-[var(--sidebar-bg)] border border-[var(--card-border)] rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-all resize-none ring-0 group-hover:border-[var(--card-border-hover)]"
-                                        />
-                                        <div className="absolute right-3 bottom-3">
-                                            <button
-                                                onClick={handleReply}
-                                                disabled={isSending || !replyText.trim()}
-                                                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
-                                            >
-                                                {isSending ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                ) : (
-                                                    <Send className="w-4 h-4" />
-                                                )}
-                                                <span>Verstuur</span>
-                                            </button>
-                                        </div>
+                                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                                        {followUpMessages.map((msg) => (
+                                            <div key={msg.id} className={`p-4 rounded-xl border text-sm whitespace-pre-wrap leading-relaxed ${msg.role === 'pro'
+                                                    ? 'bg-blue-500/10 border-blue-500/20 text-blue-100'
+                                                    : 'bg-white/5 border-white/10 text-gray-300'
+                                                }`}>
+                                                <div className="text-[10px] font-bold uppercase tracking-widest mb-1.5 opacity-60">
+                                                    {msg.role === 'pro' ? '🔵 Vakman / Support' : '👤 Klant'}
+                                                    {' · '}{new Date(msg.created_at).toLocaleString('nl-NL')}
+                                                </div>
+                                                {msg.content}
+                                            </div>
+                                        ))}
                                     </div>
-                                    {error && (
-                                        <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
-                                            <X className="w-3 h-3" /> {error}
-                                        </p>
-                                    )}
-                                    <p className="text-[10px] text-gray-500 italic">
-                                        Bericht wordt direct als e-mail verzonden en ticket wordt gesloten.
-                                    </p>
                                 </div>
                             )}
+
+                            {/* Reply Input – always visible so admin can follow up */}
+                            <div className="space-y-3">
+                                <h4 className="text-sm font-bold text-purple-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Reply className="w-4 h-4" />
+                                    {message.status === 'closed' ? 'Reageer opnieuw' : 'Stuur Antwoord'}
+                                </h4>
+                                {message.status === 'closed' && (
+                                    <p className="text-[10px] text-yellow-400/70 italic flex items-center gap-1">
+                                        <RefreshCw className="w-3 h-3" /> Dit ticket is gesloten – een nieuw antwoord opent het automatisch opnieuw.
+                                    </p>
+                                )}
+                                <div className="relative group">
+                                    <textarea
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                        placeholder="Typ hier je vervolgreactie..."
+                                        className="w-full h-40 p-4 bg-[var(--sidebar-bg)] border border-[var(--card-border)] rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-all resize-none ring-0 group-hover:border-[var(--card-border-hover)]"
+                                    />
+                                    <div className="absolute right-3 bottom-3">
+                                        <button
+                                            onClick={handleReply}
+                                            disabled={isSending || !replyText.trim()}
+                                            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
+                                        >
+                                            {isSending ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Send className="w-4 h-4" />
+                                            )}
+                                            <span>Verstuur</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                {error && (
+                                    <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+                                        <X className="w-3 h-3" /> {error}
+                                    </p>
+                                )}
+                                <p className="text-[10px] text-gray-500 italic">
+                                    Bericht wordt direct gesynchroniseerd naar SERVLY.
+                                </p>
+                            </div>
                         </div>
 
                         {/* Footer / Status Label */}

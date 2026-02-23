@@ -26,12 +26,18 @@ export const encrypt = (text: string): string => {
  */
 export const decrypt = (ciphertext: string): string => {
     try {
+        // If it's a very short string, it's probably not encrypted ciphertext
+        if (ciphertext.length < 10) return ciphertext;
+
         const bytes = CryptoJS.AES.decrypt(ciphertext, SECRET_KEY);
         const originalText = bytes.toString(CryptoJS.enc.Utf8);
-        if (!originalText) throw new Error('Decryption resulted in empty string');
+
+        // If decryption fails to produce valid Utf8, return original ciphertext
+        if (!originalText) return ciphertext;
+
         return originalText;
     } catch (error) {
-        console.error('Decryption error:', error);
-        throw new Error('Failed to decrypt data');
+        console.warn('Decryption failed, returning ciphertext:', error);
+        return ciphertext;
     }
 };
