@@ -16,6 +16,14 @@ async function handleProxy(request: Request) {
             return NextResponse.json({ error: 'Missing X-Proxy-Target header' }, { status: 400 });
         }
 
+        let parsedUrl: URL;
+        try {
+            parsedUrl = new URL(targetUrl);
+        } catch (e) {
+            console.error('Proxy Error: Invalid target URL provided:', targetUrl);
+            return NextResponse.json({ error: 'Invalid proxy target URL' }, { status: 400 });
+        }
+
         // Prepare headers to forward
         const headers = new Headers(request.headers);
         headers.delete('host');
@@ -23,11 +31,21 @@ async function handleProxy(request: Request) {
         headers.delete('content-length');
         headers.delete('X-Proxy-Target'); // Don't forward this to the target
 
-        const response = await fetch(targetUrl, {
-            method: request.method,
-            headers: headers,
-            body: request.method !== 'GET' ? await request.blob() : undefined,
-        });
+        let response: Response;
+        try {
+            response = await fetch(parsedUrl.toString(), {
+                method: request.method,
+                headers: headers,
+                body: request.method !== 'GET' ? await request.blob() : undefined,
+                // Add a timeout if possible, or just catch fetch failures
+            });
+        } catch (fetchError: any) {
+            console.error(`Proxy Fetch Error for ${targetUrl}:`, fetchError);
+            return NextResponse.json({
+                error: 'Bad Gateway - Target server unreachable',
+                details: fetchError.message || String(fetchError)
+            }, { status: 502 });
+        }
 
         const data = await response.json().catch(() => ({}));
 
@@ -37,7 +55,7 @@ async function handleProxy(request: Request) {
         });
 
     } catch (error) {
-        console.error('Proxy Error:', error);
+        console.error('Proxy internal error:', error);
         return NextResponse.json({ error: 'Proxy Request Failed', details: String(error) }, { status: 500 });
     }
 }
