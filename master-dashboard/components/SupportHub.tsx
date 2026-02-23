@@ -2,18 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { ContactMessage } from '@/types/support';
+import { SupportMessage } from '@/app/actions/helpdesk';
 import { Inbox, Mail, Send, Archive, Check, Clock, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
 export default function SupportHub() {
-    const [messages, setMessages] = useState<ContactMessage[]>([]);
+    const [messages, setMessages] = useState<SupportMessage[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
+    const [selectedMessage, setSelectedMessage] = useState<SupportMessage | null>(null);
     const [replyText, setReplyText] = useState('');
     const [sending, setSending] = useState(false);
-    const [filter, setFilter] = useState<'all' | 'new' | 'replied'>('all');
+    const [filter, setFilter] = useState<'all' | 'open' | 'closed'>('all');
     const supabase = createClient();
 
     useEffect(() => {
@@ -21,13 +21,13 @@ export default function SupportHub() {
 
         // Subscribe to real-time updates
         const channel = supabase
-            .channel('contact-messages')
+            .channel('support-messages')
             .on(
                 'postgres_changes',
                 {
                     event: '*',
                     schema: 'public',
-                    table: 'contact_messages',
+                    table: 'support_messages',
                 },
                 () => {
                     loadMessages();
@@ -43,7 +43,7 @@ export default function SupportHub() {
     const loadMessages = async () => {
         try {
             let query = supabase
-                .from('contact_messages')
+                .from('support_messages')
                 .select('*')
                 .order('created_at', { ascending: false });
 
@@ -73,7 +73,7 @@ export default function SupportHub() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messageId: selectedMessage.id,
-                    to: selectedMessage.email,
+                    to: selectedMessage.sender_email,
                     replyText: replyText.trim(),
                     originalSubject: selectedMessage.subject,
                 }),
@@ -83,10 +83,10 @@ export default function SupportHub() {
 
             // Update message status
             const { error } = await supabase
-                .from('contact_messages')
+                .from('support_messages')
                 .update({
-                    status: 'replied',
-                    replied_at: new Date().toISOString(),
+                    status: 'closed',
+                    responded_at: new Date().toISOString(),
                     reply_message: replyText.trim(),
                 })
                 .eq('id', selectedMessage.id);
@@ -106,12 +106,12 @@ export default function SupportHub() {
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'new':
+            case 'open':
                 return <Mail className="w-4 h-4 text-blue-400" />;
-            case 'replied':
+            case 'closed':
                 return <Check className="w-4 h-4 text-green-400" />;
-            case 'archived':
-                return <Archive className="w-4 h-4 text-gray-400" />;
+            case 'pending':
+                return <Clock className="w-4 h-4 text-amber-400" />;
             default:
                 return <Clock className="w-4 h-4 text-yellow-400" />;
         }
@@ -128,7 +128,7 @@ export default function SupportHub() {
         return colors[project] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     };
 
-    const newCount = messages.filter(m => m.status === 'new').length;
+    const newCount = messages.filter(m => m.status === 'open').length;
 
     return (
         <div className="card h-full flex flex-col relative overflow-hidden">
@@ -156,7 +156,7 @@ export default function SupportHub() {
 
                 {/* Filter tabs */}
                 <div className="flex gap-2 mb-4">
-                    {(['all', 'new', 'replied'] as const).map((f) => (
+                    {(['all', 'open', 'closed'] as const).map((f) => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
@@ -165,7 +165,7 @@ export default function SupportHub() {
                                 : 'bg-[var(--sidebar-bg)] text-gray-400 hover:text-white border border-[var(--card-border)]'
                                 }`}
                         >
-                            {f === 'all' ? 'Alle' : f === 'new' ? 'Nieuw' : 'Beantwoord'}
+                            {f === 'all' ? 'Alle' : f === 'open' ? 'Nieuw' : 'Beantwoord'}
                         </button>
                     ))}
                 </div>
@@ -194,31 +194,21 @@ export default function SupportHub() {
                                 <div className="flex items-start justify-between mb-2">
                                     <div className="flex items-center gap-2">
                                         {getStatusIcon(msg.status)}
-                                        <span className="text-sm font-medium text-white">{msg.name}</span>
+                                        <span className="text-sm font-medium text-white">{msg.sender_name}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        {msg.sentiment && (
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${msg.sentiment === 'positive'
-                                                    ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                                                    : msg.sentiment === 'negative'
-                                                        ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                                                        : 'bg-gray-500/20 text-gray-400 border-gray-500/30'
-                                                }`}>
-                                                {msg.sentiment === 'positive' ? '😊' : msg.sentiment === 'negative' ? '😟' : '😐'}
-                                            </span>
-                                        )}
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getProjectBadgeColor(msg.project_source)}`}>
-                                            {msg.project_source}
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getProjectBadgeColor(msg.site_name || 'unknown')}`}>
+                                            {msg.site_name}
                                         </span>
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-400 mb-1">{msg.subject}</p>
-                                <p className="text-xs text-gray-500 line-clamp-2">{msg.message}</p>
+                                <p className="text-xs text-gray-500 line-clamp-2">{msg.body}</p>
                                 <div className="flex items-center justify-between mt-2">
                                     <span className="text-[10px] text-gray-500">
                                         {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: nl })}
                                     </span>
-                                    {msg.status === 'new' && (
+                                    {msg.status === 'open' && (
                                         <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                                     )}
                                 </div>
@@ -231,7 +221,7 @@ export default function SupportHub() {
                 {selectedMessage && (
                     <div className="mt-4 pt-4 border-t border-gray-700/50">
                         <div className="mb-2">
-                            <div className="text-xs text-gray-400 mb-1">Antwoord naar: {selectedMessage.email}</div>
+                            <div className="text-xs text-gray-400 mb-1">Antwoord naar: {selectedMessage.sender_email}</div>
                             <textarea
                                 value={replyText}
                                 onChange={(e) => setReplyText(e.target.value)}
