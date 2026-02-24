@@ -1,0 +1,3 @@
+CREATE TABLE echo_score_sync (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid, score integer NOT NULL, level integer NOT NULL, missions_completed integer DEFAULT 0, contributions integer DEFAULT 0, synced_at timestamptz NOT NULL DEFAULT now(), created_at timestamptz NOT NULL DEFAULT now());
+
+CREATE TABLE reputation_history (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid, score integer NOT NULL, change integer DEFAULT 0, reason text, project_source text DEFAULT 'echo-chamber', created_at timestamptz NOT NULL DEFAULT now());

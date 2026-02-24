@@ -1,0 +1,3 @@
+CREATE TABLE baloria_balls (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), ball_type text NOT NULL, color text NOT NULL, theme text NOT NULL, title text NOT NULL, description text, creator_id uuid, status text NOT NULL DEFAULT 'active', filters jsonb, commitment_minutes integer DEFAULT 15, created_at timestamptz DEFAULT now(), caught_at timestamptz, closed_at timestamptz);
+
+CREATE TABLE baloria_catches (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), ball_id uuid NOT NULL REFERENCES baloria_balls(id) ON DELETE CASCADE, catcher_id uuid NOT NULL, answer text NOT NULL, commitment_started_at timestamptz DEFAULT now(), commitment_ended_at timestamptz, is_anonymous boolean DEFAULT true, created_at timestamptz DEFAULT now());

@@ -1,0 +1,3 @@
+CREATE TABLE user_credentials (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid NOT NULL, credential_id text NOT NULL, credential_public_key text NOT NULL, counter bigint NOT NULL DEFAULT 0, transports text[], created_at timestamptz DEFAULT now(), last_used_at timestamptz DEFAULT now(), UNIQUE(user_id, credential_id));
+
+CREATE TABLE face_profiles (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid NOT NULL, descriptor jsonb NOT NULL, label text DEFAULT 'Main Profile', created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());

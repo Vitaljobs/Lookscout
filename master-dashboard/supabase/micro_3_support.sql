@@ -1,0 +1,5 @@
+CREATE TABLE external_sites (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), site_name text NOT NULL, api_key text NOT NULL, webhook_url text, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());
+
+CREATE TABLE support_messages (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), site_id uuid REFERENCES external_sites(id) ON DELETE CASCADE, sender_name text NOT NULL, sender_email text NOT NULL, subject text NOT NULL, body text NOT NULL, status text NOT NULL DEFAULT 'open', metadata jsonb DEFAULT '{}', reply_message text, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());
+
+CREATE TABLE contact_messages (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), project_source text NOT NULL, name text NOT NULL, email text NOT NULL, subject text NOT NULL, message text NOT NULL, status text NOT NULL DEFAULT 'new', sentiment text, metadata jsonb, created_at timestamptz NOT NULL DEFAULT now());

@@ -1,0 +1,5 @@
+CREATE TABLE baztion_metrics (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), metric_type text NOT NULL, value numeric NOT NULL, percentage numeric, trend text, recorded_at timestamptz DEFAULT now());
+
+CREATE TABLE baztion_posts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), post_type text NOT NULL, is_anonymous boolean DEFAULT false, content text NOT NULL, author_id uuid, category text, status text DEFAULT 'active', upvotes integer DEFAULT 0, comments_count integer DEFAULT 0, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());
+
+CREATE TABLE baztion_feedback (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), feedback_type text NOT NULL, content text NOT NULL, author_id uuid, target_user_id uuid, sentiment text, is_resolved boolean DEFAULT false, created_at timestamptz DEFAULT now());

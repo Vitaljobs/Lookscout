@@ -1,0 +1,3 @@
+CREATE TABLE project_health_logs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), project_id text NOT NULL, health_score integer NOT NULL, sentiment_score integer, active_users integer DEFAULT 0, total_users integer DEFAULT 0, metadata jsonb DEFAULT '{}', created_at timestamptz NOT NULL DEFAULT now());
+
+CREATE TABLE alerts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), project_id text NOT NULL, type text NOT NULL, severity text NOT NULL, message text NOT NULL, status text NOT NULL DEFAULT 'new', metadata jsonb DEFAULT '{}', created_at timestamptz NOT NULL DEFAULT now());

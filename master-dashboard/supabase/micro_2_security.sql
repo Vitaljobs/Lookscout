@@ -1,0 +1,3 @@
+CREATE TABLE security_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), event_type text NOT NULL, ip_address text, user_agent text, endpoint text, reason text, severity text NOT NULL, project_source text, metadata jsonb DEFAULT '{}', blocked boolean DEFAULT false, created_at timestamptz NOT NULL DEFAULT now(), resolved_at timestamptz, resolved_by text);
+
+CREATE TABLE blocked_ips (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), ip_address text NOT NULL UNIQUE, reason text NOT NULL, blocked_at timestamptz NOT NULL DEFAULT now(), expires_at timestamptz, auto_blocked boolean DEFAULT false, block_count integer DEFAULT 1);
