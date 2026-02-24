@@ -9,11 +9,11 @@ async function getSystemContext() {
     try {
         // Use Service Role Key for "God Mode" access if available, otherwise fallback to Anon Key.
         // The Anon Key will work for reading public data (thanks to RLS policies).
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+        const insforgeKey = process.env.INSFORGE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!;
 
         const supabaseAdmin = createAdminClient({
             baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL!,
-            anonKey: supabaseKey
+            anonKey: insforgeKey
         }) as any;
 
         // Fetch active projects
