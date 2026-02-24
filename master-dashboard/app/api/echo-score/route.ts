@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const supabase = await createClient();
+        const supabase = (await createClient()) as any;
 
         // Store Echo Score data in a new table for tracking
-        const { error } = await supabase.from('echo_score_sync').insert({
+        const { error } = await supabase.database.from('echo_score_sync').insert({
             user_id,
             score,
             level,
@@ -49,10 +49,10 @@ export async function POST(request: NextRequest) {
 // GET endpoint to fetch latest Echo Score data
 export async function GET(request: NextRequest) {
     try {
-        const supabase = await createClient();
+        const supabase = (await createClient()) as any;
 
         // Get latest Echo Score data
-        const { data, error } = await supabase
+        const { data, error } = await supabase.database
             .from('echo_score_sync')
             .select('*')
             .order('synced_at', { ascending: false })

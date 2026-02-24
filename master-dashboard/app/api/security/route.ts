@@ -3,10 +3,10 @@ import { createClient } from '@/utils/supabase/server';
 
 export async function GET(request: NextRequest) {
     try {
-        const supabase = await createClient();
+        const supabase = (await createClient()) as any;
 
         // Get all blocked IPs
-        const { data: blockedIPs, error: blockedError } = await supabase
+        const { data: blockedIPs, error: blockedError } = await supabase.database
             .from('blocked_ips')
             .select('*')
             .order('blocked_at', { ascending: false });
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
         if (blockedError) throw blockedError;
 
         // Get recent security events
-        const { data: events, error: eventsError } = await supabase
+        const { data: events, error: eventsError } = await supabase.database
             .from('security_events')
             .select('*')
             .order('created_at', { ascending: false })
@@ -40,14 +40,14 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { action, ip_address, reason, duration_minutes } = body;
 
-        const supabase = await createClient();
+        const supabase = (await createClient()) as any;
 
         if (action === 'block') {
             const blockedUntil = duration_minutes
                 ? new Date(Date.now() + duration_minutes * 60 * 1000).toISOString()
                 : null;
 
-            const { error } = await supabase.from('blocked_ips').insert({
+            const { error } = await supabase.database.from('blocked_ips').insert({
                 ip_address,
                 reason,
                 blocked_until: blockedUntil,
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
             if (error) throw error;
 
             // Log the event
-            await supabase.from('security_events').insert({
+            await supabase.database.from('security_events').insert({
                 event_type: 'manual_ip_block',
                 ip_address,
                 reason,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
             return NextResponse.json({ success: true, message: 'IP blocked successfully' });
         } else if (action === 'unblock') {
-            const { error } = await supabase
+            const { error } = await supabase.database
                 .from('blocked_ips')
                 .delete()
                 .eq('ip_address', ip_address);
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
             if (error) throw error;
 
             // Log the event
-            await supabase.from('security_events').insert({
+            await supabase.database.from('security_events').insert({
                 event_type: 'manual_ip_unblock',
                 ip_address,
                 reason: 'Manually unblocked',

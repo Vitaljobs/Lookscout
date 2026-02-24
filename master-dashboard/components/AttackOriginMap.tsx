@@ -26,41 +26,42 @@ export default function AttackOriginMap() {
     const [attacks, setAttacks] = useState<AttackLocation[]>([]);
     const [stats, setStats] = useState({ total: 0, critical: 0, blocked: 0 });
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const supabase = createClient();
+    const supabase = createClient() as any;
 
     useEffect(() => {
         loadAttackData();
 
         // Subscribe to real-time security events
-        const channel = supabase
-            .channel('attack-map')
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'security_events',
-                },
-                (payload) => {
-                    const event = payload.new as SecurityEvent;
-                    if (event.ip_address && event.severity !== 'low') {
-                        const location = getLocationFromIP(event.ip_address);
-                        setAttacks((prev) => [
-                            ...prev,
-                            {
-                                ...location,
-                                severity: event.severity,
-                                eventType: event.event_type,
-                                timestamp: event.created_at,
-                            },
-                        ]);
-                    }
-                }
-            )
-            .subscribe();
+        const handleUpdate = (payload: any) => {
+            const event = (payload?.new || payload) as SecurityEvent;
+            if (event?.ip_address && event?.severity !== 'low') {
+                const location = getLocationFromIP(event.ip_address);
+                setAttacks((prev) => [
+                    ...prev,
+                    {
+                        ...location,
+                        severity: event.severity,
+                        eventType: event.event_type,
+                        timestamp: event.created_at || new Date().toISOString(),
+                    },
+                ]);
+            }
+        };
+
+        const setupRealtime = async () => {
+            try {
+                await supabase.realtime.connect();
+                await supabase.realtime.subscribe('attack_map');
+                supabase.realtime.on('postgres_changes', handleUpdate);
+            } catch (err) {
+                console.error('Realtime setup error:', err);
+            }
+        };
+        setupRealtime();
 
         return () => {
-            supabase.removeChannel(channel);
+            supabase.realtime.off('postgres_changes', handleUpdate);
+            supabase.realtime.unsubscribe('attack_map');
         };
     }, []);
 
@@ -72,7 +73,7 @@ export default function AttackOriginMap() {
 
     const loadAttackData = async () => {
         try {
-            const { data: events, error } = await supabase
+            const { data: events, error } = await supabase.database
                 .from('security_events')
                 .select('*')
                 .in('severity', ['medium', 'high', 'critical'])
@@ -82,8 +83,8 @@ export default function AttackOriginMap() {
             if (error) throw error;
 
             const attackLocations: AttackLocation[] = (events || [])
-                .filter((e) => e.ip_address)
-                .map((event) => ({
+                .filter((e: any) => e.ip_address)
+                .map((event: any) => ({
                     ...getLocationFromIP(event.ip_address!),
                     severity: event.severity,
                     eventType: event.event_type,
@@ -94,8 +95,8 @@ export default function AttackOriginMap() {
 
             // Calculate stats
             const total = events?.length || 0;
-            const critical = events?.filter((e) => e.severity === 'critical').length || 0;
-            const blocked = events?.filter((e) => e.event_type.includes('block')).length || 0;
+            const critical = events?.filter((e: any) => e.severity === 'critical').length || 0;
+            const blocked = events?.filter((e: any) => e.event_type.includes('block')).length || 0;
 
             setStats({ total, critical, blocked });
         } catch (error) {

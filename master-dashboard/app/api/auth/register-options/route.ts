@@ -3,15 +3,16 @@ import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const supabase = (await createClient()) as any;
+    const { data: { session } } = await supabase.auth.getCurrentSession();
+    const user = session?.user;
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get user's existing credentials to exclude them during registration
-    const { data: credentials } = await supabase
+    const { data: credentials } = await supabase.database
         .from('user_credentials')
         .select('credential_id')
         .eq('user_id', user.id);
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
         userID: new Uint8Array(Buffer.from(user.id)),
         userName: user.email || 'titan-user',
         attestationType: 'none',
-        excludeCredentials: credentials?.map(cred => ({
+        excludeCredentials: credentials?.map((cred: any) => ({
             id: cred.credential_id,
             type: 'public-key',
         })),

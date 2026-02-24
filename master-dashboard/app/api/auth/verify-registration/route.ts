@@ -6,8 +6,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { response, challenge } = body; // Client must send back the challenge for verification context
 
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const supabase = (await createClient()) as any;
+    const { data: { session } } = await supabase.auth.getCurrentSession();
+    const user = session?.user;
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
         const { credentialPublicKey, credentialID, counter } = verification.registrationInfo as any;
 
         // Save to DB
-        const { error } = await supabase.from('user_credentials').insert({
+        const { error } = await supabase.database.from('user_credentials').insert({
             user_id: user.id,
             credential_id: Buffer.from(credentialID).toString('base64'),
             credential_public_key: Buffer.from(credentialPublicKey).toString('base64'),

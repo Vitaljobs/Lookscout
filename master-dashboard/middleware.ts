@@ -8,8 +8,8 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 // IP blocking check
 async function isIPBlocked(ip: string): Promise<boolean> {
     try {
-        const supabase = await createClient();
-        const { data, error } = await supabase
+        const supabase = (await createClient()) as any;
+        const { data, error } = await supabase.database
             .from('blocked_ips')
             .select('*')
             .eq('ip_address', ip)
@@ -25,7 +25,7 @@ async function isIPBlocked(ip: string): Promise<boolean> {
         // Check if block has expired
         if (data.blocked_until && new Date(data.blocked_until) < new Date()) {
             // Remove expired block
-            await supabase.from('blocked_ips').delete().eq('id', data.id);
+            await supabase.database.from('blocked_ips').delete().eq('id', data.id);
             return false;
         }
 
@@ -45,8 +45,8 @@ async function logSecurityEvent(
     userAgent?: string
 ) {
     try {
-        const supabase = await createClient();
-        await supabase.from('security_events').insert({
+        const supabase = (await createClient()) as any;
+        await supabase.database.from('security_events').insert({
             event_type: eventType,
             ip_address: ip,
             user_agent: userAgent,
@@ -62,12 +62,12 @@ async function logSecurityEvent(
 // Block IP address
 async function blockIP(ip: string, reason: string, durationMinutes?: number) {
     try {
-        const supabase = await createClient();
+        const supabase = (await createClient()) as any;
         const blockedUntil = durationMinutes
             ? new Date(Date.now() + durationMinutes * 60 * 1000).toISOString()
             : null;
 
-        await supabase.from('blocked_ips').insert({
+        await supabase.database.from('blocked_ips').insert({
             ip_address: ip,
             reason,
             blocked_until: blockedUntil,

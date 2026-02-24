@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 
-import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { createClient as createAdminClient } from '@insforge/sdk';
 
 // Helper to gather system context
 async function getSystemContext() {
@@ -11,20 +11,20 @@ async function getSystemContext() {
         // The Anon Key will work for reading public data (thanks to RLS policies).
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-        const supabaseAdmin = createAdminClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            supabaseKey
-        );
+        const supabaseAdmin = createAdminClient({
+            baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL!,
+            anonKey: supabaseKey
+        }) as any;
 
         // Fetch active projects
-        const { data: projects, error: projectError } = await supabaseAdmin
+        const { data: projects, error: projectError } = await supabaseAdmin.database
             .from('projects')
             .select('name, status, health, last_updated')
             .order('last_updated', { ascending: false })
             .limit(5);
 
         // Fetch user count (simplified for stability)
-        const { count: userCount, error: countError } = await supabaseAdmin
+        const { count: userCount, error: countError } = await supabaseAdmin.database
             .from('profiles')
             .select('*', { count: 'exact', head: true });
         // Note: head:true allows counting without fetching data rows
@@ -44,7 +44,7 @@ async function getSystemContext() {
             }
         }
 
-        const projectSummary = projects?.map(p =>
+        const projectSummary = projects?.map((p: any) =>
             `- ${p.name}: Status=${p.status}, Health=${p.health || 'Onbekend'}`
         ).join('\n') || "Geen actieve projecten gevonden.";
 

@@ -13,35 +13,33 @@ export default function ReputationTrendChart() {
     const [loading, setLoading] = useState(true);
     const [isLiveData, setIsLiveData] = useState(false);
     const { selectedProjectId } = useProjects();
-    const supabase = createClient();
+    const supabase = createClient() as any;
 
     useEffect(() => {
         loadReputationData();
 
         // Subscribe to real-time updates
-        const channel = supabase
-            .channel('project-health-logs')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'project_health_logs',
-                },
-                () => {
-                    loadReputationData();
-                }
-            )
-            .subscribe();
+        const handleUpdate = () => loadReputationData();
+        const setupRealtime = async () => {
+            try {
+                await supabase.realtime.connect();
+                await supabase.realtime.subscribe('project_health_logs');
+                supabase.realtime.on('postgres_changes', handleUpdate);
+            } catch (err) {
+                console.error('Realtime setup error:', err);
+            }
+        };
+        setupRealtime();
 
         return () => {
-            supabase.removeChannel(channel);
+            supabase.realtime.off('postgres_changes', handleUpdate);
+            supabase.realtime.unsubscribe('project_health_logs');
         };
     }, [selectedProjectId]);
 
     const loadReputationData = async () => {
         try {
-            let query = supabase
+            let query = supabase.database
                 .from('project_health_logs')
                 .select('*')
                 .order('created_at', { ascending: true })
@@ -56,7 +54,7 @@ export default function ReputationTrendChart() {
             if (error) throw error;
 
             if (historyData && historyData.length > 0) {
-                const formattedData: ReputationDataPoint[] = historyData.map((item) => ({
+                const formattedData: ReputationDataPoint[] = historyData.map((item: any) => ({
                     timestamp: new Date(item.created_at),
                     score: item.health_score,
                     change: item.sentiment_score ? item.sentiment_score - item.health_score : 0,

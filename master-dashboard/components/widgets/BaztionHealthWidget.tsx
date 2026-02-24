@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@insforge/sdk';
 import { Shield, Users, MessageSquare, TrendingUp, Heart, MessageCircle, Handshake, Sparkles } from 'lucide-react';
 
 interface BaztionMetric {
@@ -49,10 +49,10 @@ function MetricCard({ icon, label, value, percentage, trend, color }: MetricCard
 export default function BaztionHealthWidget() {
     const [metrics, setMetrics] = useState<BaztionMetric[]>([]);
     const [loading, setLoading] = useState(true);
-    const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createClient({
+        baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL!,
+        anonKey: process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!
+    }) as any;
 
     useEffect(() => {
         fetchMetrics();
@@ -61,7 +61,7 @@ export default function BaztionHealthWidget() {
     async function fetchMetrics() {
         try {
             // Get Baztion project ID
-            const { data: project } = await supabase
+            const { data: project } = await supabase.database
                 .from('projects')
                 .select('id')
                 .eq('slug', 'baztion')
@@ -74,7 +74,7 @@ export default function BaztionHealthWidget() {
             }
 
             // Get latest metrics
-            const { data, error } = await supabase
+            const { data, error } = await supabase.database
                 .from('baztion_metrics')
                 .select('*')
                 .eq('project_id', project.id)

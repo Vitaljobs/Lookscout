@@ -14,39 +14,34 @@ export default function SecurityWidget() {
     const [events, setEvents] = useState<SecurityEvent[]>([]);
     const [blockedIPs, setBlockedIPs] = useState<BlockedIP[]>([]);
     const [loading, setLoading] = useState(true);
-    const supabase = createClient();
+    const supabase = createClient() as any;
 
     useEffect(() => {
         loadSecurityData();
 
         // Subscribe to real-time updates
-        const eventsChannel = supabase
-            .channel('security-events')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'security_events',
-                    // We can't easily filter subscription by dynamic value in this hook structure without reconnecting.
-                    // For now, receive all, and let reload filter. Ideally filter subscription server side.
-                    // Or check payload client side.
-                },
-                () => {
-                    loadSecurityData();
-                }
-            )
-            .subscribe();
+        const handleUpdate = () => loadSecurityData();
+        const setupRealtime = async () => {
+            try {
+                await supabase.realtime.connect();
+                await supabase.realtime.subscribe('security_events');
+                supabase.realtime.on('postgres_changes', handleUpdate);
+            } catch (err) {
+                console.error('Realtime setup error:', err);
+            }
+        };
+        setupRealtime();
 
         return () => {
-            supabase.removeChannel(eventsChannel);
+            supabase.realtime.off('postgres_changes', handleUpdate);
+            supabase.realtime.unsubscribe('security_events');
         };
     }, [selectedProjectId]);
 
     const loadSecurityData = async () => {
         try {
             // Load recent security events
-            let eventsQuery = supabase
+            let eventsQuery = supabase.database
                 .from('security_events')
                 .select('*')
                 .order('created_at', { ascending: false })
@@ -67,7 +62,7 @@ export default function SecurityWidget() {
             // Checking schema... blocked_ips has no project_source visible in previous views, so keeping global for now.
             // Wait, security_events DOES have project_source.
 
-            const { data: blockedData, error: blockedError } = await supabase
+            const { data: blockedData, error: blockedError } = await supabase.database
                 .from('blocked_ips')
                 .select('*')
                 .order('blocked_at', { ascending: false });

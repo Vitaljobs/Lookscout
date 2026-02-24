@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/utils/supabase/client';
 import { Users, HelpCircle, MessageCircle, BarChart3, TrendingUp, Calendar, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import {
@@ -22,10 +22,7 @@ export default function BaloriaAnalyticsWidget() {
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createClient() as any;
 
     useEffect(() => {
         fetchAnalytics();
@@ -34,16 +31,16 @@ export default function BaloriaAnalyticsWidget() {
     async function fetchAnalytics() {
         try {
             // 1. Fetch Metrics from real tables
-            const { count: userCount } = await supabase
+            const { count: userCount } = await supabase.database
                 .from('user_project_access')
                 .select('*', { count: 'exact', head: true })
                 .eq('role', 'owner'); // Approximation of users for this view
 
-            const { count: qCount } = await supabase
+            const { count: qCount } = await supabase.database
                 .from('baloria_questions')
                 .select('*', { count: 'exact', head: true });
 
-            const { count: aCount } = await supabase
+            const { count: aCount } = await supabase.database
                 .from('baloria_answers')
                 .select('id', { count: 'exact', head: true });
 

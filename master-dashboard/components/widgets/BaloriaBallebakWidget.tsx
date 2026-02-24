@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/utils/supabase/client';
 import { Circle, Target, HelpCircle, Trophy, TrendingUp, Sparkles, MessageCircle } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 
@@ -39,10 +39,7 @@ export default function BaloriaBallebakWidget() {
     const [stats, setStats] = useState<BaloriaStats | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createClient() as any;
 
     useEffect(() => {
         fetchBaloriaData();
@@ -53,30 +50,30 @@ export default function BaloriaBallebakWidget() {
     async function fetchBaloriaData() {
         try {
             // 1. Fetch Open Questions (Actieve Ballen)
-            const { count: openCount } = await supabase
+            const { count: openCount } = await supabase.database
                 .from('baloria_questions')
                 .select('*', { count: 'exact', head: true })
                 .eq('status', 'open');
 
             // 2. Fetch Total Answers (Ballen Gevangen)
-            const { count: answerCount } = await supabase
+            const { count: answerCount } = await supabase.database
                 .from('baloria_answers')
                 .select('id', { count: 'exact', head: true });
 
             // 3. Fetch Total Questions
-            const { count: totalQuestions } = await supabase
+            const { count: totalQuestions } = await supabase.database
                 .from('baloria_questions')
                 .select('*', { count: 'exact', head: true });
 
             // 4. Get Top Theme from questions
-            const { data: themes } = await supabase
+            const { data: themes } = await supabase.database
                 .from('baloria_questions')
                 .select('theme')
                 .limit(20);
 
             // Basic frequency calculation
             const themeCounts: Record<string, number> = {};
-            themes?.forEach(t => {
+            themes?.forEach((t: any) => {
                 if (t.theme) themeCounts[t.theme] = (themeCounts[t.theme] || 0) + 1;
             });
             const topTheme = Object.entries(themeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Gezondheid';

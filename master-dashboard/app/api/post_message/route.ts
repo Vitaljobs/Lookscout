@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@insforge/sdk';
 import { decrypt } from '@/lib/encryption';
 
-// Initialize Supabase with Service Role for administrative access
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Initialize InsForge with Service Role for administrative access
+const supabase = createClient({
+    baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL!,
+    edgeFunctionToken: process.env.INSFORGE_SERVICE_ROLE_KEY!
+});
 
 export async function POST(request: NextRequest) {
     try {
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Find the site in external_sites
-        const { data: sites, error: siteError } = await supabase
+        const { data: sites, error: siteError } = await supabase.database
             .from('external_sites')
             .select('*')
             .eq('site_name', site_id);
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 3. Save to support_messages
-        const { data: message, error: messageError } = await supabase
+        const { data: message, error: messageError } = await supabase.database
             .from('support_messages')
             .insert({
                 site_id: matchedSiteId,

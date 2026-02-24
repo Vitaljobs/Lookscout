@@ -16,13 +16,13 @@ export interface EmailAnalysis {
 async function getProjectId(slug: string): Promise<string | null> {
     try {
         // Dynamic import to avoid circular dependencies
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const { createClient } = await import('@insforge/sdk');
+        const supabase = createClient({
+            baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL!,
+            anonKey: process.env.INSFORGE_SERVICE_ROLE_KEY! || process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!
+        }) as any;
 
-        const { data, error } = await supabase
+        const { data, error } = await supabase.database
             .from('projects')
             .select('id')
             .eq('slug', slug)

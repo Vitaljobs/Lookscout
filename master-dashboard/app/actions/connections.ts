@@ -14,8 +14,8 @@ export interface ExternalSite {
 }
 
 export async function getExternalSites() {
-    const supabase = await createClient();
-    const { data, error } = await supabase
+    const supabase = await createClient() as any;
+    const { data, error } = await supabase.database
         .from('external_sites')
         .select('*')
         .order('created_at', { ascending: false });
@@ -32,11 +32,11 @@ export async function getExternalSites() {
 }
 
 export async function addExternalSite(formData: { site_name: string; api_key: string; webhook_url?: string }) {
-    const supabase = await createClient();
+    const supabase = await createClient() as any;
 
     const encryptedKey = encrypt(formData.api_key);
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase.database
         .from('external_sites')
         .insert([
             {
@@ -54,14 +54,14 @@ export async function addExternalSite(formData: { site_name: string; api_key: st
 }
 
 export async function updateExternalSite(id: string, formData: { site_name?: string; api_key?: string; webhook_url?: string }) {
-    const supabase = await createClient();
+    const supabase = await createClient() as any;
 
     const updates: any = { ...formData };
     if (formData.api_key) {
         updates.api_key = encrypt(formData.api_key);
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase.database
         .from('external_sites')
         .update(updates)
         .eq('id', id)
@@ -74,9 +74,9 @@ export async function updateExternalSite(id: string, formData: { site_name?: str
 }
 
 export async function deleteExternalSite(id: string) {
-    const supabase = await createClient();
+    const supabase = await createClient() as any;
 
-    const { error } = await supabase
+    const { error } = await supabase.database
         .from('external_sites')
         .delete()
         .eq('id', id);

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@insforge/sdk';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -8,20 +8,20 @@ export async function GET(request: Request) {
     // Initialize Supabase Client (Simple Admin/Anon Client for this route)
     // We use createClient directly to avoid cookie/SSR overhead for this simple data fetch
 
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const url = process.env.NEXT_PUBLIC_INSFORGE_URL;
+    const key = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY;
 
 
     if (!url || !key) {
-        console.error("❌ Critical: Missing Supabase Environment Variables");
+        console.error("❌ Critical: Missing InsForge Environment Variables");
         return NextResponse.json({ error: 'Configuration Error' }, { status: 500 });
     }
 
-    const supabase = createClient(url, key);
+    const supabase = createClient({ baseUrl: url, anonKey: key });
 
     try {
         if (type === 'stats') {
-            const { data, error } = await supabase
+            const { data, error } = await supabase.database
                 .from('stats')
                 .select('*')
                 .limit(1)

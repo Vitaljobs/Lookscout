@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@insforge/sdk';
 import { sendAlertEmail } from '@/lib/email';
 
 // Cron secret to prevent unauthorized triggers (optional for MVP, good for production)
@@ -9,19 +9,19 @@ export async function GET(request: Request) {
     try {
         console.log("🔍 Titan Monitor: Starting system scan...");
 
-        if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-            throw new Error("Configuration Error: Missing SUPABASE_SERVICE_ROLE_KEY in .env.local");
+        if (!process.env.INSFORGE_SERVICE_ROLE_KEY) {
+            throw new Error("Configuration Error: Missing INSFORGE_SERVICE_ROLE_KEY in .env.local");
         }
 
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const supabase = createClient({
+            baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL!,
+            edgeFunctionToken: process.env.INSFORGE_SERVICE_ROLE_KEY! // Passing service key here handles admin bypass
+        });
 
         const results = [];
 
         // 2. Check Common Ground Pulse Health
-        const { data: stats, error } = await supabase
+        const { data: stats, error } = await supabase.database
             .from('stats')
             .select('*')
             .single();
@@ -66,7 +66,7 @@ async function triggerAlert(supabase: any, projectId: string, type: string, seve
     console.log(`⚠️ Triggering Alert: ${subject}`);
 
     // A. Check Duplicate Prevention (Don't spam if alert sent in last 24h)
-    const { data: recentAlerts } = await supabase
+    const { data: recentAlerts } = await supabase.database
         .from('alerts')
         .select('*')
         .eq('project_id', projectId)
@@ -80,7 +80,7 @@ async function triggerAlert(supabase: any, projectId: string, type: string, seve
     }
 
     // B. Log to Database
-    const { data: alertEntry, error: dbError } = await supabase
+    const { data: alertEntry, error: dbError } = await supabase.database
         .from('alerts')
         .insert({
             project_id: projectId,
@@ -110,10 +110,10 @@ async function triggerAlert(supabase: any, projectId: string, type: string, seve
 
     // D. Update Status
     if (emailResult.success) {
-        await supabase.from('alerts').update({ status: 'sent' }).eq('id', alertEntry.id);
+        await supabase.database.from('alerts').update({ status: 'sent' }).eq('id', alertEntry.id);
         console.log("📧 Email sent successfully.");
     } else {
-        await supabase.from('alerts').update({ status: 'failed' }).eq('id', alertEntry.id);
+        await supabase.database.from('alerts').update({ status: 'failed' }).eq('id', alertEntry.id);
         console.error("📧 Email failed:", emailResult.error);
         throw new Error(`Resend Email Failed: ${JSON.stringify(emailResult.error)}`);
     }

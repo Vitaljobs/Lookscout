@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@insforge/nextjs": "^1.1.7",
+    "@insforge/sdk": "^1.1.5",
     "@simplewebauthn/browser": "^13.2.2",
     "@simplewebauthn/server": "^13.2.2",
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.91.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "crypto-js": "^4.2.0",

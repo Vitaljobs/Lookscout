@@ -26,9 +26,9 @@ export interface HelpdeskStats {
 }
 
 export async function getSupportMessages() {
-    const supabase = await createClient();
+    const supabase = await createClient() as any;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase.database
         .from('support_messages')
         .select('*, site:external_sites(site_name)')
         .order('created_at', { ascending: false });
@@ -42,14 +42,14 @@ export async function getSupportMessages() {
 }
 
 export async function updateMessageStatus(id: string, status: 'open' | 'pending' | 'closed') {
-    const supabase = await createClient();
+    const supabase = await createClient() as any;
 
     const updates: any = { status };
     if (status === 'closed') {
         updates.responded_at = new Date().toISOString();
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase.database
         .from('support_messages')
         .update(updates)
         .eq('id', id)
@@ -62,9 +62,9 @@ export async function updateMessageStatus(id: string, status: 'open' | 'pending'
 }
 
 export async function getHelpdeskStats(): Promise<HelpdeskStats> {
-    const supabase = await createClient();
+    const supabase = await createClient() as any;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase.database
         .from('support_messages')
         .select('*');
 
@@ -72,16 +72,16 @@ export async function getHelpdeskStats(): Promise<HelpdeskStats> {
 
     const messages = data || [];
     const totalTickets = messages.length;
-    const openTickets = messages.filter(m => m.status === 'open').length;
-    const pendingTickets = messages.filter(m => m.status === 'pending').length;
-    const closedTickets = messages.filter(m => m.status === 'closed').length;
+    const openTickets = messages.filter((m: any) => m.status === 'open').length;
+    const pendingTickets = messages.filter((m: any) => m.status === 'pending').length;
+    const closedTickets = messages.filter((m: any) => m.status === 'closed').length;
 
     // Calculate AVG response time for closed tickets
-    const resolvedTickets = messages.filter(m => m.status === 'closed' && m.responded_at);
+    const resolvedTickets = messages.filter((m: any) => m.status === 'closed' && m.responded_at);
     let avgResponseTimeHours = 0;
 
     if (resolvedTickets.length > 0) {
-        const totalTime = resolvedTickets.reduce((acc, curr) => {
+        const totalTime = resolvedTickets.reduce((acc: any, curr: any) => {
             const start = new Date(curr.created_at).getTime();
             const end = new Date(curr.responded_at!).getTime();
             return acc + (end - start);
@@ -101,7 +101,7 @@ export async function getHelpdeskStats(): Promise<HelpdeskStats> {
 }
 
 export async function sendHelpdeskReply(id: string, reply: string, recipientEmail: string, subject: string) {
-    const supabase = await createClient();
+    const supabase = await createClient() as any;
 
     const resendApiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
@@ -152,7 +152,7 @@ export async function sendHelpdeskReply(id: string, reply: string, recipientEmai
     }
 
     // 2. Update Supabase – keep as 'pending' (in behandeling) so admin can keep replying
-    const { data, error } = await supabase
+    const { data, error } = await supabase.database
         .from('support_messages')
         .update({
             status: 'pending',
@@ -170,7 +170,7 @@ export async function sendHelpdeskReply(id: string, reply: string, recipientEmai
         const threadId = threadIdMatch[1];
         console.log(`[Helpdesk Sync] Direct Supabase insert for SERVLY thread ${threadId}...`);
         try {
-            const { error: insertError } = await supabase
+            const { error: insertError } = await supabase.database
                 .from('messages')
                 .insert({
                     project_id: 'SERVLY',

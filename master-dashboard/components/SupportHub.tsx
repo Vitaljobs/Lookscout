@@ -14,35 +14,33 @@ export default function SupportHub() {
     const [replyText, setReplyText] = useState('');
     const [sending, setSending] = useState(false);
     const [filter, setFilter] = useState<'all' | 'open' | 'closed'>('all');
-    const supabase = createClient();
+    const supabase = createClient() as any;
 
     useEffect(() => {
         loadMessages();
 
         // Subscribe to real-time updates
-        const channel = supabase
-            .channel('support-messages')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'support_messages',
-                },
-                () => {
-                    loadMessages();
-                }
-            )
-            .subscribe();
+        const handleUpdate = () => loadMessages();
+        const setupRealtime = async () => {
+            try {
+                await supabase.realtime.connect();
+                await supabase.realtime.subscribe('support_messages');
+                supabase.realtime.on('postgres_changes', handleUpdate);
+            } catch (err) {
+                console.error('Realtime setup error:', err);
+            }
+        };
+        setupRealtime();
 
         return () => {
-            supabase.removeChannel(channel);
+            supabase.realtime.off('postgres_changes', handleUpdate);
+            supabase.realtime.unsubscribe('support_messages');
         };
     }, [filter]);
 
     const loadMessages = async () => {
         try {
-            let query = supabase
+            let query = supabase.database
                 .from('support_messages')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -82,7 +80,7 @@ export default function SupportHub() {
             if (!response.ok) throw new Error('Failed to send reply');
 
             // Update message status
-            const { error } = await supabase
+            const { error } = await supabase.database
                 .from('support_messages')
                 .update({
                     status: 'closed',

@@ -1,36 +1,18 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { auth } from '@insforge/nextjs/server';
+import { createClient as createInsForgeClient } from '@insforge/sdk';
 
 export async function createClient() {
-    const cookieStore = await cookies()
+    let token;
+    try {
+        const authData = await auth();
+        token = authData.token;
+    } catch (error) {
+        // User not authenticated or SSR pre-render without request context
+    }
 
-    return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                get(name: string) {
-                    return cookieStore.get(name)?.value
-                },
-                set(name: string, value: string, options: CookieOptions) {
-                    try {
-                        cookieStore.set({ name, value, ...options })
-                    } catch (error) {
-                        // The `set` method was called from a Server Component.
-                        // This can be ignored if you have middleware refreshing
-                        // user sessions.
-                    }
-                },
-                remove(name: string, options: CookieOptions) {
-                    try {
-                        cookieStore.set({ name, value: '', ...options })
-                    } catch (error) {
-                        // The `delete` method was called from a Server Component.
-                        // This can be ignored if you have middleware refreshing
-                        // user sessions.
-                    }
-                },
-            },
-        }
-    )
+    return createInsForgeClient({
+        baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL!,
+        anonKey: process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!,
+        ...(token ? { edgeFunctionToken: token } : {})
+    });
 }

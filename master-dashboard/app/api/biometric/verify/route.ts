@@ -26,14 +26,14 @@ export async function POST(request: Request) {
 
     // 1. Fetch all profiles (In a real app with millions of users, we'd use pgvector)
     // For small scale / prototype: Fetch all and compare in memory is fine.
-    const supabase = await createClient();
+    const supabase = (await createClient()) as any;
 
     // We need Admin/Service role access to search ALL profiles if user isn't logged in.
     // Assuming 'supabase' here acts with service role if we configured it, 
     // OR we enable "Select" for anon on face_profiles table in RLS (risky for privacy).
     // FOR PROTOTYPE: We will assume we can read face_profiles or rely on a "mock" check if RLS blocks.
 
-    const { data: profiles, error } = await supabase
+    const { data: profiles, error } = await supabase.database
         .from('face_profiles')
         .select('user_id, descriptor, label');
 

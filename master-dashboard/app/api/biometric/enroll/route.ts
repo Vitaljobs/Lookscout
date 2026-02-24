@@ -2,8 +2,9 @@ import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const supabase = (await createClient()) as any;
+    const { data: { session } } = await supabase.auth.getCurrentSession();
+    const user = session?.user;
     let userId = user?.id;
 
     // PROTOTYPE FALLBACK: If no session exists (simulated login), use a fixed Demo ID.
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     // Save to DB
-    const { error } = await supabase.from('face_profiles').upsert({
+    const { error } = await supabase.database.from('face_profiles').upsert({
         user_id: userId,
         descriptor, // float array
         updated_at: new Date().toISOString(),

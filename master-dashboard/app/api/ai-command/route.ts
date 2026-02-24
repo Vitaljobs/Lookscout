@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { command, parameters } = body;
 
-        const supabase = await createClient();
+        const supabase = (await createClient()) as any;
 
         switch (command) {
             case 'block_ip': {
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
                     ? new Date(Date.now() + duration_minutes * 60 * 1000).toISOString()
                     : null;
 
-                const { error } = await supabase.from('blocked_ips').insert({
+                const { error } = await supabase.database.from('blocked_ips').insert({
                     ip_address,
                     reason: reason || 'Blocked via AI command',
                     blocked_until: blockedUntil,
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
                 if (error) throw error;
 
                 // Log security event
-                await supabase.from('security_events').insert({
+                await supabase.database.from('security_events').insert({
                     event_type: 'ai_command_block',
                     ip_address,
                     reason: `AI blocked IP: ${reason || 'No reason provided'}`,
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
                     );
                 }
 
-                const { error } = await supabase
+                const { error } = await supabase.database
                     .from('blocked_ips')
                     .delete()
                     .eq('ip_address', ip_address);
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
                 if (error) throw error;
 
                 // Log security event
-                await supabase.from('security_events').insert({
+                await supabase.database.from('security_events').insert({
                     event_type: 'ai_command_unblock',
                     ip_address,
                     reason: 'AI unblocked IP',
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
             }
 
             case 'list_blocked_ips': {
-                const { data, error } = await supabase
+                const { data, error } = await supabase.database
                     .from('blocked_ips')
                     .select('*')
                     .order('blocked_at', { ascending: false })
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
             }
 
             case 'get_security_stats': {
-                const { data: events, error: eventsError } = await supabase
+                const { data: events, error: eventsError } = await supabase.database
                     .from('security_events')
                     .select('severity')
                     .gte('created_at', new Date(Date.now() - 24 * 3600000).toISOString());
@@ -111,13 +111,13 @@ export async function POST(request: NextRequest) {
 
                 const stats = {
                     total: events?.length || 0,
-                    critical: events?.filter((e) => e.severity === 'critical').length || 0,
-                    high: events?.filter((e) => e.severity === 'high').length || 0,
-                    medium: events?.filter((e) => e.severity === 'medium').length || 0,
-                    low: events?.filter((e) => e.severity === 'low').length || 0,
+                    critical: events?.filter((e: any) => e.severity === 'critical').length || 0,
+                    high: events?.filter((e: any) => e.severity === 'high').length || 0,
+                    medium: events?.filter((e: any) => e.severity === 'medium').length || 0,
+                    low: events?.filter((e: any) => e.severity === 'low').length || 0,
                 };
 
-                const { data: blockedIPs, error: blockedError } = await supabase
+                const { data: blockedIPs, error: blockedError } = await supabase.database
                     .from('blocked_ips')
                     .select('id');
 

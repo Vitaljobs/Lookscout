@@ -32,10 +32,10 @@ export async function POST(request: Request) {
             );
         }
 
-        const supabase = await createClient();
+        const supabase = await createClient() as any;
 
         // 1. Check if IP is blocked
-        const { data: blockedIP } = await supabase
+        const { data: blockedIP } = await supabase.database
             .from('blocked_ips')
             .select('*')
             .eq('ip_address', ip_address)
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
             // Check if block has expired
             if (blockedIP.expires_at && new Date(blockedIP.expires_at) < new Date()) {
                 // Expired - unblock
-                await supabase
+                await supabase.database
                     .from('blocked_ips')
                     .delete()
                     .eq('ip_address', ip_address);
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
         }
 
         // 2. Log the security event
-        const { error: insertError } = await supabase
+        const { error: insertError } = await supabase.database
             .from('security_events')
             .insert({
                 event_type,
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
         if (event_type === 'failed_login') {
             const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
 
-            const { data: recentFailures, error: countError } = await supabase
+            const { data: recentFailures, error: countError } = await supabase.database
                 .from('security_events')
                 .select('id')
                 .eq('ip_address', ip_address)
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
 
             // If 5+ failed logins in 5 minutes, block the IP
             if (recentFailures && recentFailures.length >= 5) {
-                const { error: blockError } = await supabase
+                const { error: blockError } = await supabase.database
                     .from('blocked_ips')
                     .insert({
                         ip_address,
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
                 }
 
                 // Update the event to mark it as blocked
-                await supabase
+                await supabase.database
                     .from('security_events')
                     .update({ blocked: true })
                     .eq('ip_address', ip_address)
@@ -135,9 +135,9 @@ export async function GET(request: Request) {
         const project = searchParams.get('project');
         const limit = parseInt(searchParams.get('limit') || '50');
 
-        const supabase = await createClient();
+        const supabase = await createClient() as any;
 
-        let query = supabase
+        let query = supabase.database
             .from('security_events')
             .select('*')
             .order('created_at', { ascending: false })

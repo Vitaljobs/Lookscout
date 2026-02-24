@@ -12,7 +12,7 @@ export function CommandPalette() {
     const [inputValue, setInputValue] = React.useState('');
     const [pages, setPages] = React.useState<string[]>([]);
     const router = useRouter();
-    const supabase = createClient();
+    const supabase = createClient() as any;
     const activePage = pages[pages.length - 1];
     const isHome = pages.length === 0;
 
@@ -31,14 +31,14 @@ export function CommandPalette() {
     const handleBanIP = async (ip: string) => {
         if (!ip) return;
         try {
-            await supabase.from('blocked_ips').insert({
+            await supabase.database.from('blocked_ips').insert({
                 ip_address: ip,
                 reason: 'Banned via Neural Command',
                 blocked_by: 'titan-admin',
                 is_permanent: true
             });
             // Also log event
-            await supabase.from('security_events').insert({
+            await supabase.database.from('security_events').insert({
                 event_type: 'manual_ban',
                 severity: 'high',
                 ip_address: ip,

@@ -6,12 +6,12 @@ import { X, Send, User, Mail, Globe, Clock, CheckCircle, Reply, MessageSquare, L
 import { SupportMessage, sendHelpdeskReply } from '@/app/actions/helpdesk';
 import { formatDistanceToNow } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@insforge/sdk';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = createClient({
+    baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL!,
+    anonKey: process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!
+}) as any;
 
 interface FollowUpMessage {
     id: string;
@@ -38,12 +38,12 @@ export default function HelpdeskDetail({ message, onClose, onReplySuccess }: Hel
         const threadIdMatch = message.sender_email?.match(/\+id_([^@]+)@/);
         if (!threadIdMatch) return;
         const threadId = threadIdMatch[1];
-        supabase
+        supabase.database
             .from('messages')
             .select('id, content, role, created_at')
             .eq('thread_id', threadId)
             .order('created_at', { ascending: true })
-            .then(({ data }) => setFollowUpMessages(data || []));
+            .then(({ data }: any) => setFollowUpMessages(data || []));
     }, [message?.id]);
 
     const handleReply = async () => {
@@ -182,8 +182,8 @@ export default function HelpdeskDetail({ message, onClose, onReplySuccess }: Hel
                                     <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                                         {followUpMessages.map((msg) => (
                                             <div key={msg.id} className={`p-4 rounded-xl border text-sm whitespace-pre-wrap leading-relaxed ${msg.role === 'pro'
-                                                    ? 'bg-blue-500/10 border-blue-500/20 text-blue-100'
-                                                    : 'bg-white/5 border-white/10 text-gray-300'
+                                                ? 'bg-blue-500/10 border-blue-500/20 text-blue-100'
+                                                : 'bg-white/5 border-white/10 text-gray-300'
                                                 }`}>
                                                 <div className="text-[10px] font-bold uppercase tracking-widest mb-1.5 opacity-60">
                                                     {msg.role === 'pro' ? '🔵 Vakman / Support' : '👤 Klant'}

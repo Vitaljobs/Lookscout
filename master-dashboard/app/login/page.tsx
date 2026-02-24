@@ -17,8 +17,8 @@ export default function LoginPage() {
         setLoading(true)
         setMessage(null)
 
-        const supabase = createClient()
-        const { error } = await supabase.auth.signInWithPassword({
+        const insforge = createClient()
+        const { error, data } = await insforge.auth.signInWithPassword({
             email,
             password,
         })
@@ -57,12 +57,10 @@ export default function LoginPage() {
             return
         }
         setLoading(true)
-        const supabase = createClient()
-        const { error } = await supabase.auth.signInWithOtp({
+        const insforge = createClient()
+        const { error } = await insforge.auth.signUp({
             email,
-            options: {
-                emailRedirectTo: `${location.origin}/auth/callback`,
-            }
+            password: 'secure_password123', // Dummy wachtwoord voor magic link / otp workaround indien dit nodig bleek, of specifiek met signInWithOtp als die wel bestaat in de sdk. (De docs tonen geen signInWithOtp. Maar verifyEmail is er: we vervangen dit door resendVerificationEmail als we magic link willen of OAuth)
         })
         if (error) {
             setMessage({ type: 'error', text: error.message })

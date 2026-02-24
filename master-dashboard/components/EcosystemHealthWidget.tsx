@@ -18,7 +18,7 @@ export default function EcosystemHealthWidget() {
     const [data, setData] = useState<ProjectStats[]>([]);
     const [totals, setTotals] = useState({ commonground: 0, vitaljobs: 0, 'echo-chamber': 0, lookscout: 0 });
     const [loading, setLoading] = useState(true);
-    const supabase = createClient();
+    const supabase = createClient() as any;
 
     useEffect(() => {
         loadEcosystemData();
@@ -33,7 +33,7 @@ export default function EcosystemHealthWidget() {
             // Fetch last 24 hours of health logs for all projects
             const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-            const { data: healthLogs, error } = await supabase
+            const { data: healthLogs, error } = await supabase.database
                 .from('project_health_logs')
                 .select('*')
                 .gte('created_at', twentyFourHoursAgo)
@@ -45,7 +45,7 @@ export default function EcosystemHealthWidget() {
                 // Group by hour and project
                 const hourlyData: Map<string, ProjectStats> = new Map();
 
-                healthLogs.forEach((log) => {
+                healthLogs.forEach((log: any) => {
                     const hour = new Date(log.created_at);
                     hour.setMinutes(0, 0, 0);
                     const hourKey = hour.toISOString();
